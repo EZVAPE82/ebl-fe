@@ -31,8 +31,9 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# 비루트 사용자
-RUN addgroup --system --gid 1001 nodejs && \
+# 비루트 사용자 + healthcheck용 curl (alpine은 wget 내장이지만 상태코드 검증을 위해 curl 사용)
+RUN apk add --no-cache curl && \
+    addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # standalone 결과만 복사 (이미지 크기 최소)
@@ -44,8 +45,8 @@ USER nextjs
 
 EXPOSE 3000
 
-# Healthcheck (홈 페이지 GET 200)
+# Healthcheck (홈 페이지 GET 200) — curl로 status 검증
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD wget -q --spider http://localhost:3000 || exit 1
+    CMD curl -fsS http://localhost:3000/ || exit 1
 
 CMD ["node", "server.js"]

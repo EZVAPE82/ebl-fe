@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
+import { validatePassword } from "@/lib/validation";
 
 export default function PasswordResetPage() {
     const [step, setStep] = useState<"request" | "confirm">("request");
@@ -30,7 +31,10 @@ export default function PasswordResetPage() {
 
     async function confirm(e: React.FormEvent) {
         e.preventDefault();
-        setError(null); setSubmitting(true);
+        setError(null);
+        const pwError = validatePassword(newPassword);
+        if (pwError) { setError(pwError); return; }
+        setSubmitting(true);
         try {
             await api("/api/v1/auth/password-reset/confirm", {
                 method: "POST", body: JSON.stringify({ token, newPassword }),

@@ -28,7 +28,8 @@ function Inner() {
 
     if (authLoading) return <Shell><p className="text-zinc-500">로그인 확인 중...</p></Shell>;
     if (!user) {
-        router.replace(`/login?redirect=/reviews/write?orderItemId=${orderItemId}`);
+        const redirect = encodeURIComponent(`/reviews/write?orderItemId=${orderItemId}`);
+        router.replace(`/login?redirect=${redirect}`);
         return null;
     }
     if (!orderItemId) {

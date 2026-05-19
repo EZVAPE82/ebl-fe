@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
+import { validatePassword } from "@/lib/validation";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -30,6 +31,11 @@ export default function SignupPage() {
         e.preventDefault();
         setError(null);
 
+        const pwError = validatePassword(form.password);
+        if (pwError) {
+            setError(pwError);
+            return;
+        }
         if (form.password !== form.passwordConfirm) {
             setError("비밀번호가 일치하지 않습니다.");
             return;

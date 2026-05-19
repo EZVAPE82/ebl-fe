@@ -23,6 +23,20 @@ export const metadata: Metadata = {
         siteName: "엘프바 라운지",
         locale: "ko_KR",
         type: "website",
+        images: [
+            {
+                url: "/og-default.png",
+                width: 1200,
+                height: 630,
+                alt: "엘프바 라운지",
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "엘프바 라운지",
+        description: "정품 전자담배 기기·액상 전문몰",
+        images: ["/og-default.png"],
     },
     robots: isProd ? { index: true, follow: true } : { index: false, follow: false },
 };

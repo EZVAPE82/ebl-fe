@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { validatePassword } from "@/lib/validation";
 
 export default function MyPageSettings() {
     const { user, loading: authLoading, logout } = useAuth();
@@ -34,6 +35,11 @@ export default function MyPageSettings() {
     }
 
     async function changePassword() {
+        const err = validatePassword(newPassword);
+        if (err) {
+            alert(err);
+            return;
+        }
         try {
             await api("/api/v1/members/me/password", {
                 method: "POST", auth: true,

@@ -1,5 +1,18 @@
 "use client";
 
+/**
+ * 인증 컨텍스트 — 점진 전환 단계.
+ *
+ * 현재(P0-8 hybrid):
+ *  - 백엔드: Set-Cookie (httpOnly, Secure, SameSite=Strict) + JSON body 둘 다 반환
+ *  - 프론트: sessionStorage 토큰 유지 + credentials: 'include' 로 쿠키도 자동 전송
+ *  - 점진 마이그레이션 후 sessionStorage 부분 제거 예정 (XSS 토큰 탈취 완전 차단)
+ *
+ * Next phase:
+ *  - sessionStorage 사용 제거 → fetchMe()만으로 인증 상태 확인
+ *  - login 응답에서 토큰 무시 (쿠키만 사용)
+ */
+
 import {
     createContext, useCallback, useContext, useEffect, useMemo, useState,
     type ReactNode
