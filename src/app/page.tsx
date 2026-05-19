@@ -1,53 +1,90 @@
 import { api } from "@/lib/api";
+import { ProductCard } from "@/components/ProductCard";
+import type { Banner, Page, ProductSummary } from "@/types/api";
+import Link from "next/link";
 
-type Health = {
-    status: string;
-    service: string;
-    timestamp: string;
-};
-
-async function fetchHealth(): Promise<Health | null> {
+async function safeFetch<T>(path: string, fallback: T): Promise<T> {
     try {
-        // 서버 컴포넌트에서 호출. NEXT_PUBLIC_API_BASE_URL 사용.
-        return await api<Health>("/api/v1/public/ping", { cache: "no-store" });
+        return await api<T>(path, { cache: "no-store" });
     } catch {
-        return null;
+        return fallback;
     }
 }
 
 export default async function Home() {
-    const health = await fetchHealth();
+    const [bannersHero, popular, newest] = await Promise.all([
+        safeFetch<Banner[]>("/api/v1/public/banners?placement=MAIN_HERO", []),
+        safeFetch<Page<ProductSummary>>("/api/v1/public/products?sort=popular&size=8", {
+            content: [], totalElements: 0, totalPages: 0, number: 0, size: 8,
+            first: true, last: true, empty: true,
+        }),
+        safeFetch<Page<ProductSummary>>("/api/v1/public/products?sort=newest&size=8", {
+            content: [], totalElements: 0, totalPages: 0, number: 0, size: 8,
+            first: true, last: true, empty: true,
+        }),
+    ]);
+
+    const hero = bannersHero[0];
 
     return (
-        <main className="min-h-screen flex items-center justify-center px-6 py-12 bg-white">
-            <div className="w-full max-w-xl space-y-6">
-                <header className="space-y-1">
-                    <h1 className="text-2xl font-bold tracking-tight">엘프바 라운지</h1>
-                    <p className="text-sm text-zinc-500">elfbarlounge.co.kr · 개발 환경</p>
-                </header>
+        <div className="mx-auto max-w-screen-xl px-4 py-6 space-y-12">
+            {/* Hero */}
+            {hero ? (
+                <Link href={hero.linkUrl ?? "#"} className="block overflow-hidden rounded-lg">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={hero.imageUrl}
+                        alt={hero.altText ?? ""}
+                        className="w-full h-48 md:h-72 object-cover"
+                    />
+                </Link>
+            ) : (
+                <div className="rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-700 px-6 py-10 md:py-16 text-white">
+                    <p className="text-xs uppercase tracking-wider opacity-70 mb-2">elfbarlounge.co.kr</p>
+                    <h1 className="text-2xl md:text-4xl font-bold leading-tight">
+                        정품 전자담배 기기·액상 전문몰
+                    </h1>
+                    <p className="mt-3 text-sm md:text-base opacity-80">
+                        만 19세 이상 성인 인증 후 이용 가능합니다.
+                    </p>
+                </div>
+            )}
 
-                <section className="rounded-md border border-zinc-200 p-4 text-sm">
-                    <div className="font-medium mb-2">백엔드 헬스체크</div>
-                    {health ? (
-                        <dl className="grid grid-cols-[100px_1fr] gap-y-1 text-zinc-700">
-                            <dt className="text-zinc-500">status</dt>
-                            <dd className="font-mono">{health.status}</dd>
-                            <dt className="text-zinc-500">service</dt>
-                            <dd className="font-mono">{health.service}</dd>
-                            <dt className="text-zinc-500">timestamp</dt>
-                            <dd className="font-mono text-xs">{health.timestamp}</dd>
-                        </dl>
-                    ) : (
-                        <p className="text-rose-600">
-                            백엔드에 연결할 수 없습니다. <code className="text-xs">./gradlew bootRun</code> 으로 백엔드를 실행하세요.
-                        </p>
-                    )}
-                </section>
+            {/* BEST */}
+            <section>
+                <SectionTitle title="BEST" href="/c/best" />
+                <ProductGrid items={popular.content} emptyText="아직 상품이 없습니다." />
+            </section>
 
-                <footer className="text-xs text-zinc-400">
-                    Next.js 15 · Spring Boot 3 · 기능명세서 v1.5
-                </footer>
+            {/* NEW */}
+            <section>
+                <SectionTitle title="신상품" href="/c/new" />
+                <ProductGrid items={newest.content} emptyText="아직 상품이 없습니다." />
+            </section>
+        </div>
+    );
+}
+
+function SectionTitle({ title, href }: { title: string; href: string }) {
+    return (
+        <div className="flex items-end justify-between mb-3">
+            <h2 className="text-lg md:text-xl font-bold tracking-tight">{title}</h2>
+            <Link href={href} className="text-xs text-zinc-500 hover:text-black">더보기 →</Link>
+        </div>
+    );
+}
+
+function ProductGrid({ items, emptyText }: { items: ProductSummary[]; emptyText: string }) {
+    if (items.length === 0) {
+        return (
+            <div className="rounded-md border border-dashed border-zinc-300 px-4 py-12 text-center text-sm text-zinc-500">
+                {emptyText}
             </div>
-        </main>
+        );
+    }
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {items.map(p => <ProductCard key={p.id} p={p} />)}
+        </div>
     );
 }
