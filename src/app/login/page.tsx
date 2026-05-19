@@ -74,6 +74,11 @@ function LoginForm() {
                     {submitting ? "로그인 중..." : "로그인"}
                 </button>
             </form>
+            <div className="mt-4 flex justify-center gap-3 text-xs text-zinc-500">
+                <Link href="/find-email" className="hover:text-black">아이디 찾기</Link>
+                <span>·</span>
+                <Link href="/password-reset" className="hover:text-black">비밀번호 재설정</Link>
+            </div>
             <div className="mt-6 text-center text-sm text-zinc-500">
                 계정이 없으신가요?{" "}
                 <Link href="/signup" className="text-zinc-900 underline">회원가입</Link>

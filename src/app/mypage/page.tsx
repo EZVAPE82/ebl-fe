@@ -80,10 +80,17 @@ export default function MyPage() {
             </div>
 
             {/* 요약 */}
-            <div className="grid grid-cols-3 gap-2 mb-6 text-center text-sm">
+            <div className="grid grid-cols-3 gap-2 mb-4 text-center text-sm">
                 <Stat label="보유 적립금" value={formatPrice(balance)} />
                 <Stat label="쿠폰" value={`${coupons.filter(c => !c.usedAt && new Date(c.expiresAt) > new Date()).length}장`} />
                 <Stat label="주문" value={`${orders.length}건`} />
+            </div>
+
+            {/* 부가 메뉴 */}
+            <div className="grid grid-cols-3 gap-2 mb-6 text-center text-xs">
+                <Link href="/mypage/wishlist" className="rounded border border-zinc-200 py-2 hover:border-zinc-400">위시리스트</Link>
+                <Link href="/mypage/addresses" className="rounded border border-zinc-200 py-2 hover:border-zinc-400">배송지 관리</Link>
+                <Link href="/mypage/settings" className="rounded border border-zinc-200 py-2 hover:border-zinc-400">계정 설정</Link>
             </div>
 
             {/* 탭 */}
