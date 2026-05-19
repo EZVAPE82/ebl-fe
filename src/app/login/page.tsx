@@ -1,10 +1,11 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
+import { fetchIntegrations, type Integrations } from "@/lib/integrations";
 
 export default function LoginPage() {
     return (
@@ -24,6 +25,11 @@ function LoginForm() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [integrations, setIntegrations] = useState<Integrations | null>(null);
+
+    useEffect(() => {
+        fetchIntegrations().then(setIntegrations);
+    }, []);
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -74,6 +80,18 @@ function LoginForm() {
                     {submitting ? "로그인 중..." : "로그인"}
                 </button>
             </form>
+
+            <div className="mt-5">
+                <div className="text-center text-xs text-zinc-400 mb-2">소셜 계정으로 로그인</div>
+                <div className="space-y-2">
+                    <SocialBtn provider="KAKAO" label="카카오로 시작하기" bg="bg-yellow-300 text-zinc-900" />
+                    <SocialBtn provider="GOOGLE" label="Google로 시작하기" bg="bg-white text-zinc-800 border border-zinc-300" />
+                    {integrations?.naverLogin && (
+                        <SocialBtn provider="NAVER" label="네이버로 시작하기" bg="bg-emerald-500 text-white" />
+                    )}
+                </div>
+            </div>
+
             <div className="mt-4 flex justify-center gap-3 text-xs text-zinc-500">
                 <Link href="/find-email" className="hover:text-black">아이디 찾기</Link>
                 <span>·</span>
@@ -88,5 +106,20 @@ function LoginForm() {
                 * 가입 후 PASS 본인인증을 완료해야 구매가 가능합니다.
             </p>
         </div>
+    );
+}
+
+function SocialBtn({ provider, label, bg }: { provider: string; label: string; bg: string }) {
+    function handleClick() {
+        alert(`${provider} 로그인은 도급인 콘솔 키 수령 후 활성화됩니다.`);
+    }
+    return (
+        <button
+            type="button"
+            onClick={handleClick}
+            className={`w-full rounded-md py-2.5 text-sm font-medium ${bg}`}
+        >
+            {label}
+        </button>
     );
 }
