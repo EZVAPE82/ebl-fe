@@ -1,5 +1,6 @@
 import { api, ApiError } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductReviews } from "@/components/ProductReviews";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
 import { formatPrice } from "@/lib/format";
 import { notFound } from "next/navigation";
@@ -105,6 +106,11 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                     <p className="text-sm text-zinc-700 whitespace-pre-line">{product.description}</p>
                 </section>
             )}
+
+            {/* 리뷰 */}
+            <section className="mx-auto max-w-screen-xl px-4 mt-10">
+                <ProductReviews productId={product.id} />
+            </section>
 
             {/* 연관 상품 */}
             {related.content.length > 0 && (

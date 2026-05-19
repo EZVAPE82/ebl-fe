@@ -128,6 +128,12 @@ function OrderInner({ params }: { params: Promise<{ id: string }> }) {
                             </Link>
                             {i.optionText && <div className="text-xs text-zinc-500 mt-1">{i.optionText}</div>}
                             <div className="text-xs text-zinc-500 mt-0.5">수량 {i.quantity}</div>
+                            {order.status === "DELIVERED" && (
+                                <Link
+                                    href={`/reviews/write?orderItemId=${i.id}`}
+                                    className="inline-block mt-2 text-xs rounded border border-zinc-300 px-2 py-1 hover:border-zinc-500"
+                                >리뷰 작성</Link>
+                            )}
                         </div>
                         <div className="text-right text-sm">{formatPrice(i.subtotal)}</div>
                     </li>
