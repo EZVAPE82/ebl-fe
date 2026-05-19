@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
+import { safeImageUrl, safeLinkUrl } from "@/lib/url";
 import type { Banner, Page, ProductSummary } from "@/types/api";
 import Link from "next/link";
 
@@ -30,10 +31,10 @@ export default async function Home() {
         <div className="mx-auto max-w-screen-xl px-4 py-6 space-y-12">
             {/* Hero */}
             {hero ? (
-                <Link href={hero.linkUrl ?? "#"} className="block overflow-hidden rounded-lg">
+                <Link href={safeLinkUrl(hero.linkUrl)} className="block overflow-hidden rounded-lg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={hero.imageUrl}
+                        src={safeImageUrl(hero.imageUrl)}
                         alt={hero.altText ?? ""}
                         className="w-full h-48 md:h-72 object-cover"
                     />

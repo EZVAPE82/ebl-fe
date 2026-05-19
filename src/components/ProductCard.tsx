@@ -1,19 +1,21 @@
 import Link from "next/link";
 import type { ProductSummary } from "@/types/api";
 import { formatPrice } from "@/lib/format";
+import { safeImageUrl } from "@/lib/url";
 
 export function ProductCard({ p }: { p: ProductSummary }) {
     const isSoldOut = p.status === "SOLD_OUT";
+    const thumb = safeImageUrl(p.thumbnailUrl);
     return (
         <Link
             href={`/p/${p.id}`}
             className="group flex flex-col rounded-md overflow-hidden border border-zinc-200 hover:border-zinc-400 transition"
         >
             <div className="aspect-square bg-zinc-100 relative">
-                {p.thumbnailUrl ? (
+                {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                        src={p.thumbnailUrl}
+                        src={thumb}
                         alt={p.name}
                         loading="lazy"
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition"

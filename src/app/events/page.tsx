@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
+import { safeImageUrl } from "@/lib/url";
 import type { Page } from "@/types/api";
 
 export const dynamic = "force-dynamic";
@@ -39,9 +40,9 @@ export default async function EventsPage() {
                     {events.map(e => (
                         <Link key={e.id} href="#" className="rounded-md overflow-hidden border border-zinc-200 hover:border-zinc-400">
                             <div className="aspect-[16/7] bg-zinc-100">
-                                {e.bannerUrl && (
+                                {e.bannerUrl && safeImageUrl(e.bannerUrl) && (
                                     // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={e.bannerUrl} alt={e.title} className="w-full h-full object-cover" />
+                                    <img src={safeImageUrl(e.bannerUrl)} alt={e.title} className="w-full h-full object-cover" />
                                 )}
                             </div>
                             <div className="p-4">
