@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { validatePassword } from "@/lib/validation";
+import { Button, Input, Card, CardTitle, Checkbox } from "@/components/ui";
 
 export default function MyPageSettings() {
     const { user, loading: authLoading, logout } = useAuth();
@@ -65,61 +66,64 @@ export default function MyPageSettings() {
         }
     }
 
-    if (authLoading || !user) return <div className="mx-auto max-w-md px-4 py-10 text-zinc-500">불러오는 중...</div>;
+    if (authLoading || !user) {
+        return <div className="mx-auto max-w-md px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+    }
 
     return (
         <div className="mx-auto max-w-md px-4 py-8 space-y-6">
             <div>
-                <Link href="/mypage" className="text-xs text-zinc-500 hover:text-black">← 마이페이지</Link>
+                <Link href="/mypage" className="text-xs text-[var(--color-fg-subtle)] hover:text-[var(--color-fg)]">
+                    ← 마이페이지
+                </Link>
                 <h1 className="text-xl md:text-2xl font-bold mt-1">계정 설정</h1>
             </div>
 
-            <Section title="마케팅 수신 동의">
-                <Check label="이메일 수신" checked={marketingEmail} onChange={setMarketingEmail} />
-                <Check label="SMS 수신" checked={marketingSms} onChange={setMarketingSms} />
-                <button onClick={saveProfile} className={btn}>저장</button>
-            </Section>
+            <Card>
+                <CardTitle>마케팅 수신 동의</CardTitle>
+                <div className="space-y-2">
+                    <Checkbox label="이메일 수신" checked={marketingEmail} onChange={e => setMarketingEmail(e.target.checked)} />
+                    <Checkbox label="SMS 수신" checked={marketingSms} onChange={e => setMarketingSms(e.target.checked)} />
+                </div>
+                <div className="mt-3">
+                    <Button onClick={saveProfile} fullWidth>저장</Button>
+                </div>
+            </Card>
 
-            <Section title="비밀번호 변경">
-                <label className="block">
-                    <span className="text-xs text-zinc-600">현재 비밀번호</span>
-                    <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className={input} />
-                </label>
-                <label className="block">
-                    <span className="text-xs text-zinc-600">새 비밀번호 (10자 이상, 영문/숫자/특수문자)</span>
-                    <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className={input} />
-                </label>
-                <button onClick={changePassword} className={btn}>변경</button>
-                <p className="text-[10px] text-zinc-400">* 변경 시 모든 기기에서 로그아웃됩니다.</p>
-            </Section>
+            <Card>
+                <CardTitle>비밀번호 변경</CardTitle>
+                <div className="space-y-3">
+                    <Input
+                        type="password"
+                        label="현재 비밀번호"
+                        value={currentPassword}
+                        onChange={e => setCurrentPassword(e.target.value)}
+                    />
+                    <Input
+                        type="password"
+                        label="새 비밀번호"
+                        helperText="10자 이상, 영문·숫자·특수문자 포함"
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                    />
+                    <Button onClick={changePassword} fullWidth>변경</Button>
+                    <p className="text-[10px] text-[var(--color-fg-subtle)]">
+                        * 변경 시 모든 기기에서 로그아웃됩니다.
+                    </p>
+                </div>
+            </Card>
 
-            <Section title="회원 탈퇴" danger>
-                <p className="text-xs text-zinc-600">
+            <Card tone="danger">
+                <CardTitle>회원 탈퇴</CardTitle>
+                <p className="text-xs text-[var(--color-fg-muted)] mb-3">
                     탈퇴 시 개인정보(이름·휴대폰·이메일)는 즉시 익명화됩니다.<br />
                     결제·주문 기록은 전자상거래법에 따라 5년간 익명 보관됩니다.
                 </p>
-                <button onClick={withdraw} className="w-full rounded-md border border-rose-300 text-rose-600 py-2 text-sm">탈퇴하기</button>
-            </Section>
+                <Button onClick={withdraw} variant="secondary" fullWidth
+                    className="!border-[var(--color-danger)] !text-[var(--color-danger)] hover:!bg-[var(--color-danger-bg)]">
+                    탈퇴하기
+                </Button>
+            </Card>
         </div>
-    );
-}
-
-const input = "mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm";
-const btn = "w-full rounded-md bg-zinc-900 text-white py-2 text-sm";
-
-function Section({ title, danger, children }: { title: string; danger?: boolean; children: React.ReactNode }) {
-    return (
-        <section className={`rounded-md border p-4 space-y-3 ${danger ? "border-rose-200 bg-rose-50/40" : "border-zinc-200"}`}>
-            <h2 className="font-semibold text-sm">{title}</h2>
-            {children}
-        </section>
-    );
-}
-function Check({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-    return (
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} />
-            <span>{label}</span>
-        </label>
     );
 }

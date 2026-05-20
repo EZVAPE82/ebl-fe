@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
+/* =====================================================
+ * 디자인 토큰 (Design Tokens)
+ *
+ * 디자이너 산출물이 들어오면 이 변수만 교체하면
+ * 33개 페이지 + 공통 컴포넌트가 일괄 반영됩니다.
+ *
+ * 카테고리:
+ *   - color-*  : 컬러 시스템
+ *   - radius-* : 모서리 둥글기
+ *   - shadow-* : 그림자
+ *   - space-*  : 간격 (Tailwind 기본 단위 활용)
+ *   - font-*   : 폰트 패밀리
+ *   - text-*   : 폰트 사이즈
+ *
+ * Tailwind v4 @theme 블록에 inline 노출되어
+ *   bg-[var(--color-brand)] 또는
+ *   bg-brand (theme 등록 시) 양쪽으로 사용 가능.
+ * ===================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ---- Surface (배경·표면) ---- */
+  --color-bg:            #ffffff;       /* 페이지 기본 배경 */
+  --color-bg-subtle:     #f7f7f8;       /* 카드 배경, 입력 배경 */
+  --color-bg-muted:      #f0f0f1;       /* 호버 등 약한 강조 */
+  --color-surface:       #ffffff;       /* 카드 표면 */
+  --color-overlay:       rgba(0,0,0,.5); /* 모달 백드롭 */
+
+  /* ---- Text (글자) ---- */
+  --color-fg:            #18181b;       /* 본문 */
+  --color-fg-muted:      #52525b;       /* 보조 */
+  --color-fg-subtle:     #a1a1aa;       /* 비활성·캡션 */
+  --color-fg-inverse:    #ffffff;       /* 어두운 배경 위 글자 */
+
+  /* ---- Brand (브랜드 컬러 — 디자이너 팔레트로 교체) ---- */
+  --color-brand:         #18181b;       /* primary action */
+  --color-brand-hover:   #27272a;
+  --color-brand-fg:      #ffffff;
+  --color-accent:        #f59e0b;       /* 보조 강조 (예: 가격, 뱃지) */
+
+  /* ---- Semantic (상태) ---- */
+  --color-success:       #16a34a;
+  --color-warning:       #d97706;
+  --color-danger:        #e11d48;
+  --color-danger-bg:     #fff1f2;
+  --color-info:          #2563eb;
+
+  /* ---- Border ---- */
+  --color-border:        #e4e4e7;
+  --color-border-strong: #d4d4d8;
+  --color-ring:          #18181b;       /* focus ring */
+
+  /* ---- Radius ---- */
+  --radius-sm:           4px;
+  --radius-md:           6px;
+  --radius-lg:           10px;
+  --radius-xl:           16px;
+  --radius-full:         9999px;
+
+  /* ---- Shadow ---- */
+  --shadow-sm:           0 1px 2px 0 rgba(0,0,0,.05);
+  --shadow-md:           0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -2px rgba(0,0,0,.05);
+  --shadow-lg:           0 10px 20px -3px rgba(0,0,0,.10), 0 4px 6px -4px rgba(0,0,0,.05);
+
+  /* ---- Typography ---- */
+  --font-sans:  var(--font-geist-sans), -apple-system, "Pretendard Variable", "Pretendard",
+                "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono:  var(--font-geist-mono), ui-monospace, Menlo, monospace;
+
+  --text-xs:    12px;
+  --text-sm:    13px;
+  --text-base:  14px;
+  --text-md:    15px;
+  --text-lg:    17px;
+  --text-xl:    20px;
+  --text-2xl:   24px;
+  --text-3xl:   30px;
+
+  /* ---- Layout ---- */
+  --container-max: 1200px;
+  --header-h:      56px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Dark mode 토큰 — 디자이너가 다크모드 지원할 때 채움.
+   현재는 명시 OFF (운영 첫 출시는 라이트 단일).
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  :root { ... }
+}
+*/
+
+/* Tailwind v4 @theme inline — utility class로도 노출 */
+@theme inline {
+  --color-background:      var(--color-bg);
+  --color-foreground:      var(--color-fg);
+  --color-brand:           var(--color-brand);
+  --color-brand-hover:     var(--color-brand-hover);
+  --color-accent:          var(--color-accent);
+  --color-success:         var(--color-success);
+  --color-warning:         var(--color-warning);
+  --color-danger:          var(--color-danger);
+  --color-info:            var(--color-info);
+  --font-sans:             var(--font-sans);
+  --font-mono:             var(--font-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
