@@ -25,7 +25,7 @@ export default function YouthPage() {
                 취합니다.
             </p>
 
-            <p className="mt-8 text-xs text-zinc-500">
+            <p className="mt-8 text-xs text-[var(--color-fg-subtle)]">
                 * 본 방침의 상세 조항은 도급인 법무 검토 후 확정됩니다.
             </p>
         </DocPage>
