@@ -18,11 +18,13 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     rightAddon?: ReactNode;
 }
 
+// Figma 시안: radius 4px, padding 16, body3(14 Regular)
+// border #e5e5ec → focus #222222 (Border-line-200) 색상 변화로 강조
 const base =
     "block w-full bg-[var(--color-surface)] text-[var(--color-fg)] " +
-    "border rounded-[var(--radius-md)] px-3 py-2.5 text-sm " +
+    "border rounded-[var(--radius-sm)] px-4 py-3.5 text-sm " +
     "placeholder:text-[var(--color-fg-subtle)] " +
-    "focus:outline-none focus:ring-2 focus:ring-offset-0 transition " +
+    "focus:outline-none focus:ring-1 transition " +
     "disabled:bg-[var(--color-bg-subtle)] disabled:cursor-not-allowed";
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
@@ -36,7 +38,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     const describedBy = [errorId, helperId].filter(Boolean).join(" ") || undefined;
 
     const borderColor = error
-        ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)]"
+        ? "border-[var(--color-danger)] focus:ring-[var(--color-danger)] focus:border-[var(--color-danger)]"
         : "border-[var(--color-border)] focus:ring-[var(--color-ring)] focus:border-[var(--color-ring)]";
 
     return (

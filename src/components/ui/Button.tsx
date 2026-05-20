@@ -49,10 +49,12 @@ const variants: Record<Variant, string> = {
         "bg-transparent text-[var(--color-fg)] hover:bg-[var(--color-bg-muted)]",
 };
 
+// Figma 시안: radius 4px(sm) 통일, padding 16(px-4), Medium 14/16
+// md 기준 ~48px (full-width CTA = ~52px with lg)
 const sizes: Record<Size, string> = {
-    sm: "text-xs px-3 py-1.5 rounded-[var(--radius-md)]",
-    md: "text-sm px-4 py-2.5 rounded-[var(--radius-md)]",
-    lg: "text-base px-5 py-3 rounded-[var(--radius-lg)]",
+    sm: "text-xs px-3 py-2 rounded-[var(--radius-sm)]",
+    md: "text-sm px-4 py-3.5 rounded-[var(--radius-sm)]",
+    lg: "text-base px-6 py-4 rounded-[var(--radius-sm)]",
 };
 
 export function Button({

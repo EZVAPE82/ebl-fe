@@ -26,9 +26,10 @@ const tones: Record<Tone, string> = {
     brand:   "bg-[var(--color-brand)] text-[var(--color-brand-fg)]",
 };
 
+// Figma 시안: Caption2(14 Medium) — 카테고리/상태 칩. radius 4 sharp.
 const sizes: Record<Size, string> = {
-    sm: "text-[10px] px-1.5 py-0.5",
-    md: "text-xs px-2 py-1",
+    sm: "text-[11px] px-2 py-0.5",
+    md: "text-xs px-2.5 py-1",
 };
 
 export function Badge({
@@ -41,7 +42,7 @@ export function Badge({
     return (
         <span
             className={cn(
-                "inline-flex items-center rounded-[var(--radius-full)] font-medium",
+                "inline-flex items-center rounded-[var(--radius-sm)] font-medium",
                 tones[tone],
                 sizes[size],
                 className

@@ -33,23 +33,23 @@
   --color-fg-subtle:     #999999;       /* Text/Disabled — 비활성·캡션 */
   --color-fg-inverse:    #ffffff;       /* 어두운 배경 위 글자 */
 
-  /* ---- Brand (Figma primary-color scale) ---- */
-  --color-brand:         #0072dd;       /* primary-color (500-tone) */
-  --color-brand-hover:   #0461cb;       /* primary-color/800 */
+  /* ---- Brand (Figma 시안: Primary CTA = 검정) ---- */
+  --color-brand:         #000000;       /* Primary CTA bg (로그인·결제 등) */
+  --color-brand-hover:   #222222;       /* Text/Primary-text-color */
   --color-brand-fg:      #ffffff;
-  --color-accent:        #0c6f23;       /* Primary-color (포인트·할인 추정) */
+  --color-accent:        #0072dd;       /* primary-color — 링크·강조·아이콘 */
 
   /* ---- Semantic (상태) ---- */
   --color-success:       #16a34a;
   --color-warning:       #d97706;
   --color-danger:        #e11d48;
   --color-danger-bg:     #fff1f2;
-  --color-info:          #2563eb;
+  --color-info:          #0072dd;       /* primary-color — 인포 토스트·링크 */
 
   /* ---- Border ---- */
   --color-border:        #e5e5ec;       /* Border/Border-line-100 */
   --color-border-strong: #dddddd;       /* line-color/line-color-100 */
-  --color-ring:          #0072dd;       /* brand focus ring */
+  --color-ring:          #000000;       /* focus ring — brand color */
 
   /* ---- Radius (Figma radius 1–4 + full) ---- */
   --radius-sm:           4px;

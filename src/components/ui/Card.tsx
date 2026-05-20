@@ -33,12 +33,13 @@ export function Card({
     children,
     ...rest
 }: CardProps) {
+    // Figma 시안: radius 12 (radius-lg), padding 24 (padding 6)
     return (
         <div
             className={cn(
                 "rounded-[var(--radius-lg)] border",
                 tones[tone],
-                padding && "p-4",
+                padding && "p-6",
                 className
             )}
             {...rest}
@@ -49,8 +50,9 @@ export function Card({
 }
 
 export function CardTitle({ children, className }: { children: ReactNode; className?: string }) {
+    // Figma Title 5 (16 Medium, line 24)
     return (
-        <h2 className={cn("font-semibold text-sm text-[var(--color-fg)] mb-3", className)}>
+        <h2 className={cn("font-medium text-base text-[var(--color-fg)] mb-4", className)}>
             {children}
         </h2>
     );
