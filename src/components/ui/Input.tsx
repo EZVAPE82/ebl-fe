@@ -63,8 +63,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
                     className={cn(
                         base,
                         borderColor,
-                        leftAddon && "pl-9",
-                        rightAddon && "pr-9",
+                        !!leftAddon && "pl-9",
+                        !!rightAddon && "pr-9",
                         className
                     )}
                     {...rest}

@@ -22,22 +22,22 @@
 :root {
   /* ---- Surface (배경·표면) ---- */
   --color-bg:            #ffffff;       /* 페이지 기본 배경 */
-  --color-bg-subtle:     #f7f7f8;       /* 카드 배경, 입력 배경 */
-  --color-bg-muted:      #f0f0f1;       /* 호버 등 약한 강조 */
+  --color-bg-subtle:     #f7f7fb;       /* Bg/Primary-bg-color — 카드·입력 배경 */
+  --color-bg-muted:      #f3f3f3;       /* Bg/Secondary-bg-color — 호버 약 강조 */
   --color-surface:       #ffffff;       /* 카드 표면 */
   --color-overlay:       rgba(0,0,0,.5); /* 모달 백드롭 */
 
   /* ---- Text (글자) ---- */
-  --color-fg:            #18181b;       /* 본문 */
-  --color-fg-muted:      #52525b;       /* 보조 */
-  --color-fg-subtle:     #a1a1aa;       /* 비활성·캡션 */
+  --color-fg:            #222222;       /* Text/Primary — 본문 */
+  --color-fg-muted:      #505050;       /* Text/Secondary — 보조 */
+  --color-fg-subtle:     #999999;       /* Text/Disabled — 비활성·캡션 */
   --color-fg-inverse:    #ffffff;       /* 어두운 배경 위 글자 */
 
-  /* ---- Brand (브랜드 컬러 — 디자이너 팔레트로 교체) ---- */
-  --color-brand:         #18181b;       /* primary action */
-  --color-brand-hover:   #27272a;
+  /* ---- Brand (Figma primary-color scale) ---- */
+  --color-brand:         #0072dd;       /* primary-color (500-tone) */
+  --color-brand-hover:   #0461cb;       /* primary-color/800 */
   --color-brand-fg:      #ffffff;
-  --color-accent:        #f59e0b;       /* 보조 강조 (예: 가격, 뱃지) */
+  --color-accent:        #0c6f23;       /* Primary-color (포인트·할인 추정) */
 
   /* ---- Semantic (상태) ---- */
   --color-success:       #16a34a;
@@ -47,14 +47,14 @@
   --color-info:          #2563eb;
 
   /* ---- Border ---- */
-  --color-border:        #e4e4e7;
-  --color-border-strong: #d4d4d8;
-  --color-ring:          #18181b;       /* focus ring */
+  --color-border:        #e5e5ec;       /* Border/Border-line-100 */
+  --color-border-strong: #dddddd;       /* line-color/line-color-100 */
+  --color-ring:          #0072dd;       /* brand focus ring */
 
-  /* ---- Radius ---- */
+  /* ---- Radius (Figma radius 1–4 + full) ---- */
   --radius-sm:           4px;
-  --radius-md:           6px;
-  --radius-lg:           10px;
+  --radius-md:           8px;
+  --radius-lg:           12px;
   --radius-xl:           16px;
   --radius-full:         9999px;
 
@@ -63,19 +63,19 @@
   --shadow-md:           0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -2px rgba(0,0,0,.05);
   --shadow-lg:           0 10px 20px -3px rgba(0,0,0,.10), 0 4px 6px -4px rgba(0,0,0,.05);
 
-  /* ---- Typography ---- */
-  --font-sans:  var(--font-geist-sans), -apple-system, "Pretendard Variable", "Pretendard",
+  /* ---- Typography (Figma: Pretendard) ---- */
+  --font-sans:  "Pretendard Variable", "Pretendard", var(--font-geist-sans), -apple-system,
                 "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --font-mono:  var(--font-geist-mono), ui-monospace, Menlo, monospace;
 
   --text-xs:    12px;
-  --text-sm:    13px;
-  --text-base:  14px;
-  --text-md:    15px;
-  --text-lg:    17px;
-  --text-xl:    20px;
-  --text-2xl:   24px;
-  --text-3xl:   30px;
+  --text-sm:    14px;   /* Body3 / Title6 / Button2 */
+  --text-base:  14px;   /* Body3 default */
+  --text-md:    16px;   /* Body2 / Title5 / Button1 / Caption1 */
+  --text-lg:    18px;   /* Body1 / Title4 */
+  --text-xl:    20px;   /* Title3 */
+  --text-2xl:   24px;   /* Title2 */
+  --text-3xl:   28px;   /* Title1 / Headline3 */
 
   /* ---- Layout ---- */
   --container-max: 1200px;
