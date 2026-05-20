@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatDate, formatPrice } from "@/lib/format";
+import { Badge } from "@/components/ui";
 
 type Tab = "orders" | "points" | "coupons" | "reviews";
 
@@ -64,37 +65,33 @@ export default function MyPage() {
         })();
     }, [user, authLoading, router]);
 
-    if (authLoading || !user) return <div className="mx-auto max-w-3xl px-4 py-10 text-zinc-500">불러오는 중...</div>;
+    if (authLoading || !user) return <div className="mx-auto max-w-3xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
 
     return (
         <div className="mx-auto max-w-3xl px-4 py-8">
-            {/* 헤더 */}
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-xl md:text-2xl font-bold">마이페이지</h1>
-                    <p className="text-sm text-zinc-500 mt-1">{user.name} 님 · {user.email}</p>
+                    <h1 className="text-xl md:text-2xl font-semibold text-[var(--color-fg)]">마이페이지</h1>
+                    <p className="text-sm text-[var(--color-fg-muted)] mt-1">{user.name} 님 · {user.email}</p>
                 </div>
-                <button onClick={async () => { await logout(); router.replace("/"); }} className="text-xs text-zinc-500 hover:text-rose-600">
+                <button onClick={async () => { await logout(); router.replace("/"); }} className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-danger)]">
                     로그아웃
                 </button>
             </div>
 
-            {/* 요약 */}
             <div className="grid grid-cols-3 gap-2 mb-4 text-center text-sm">
                 <Stat label="보유 적립금" value={formatPrice(balance)} />
                 <Stat label="쿠폰" value={`${coupons.filter(c => !c.usedAt && new Date(c.expiresAt) > new Date()).length}장`} />
                 <Stat label="주문" value={`${orders.length}건`} />
             </div>
 
-            {/* 부가 메뉴 */}
             <div className="grid grid-cols-3 gap-2 mb-6 text-center text-xs">
-                <Link href="/mypage/wishlist" className="rounded border border-zinc-200 py-2 hover:border-zinc-400">위시리스트</Link>
-                <Link href="/mypage/addresses" className="rounded border border-zinc-200 py-2 hover:border-zinc-400">배송지 관리</Link>
-                <Link href="/mypage/settings" className="rounded border border-zinc-200 py-2 hover:border-zinc-400">계정 설정</Link>
+                <Link href="/mypage/wishlist" className="rounded-[var(--radius-sm)] border border-[var(--color-border)] py-2.5 text-[var(--color-fg)] hover:border-[var(--color-border-strong)]">위시리스트</Link>
+                <Link href="/mypage/addresses" className="rounded-[var(--radius-sm)] border border-[var(--color-border)] py-2.5 text-[var(--color-fg)] hover:border-[var(--color-border-strong)]">배송지 관리</Link>
+                <Link href="/mypage/settings" className="rounded-[var(--radius-sm)] border border-[var(--color-border)] py-2.5 text-[var(--color-fg)] hover:border-[var(--color-border-strong)]">계정 설정</Link>
             </div>
 
-            {/* 탭 */}
-            <div className="border-b border-zinc-200 mb-4 flex gap-1 text-sm overflow-x-auto">
+            <div className="border-b border-[var(--color-border)] mb-4 flex gap-1 text-sm overflow-x-auto">
                 <TabBtn k="orders" cur={tab} setTab={setTab}>주문내역</TabBtn>
                 <TabBtn k="points" cur={tab} setTab={setTab}>적립금</TabBtn>
                 <TabBtn k="coupons" cur={tab} setTab={setTab}>쿠폰</TabBtn>
@@ -104,18 +101,18 @@ export default function MyPage() {
             {tab === "orders" && (
                 <Section empty={orders.length === 0} emptyText="주문 내역이 없습니다.">
                     {orders.map(o => (
-                        <Link key={o.id} href={`/orders/${o.id}`} className="block rounded-md border border-zinc-200 p-3 hover:border-zinc-400">
+                        <Link key={o.id} href={`/orders/${o.id}`} className="block rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 hover:border-[var(--color-border-strong)]">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <div className="text-xs text-zinc-500">{o.orderNo}</div>
-                                    <div className="text-sm font-medium mt-0.5">
+                                    <div className="text-xs text-[var(--color-fg-muted)]">{o.orderNo}</div>
+                                    <div className="text-sm font-medium mt-0.5 text-[var(--color-fg)]">
                                         {o.items[0]?.productName ?? "-"} {o.items.length > 1 && `외 ${o.items.length - 1}건`}
                                     </div>
-                                    <div className="text-xs text-zinc-500 mt-1">{formatDate(o.orderedAt)}</div>
+                                    <div className="text-xs text-[var(--color-fg-muted)] mt-1">{formatDate(o.orderedAt)}</div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-sm font-semibold">{formatPrice(o.paidAmount)}</div>
-                                    <span className="inline-block mt-1 text-[10px] rounded-full bg-zinc-100 px-2 py-0.5">{o.status}</span>
+                                    <div className="text-sm font-semibold text-[var(--color-fg)]">{formatPrice(o.paidAmount)}</div>
+                                    <Badge size="sm" tone="neutral" className="mt-1">{o.status}</Badge>
                                 </div>
                             </div>
                         </Link>
@@ -126,16 +123,16 @@ export default function MyPage() {
             {tab === "points" && (
                 <Section empty={points.length === 0} emptyText="적립금 내역이 없습니다.">
                     {points.map(p => (
-                        <div key={p.id} className="rounded-md border border-zinc-200 p-3 flex justify-between text-sm">
+                        <div key={p.id} className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 flex justify-between text-sm">
                             <div>
-                                <div className="font-medium">{p.memo ?? p.type}</div>
-                                <div className="text-xs text-zinc-500 mt-0.5">{formatDate(p.createdAt)}</div>
+                                <div className="font-medium text-[var(--color-fg)]">{p.memo ?? p.type}</div>
+                                <div className="text-xs text-[var(--color-fg-muted)] mt-0.5">{formatDate(p.createdAt)}</div>
                             </div>
                             <div className="text-right">
-                                <div className={p.amount > 0 ? "text-emerald-600 font-semibold" : "text-zinc-700"}>
+                                <div className={p.amount > 0 ? "text-[var(--color-success)] font-semibold" : "text-[var(--color-fg)]"}>
                                     {p.amount > 0 ? "+" : ""}{formatPrice(p.amount)}
                                 </div>
-                                <div className="text-xs text-zinc-400">잔액 {formatPrice(p.balanceAfter)}</div>
+                                <div className="text-xs text-[var(--color-fg-subtle)]">잔액 {formatPrice(p.balanceAfter)}</div>
                             </div>
                         </div>
                     ))}
@@ -149,14 +146,14 @@ export default function MyPage() {
                         const used = !!c.usedAt;
                         const dimmed = expired || used;
                         return (
-                            <div key={c.memberCouponId} className={`rounded-md border p-3 flex justify-between ${dimmed ? "border-zinc-200 opacity-60" : "border-zinc-300"}`}>
+                            <div key={c.memberCouponId} className={`rounded-[var(--radius-lg)] border bg-[var(--color-surface)] p-4 flex justify-between ${dimmed ? "border-[var(--color-border)] opacity-60" : "border-[var(--color-border-strong)]"}`}>
                                 <div>
-                                    <div className="font-medium text-sm">{c.name}</div>
-                                    <div className="text-xs text-zinc-500 mt-0.5">
+                                    <div className="font-medium text-sm text-[var(--color-fg)]">{c.name}</div>
+                                    <div className="text-xs text-[var(--color-fg-muted)] mt-0.5">
                                         ~{formatDate(c.expiresAt)} {used && "· 사용함"} {expired && !used && "· 만료"}
                                     </div>
                                 </div>
-                                <div className="text-sm font-semibold">
+                                <div className="text-sm font-semibold text-[var(--color-fg)]">
                                     {c.discountType === "AMOUNT" ? formatPrice(c.discountValue) : `${c.discountValue}%`}
                                 </div>
                             </div>
@@ -168,15 +165,15 @@ export default function MyPage() {
             {tab === "reviews" && (
                 <Section empty={reviews.length === 0} emptyText="작성한 리뷰가 없습니다.">
                     {reviews.map(r => (
-                        <Link key={r.id} href={`/p/${r.productId}`} className="block rounded-md border border-zinc-200 p-3 hover:border-zinc-400">
+                        <Link key={r.id} href={`/p/${r.productId}`} className="block rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 hover:border-[var(--color-border-strong)]">
                             <div className="flex justify-between text-sm">
-                                <span>★ {r.rating}</span>
-                                <span className="text-xs text-zinc-500">{formatDate(r.createdAt)}</span>
+                                <span className="text-[var(--color-fg)]">★ {r.rating}</span>
+                                <span className="text-xs text-[var(--color-fg-muted)]">{formatDate(r.createdAt)}</span>
                             </div>
-                            {r.content && <p className="mt-1 text-sm text-zinc-700 line-clamp-2">{r.content}</p>}
-                            <div className="mt-1 flex gap-2 text-[11px] text-zinc-500">
+                            {r.content && <p className="mt-1 text-sm text-[var(--color-fg)] line-clamp-2">{r.content}</p>}
+                            <div className="mt-1 flex gap-2 text-[11px] text-[var(--color-fg-muted)]">
                                 {r.hasPhoto && <span>📷 포토</span>}
-                                {r.pointRewarded && <span className="text-emerald-600">적립 완료</span>}
+                                {r.pointRewarded && <span className="text-[var(--color-success)]">적립 완료</span>}
                             </div>
                         </Link>
                     ))}
@@ -188,9 +185,9 @@ export default function MyPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
     return (
-        <div className="rounded-md bg-zinc-50 border border-zinc-200 py-3 px-2">
-            <div className="text-xs text-zinc-500">{label}</div>
-            <div className="text-sm md:text-base font-bold mt-0.5">{value}</div>
+        <div className="rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] py-4 px-3">
+            <div className="text-xs text-[var(--color-fg-muted)]">{label}</div>
+            <div className="text-sm md:text-base font-bold mt-0.5 text-[var(--color-fg)]">{value}</div>
         </div>
     );
 }
@@ -200,14 +197,16 @@ function TabBtn({ k, cur, setTab, children }: { k: Tab; cur: Tab; setTab: (t: Ta
     return (
         <button
             onClick={() => setTab(k)}
-            className={`px-3 py-2 border-b-2 whitespace-nowrap ${
-                active ? "border-zinc-900 font-semibold" : "border-transparent text-zinc-500 hover:text-zinc-900"
+            className={`px-3 py-2 border-b-2 whitespace-nowrap transition ${
+                active
+                    ? "border-[var(--color-fg)] text-[var(--color-fg)] font-semibold"
+                    : "border-transparent text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
             }`}
         >{children}</button>
     );
 }
 
 function Section({ empty, emptyText, children }: { empty: boolean; emptyText: string; children: React.ReactNode }) {
-    if (empty) return <p className="text-sm text-zinc-500 text-center py-12">{emptyText}</p>;
+    if (empty) return <p className="text-sm text-[var(--color-fg-subtle)] text-center py-12">{emptyText}</p>;
     return <div className="space-y-2">{children}</div>;
 }
