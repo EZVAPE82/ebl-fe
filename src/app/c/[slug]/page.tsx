@@ -46,36 +46,45 @@ export default async function CategoryPage({
         { content: [], totalElements: 0, totalPages: 0, number: 0, size: 20, first: true, last: true, empty: true }
     );
 
+    const pages = compactPagination(page, list.totalPages);
+
     return (
-        <div className="mx-auto max-w-screen-xl px-4 py-6">
-            <header className="mb-5">
-                <h1 className="text-xl md:text-2xl font-semibold text-[var(--color-fg)]">
+        <div className="mx-auto max-w-screen-xl px-4 py-8">
+            {/* 헤더: 타이틀 큰 글씨 (시안 "아이템리스트" 톤) */}
+            <header className="mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">
                     {cat?.name ?? slug.toUpperCase()}
                 </h1>
-                <p className="text-xs text-[var(--color-fg-muted)] mt-1">총 {list.totalElements}개</p>
             </header>
 
-            {/* 정렬 */}
-            <div className="flex flex-wrap gap-1.5 mb-5 text-xs">
-                {SORTS.map(s => {
-                    const params = new URLSearchParams(qs);
-                    params.set("sort", s.key);
-                    params.delete("page");
-                    const active = sort === s.key;
-                    return (
-                        <Link
-                            key={s.key}
-                            href={`/c/${slug}?${params.toString()}`}
-                            className={`px-3 py-1.5 rounded-[var(--radius-sm)] border transition ${
-                                active
-                                    ? "bg-[var(--color-brand)] text-[var(--color-brand-fg)] border-[var(--color-brand)]"
-                                    : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]"
-                            }`}
-                        >
-                            {s.label}
-                        </Link>
-                    );
-                })}
+            {/* 좌측 카운트 + 우측 정렬 selector */}
+            <div className="flex items-center justify-between mb-5 text-xs">
+                <p className="text-[var(--color-fg-muted)]">
+                    총 <span className="text-[var(--color-fg)] font-medium">{list.totalElements}</span>개의 상품
+                </p>
+                <div className="flex items-center gap-1">
+                    {SORTS.map((s, i) => {
+                        const params = new URLSearchParams(qs);
+                        params.set("sort", s.key);
+                        params.delete("page");
+                        const active = sort === s.key;
+                        return (
+                            <span key={s.key} className="flex items-center gap-1">
+                                {i > 0 && <span className="text-[var(--color-border-strong)]">·</span>}
+                                <Link
+                                    href={`/c/${slug}?${params.toString()}`}
+                                    className={`px-1.5 transition ${
+                                        active
+                                            ? "text-[var(--color-fg)] font-semibold"
+                                            : "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
+                                    }`}
+                                >
+                                    {s.label}
+                                </Link>
+                            </span>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* 목록 */}
@@ -89,31 +98,57 @@ export default async function CategoryPage({
                 </div>
             )}
 
-            {/* 페이지네이션 (간단) */}
+            {/* 페이지네이션 (압축) */}
             {list.totalPages > 1 && (
-                <div className="mt-8 flex justify-center gap-1.5 text-sm">
-                    {Array.from({ length: list.totalPages }, (_, i) => i).map(i => {
-                        const p = new URLSearchParams(qs);
-                        p.set("page", String(i));
-                        const active = i === page;
-                        return (
-                            <Link
-                                key={i}
-                                href={`/c/${slug}?${p.toString()}`}
-                                className={`min-w-9 text-center px-3 py-1.5 rounded-[var(--radius-sm)] border transition ${
-                                    active
-                                        ? "bg-[var(--color-brand)] text-[var(--color-brand-fg)] border-[var(--color-brand)]"
-                                        : "border-[var(--color-border)] text-[var(--color-fg-muted)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]"
-                                }`}
-                            >
-                                {i + 1}
-                            </Link>
-                        );
-                    })}
+                <div className="mt-10 flex justify-center items-center gap-1.5 text-sm">
+                    {page > 0 && (
+                        <PageLink slug={slug} qs={qs} target={page - 1} label="‹" />
+                    )}
+                    {pages.map((p, idx) =>
+                        p === "..." ? (
+                            <span key={`gap-${idx}`} className="px-2 text-[var(--color-fg-subtle)]">…</span>
+                        ) : (
+                            <PageLink key={p} slug={slug} qs={qs} target={p} label={String(p + 1)} active={p === page} />
+                        )
+                    )}
+                    {page < list.totalPages - 1 && (
+                        <PageLink slug={slug} qs={qs} target={page + 1} label="›" />
+                    )}
                 </div>
             )}
         </div>
     );
+}
+
+function PageLink({ slug, qs, target, label, active }: { slug: string; qs: URLSearchParams; target: number; label: string; active?: boolean }) {
+    const p = new URLSearchParams(qs);
+    p.set("page", String(target));
+    return (
+        <Link
+            href={`/c/${slug}?${p.toString()}`}
+            className={`min-w-8 h-8 inline-flex items-center justify-center rounded-[var(--radius-sm)] border text-sm transition ${
+                active
+                    ? "bg-[var(--color-brand)] text-[var(--color-brand-fg)] border-[var(--color-brand)]"
+                    : "border-[var(--color-border)] text-[var(--color-fg-muted)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]"
+            }`}
+        >
+            {label}
+        </Link>
+    );
+}
+
+// 1 2 3 4 5 ... 30 형태로 압축. 현재 페이지 기준 ±2 보여줌.
+function compactPagination(current: number, total: number): (number | "...")[] {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+    const out: (number | "...")[] = [];
+    out.push(0);
+    if (current > 3) out.push("...");
+    const start = Math.max(1, current - 1);
+    const end = Math.min(total - 2, current + 1);
+    for (let i = start; i <= end; i++) out.push(i);
+    if (current < total - 4) out.push("...");
+    out.push(total - 1);
+    return out;
 }
 
 async function safeFetch<T>(path: string, fallback: T): Promise<T> {
