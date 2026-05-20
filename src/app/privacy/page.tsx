@@ -40,7 +40,7 @@ export default function PrivacyPage() {
             <h2>6. 개인정보 보호책임자</h2>
             <p>성명: —, 연락처: —, 이메일: —</p>
 
-            <p className="mt-8 text-xs text-zinc-500">
+            <p className="mt-8 text-xs text-[var(--color-fg-subtle)]">
                 * 본 방침의 상세 조항은 도급인 법무 검토 후 확정됩니다. 위 내용은 견본 텍스트입니다.
             </p>
         </DocPage>

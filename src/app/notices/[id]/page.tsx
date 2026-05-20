@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { formatDate } from "@/lib/format";
+import { Badge } from "@/components/ui";
 import type { Notice } from "@/types/api";
 import { notFound } from "next/navigation";
 
@@ -19,19 +20,17 @@ export default async function NoticeDetail({ params }: { params: Promise<{ id: s
 
     return (
         <div className="mx-auto max-w-3xl px-4 py-8">
-            <Link href="/notices" className="text-xs text-zinc-500 hover:text-black">← 공지사항 목록</Link>
+            <Link href="/notices" className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">← 공지사항 목록</Link>
 
             <article className="mt-3">
                 <div className="flex items-start gap-2">
-                    {n.pinned && (
-                        <span className="rounded bg-rose-100 text-rose-700 px-1.5 py-0.5 text-[10px] font-medium">필독</span>
-                    )}
-                    <h1 className="text-xl md:text-2xl font-bold flex-1">{n.title}</h1>
+                    {n.pinned && <Badge size="sm" tone="danger">필독</Badge>}
+                    <h1 className="text-xl md:text-2xl font-semibold flex-1 text-[var(--color-fg)]">{n.title}</h1>
                 </div>
-                <div className="text-xs text-zinc-500 mt-2 mb-6 border-b border-zinc-200 pb-3">
+                <div className="text-xs text-[var(--color-fg-muted)] mt-2 mb-6 border-b border-[var(--color-border)] pb-3">
                     {formatDate(n.createdAt)} · 조회 {n.viewCount}
                 </div>
-                <div className="prose prose-sm max-w-none whitespace-pre-line">
+                <div className="prose prose-sm max-w-none whitespace-pre-line text-[var(--color-fg)]">
                     {n.content}
                 </div>
             </article>

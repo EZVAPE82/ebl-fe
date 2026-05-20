@@ -22,7 +22,6 @@ async function fetchFaqs(): Promise<Faq[]> {
 export default async function FaqPage() {
     const faqs = await fetchFaqs();
 
-    // 카테고리별 그룹핑
     const groups = new Map<string, Faq[]>();
     for (const f of faqs) {
         const k = f.category ?? "기타";
@@ -32,23 +31,23 @@ export default async function FaqPage() {
 
     return (
         <div className="mx-auto max-w-3xl px-4 py-8">
-            <h1 className="text-xl md:text-2xl font-bold mb-6">자주 묻는 질문</h1>
+            <h1 className="text-xl md:text-2xl font-semibold mb-6 text-[var(--color-fg)]">자주 묻는 질문</h1>
 
             {faqs.length === 0 ? (
-                <p className="text-sm text-zinc-500 text-center py-12">등록된 FAQ가 없습니다.</p>
+                <p className="text-sm text-[var(--color-fg-subtle)] text-center py-12">등록된 FAQ가 없습니다.</p>
             ) : (
                 <div className="space-y-6">
                     {Array.from(groups.entries()).map(([cat, items]) => (
                         <section key={cat}>
-                            <h2 className="text-sm font-semibold text-zinc-700 mb-2">{cat}</h2>
-                            <div className="divide-y divide-zinc-200 rounded-md border border-zinc-200">
+                            <h2 className="text-base font-medium text-[var(--color-fg)] mb-2">{cat}</h2>
+                            <div className="divide-y divide-[var(--color-border)] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
                                 {items.map(f => (
                                     <details key={f.id} className="group">
-                                        <summary className="cursor-pointer list-none px-4 py-3 flex items-center gap-2 hover:bg-zinc-50">
-                                            <span className="text-sm flex-1">{f.question}</span>
-                                            <span className="text-zinc-400 text-xs group-open:rotate-180 transition">▼</span>
+                                        <summary className="cursor-pointer list-none px-4 py-3.5 flex items-center gap-2 hover:bg-[var(--color-bg-subtle)]">
+                                            <span className="text-sm flex-1 text-[var(--color-fg)]">{f.question}</span>
+                                            <span className="text-[var(--color-fg-subtle)] text-xs group-open:rotate-180 transition">▼</span>
                                         </summary>
-                                        <div className="px-4 py-3 bg-zinc-50 text-sm text-zinc-700 whitespace-pre-line border-t border-zinc-200">
+                                        <div className="px-4 py-3.5 bg-[var(--color-bg-subtle)] text-sm text-[var(--color-fg)] whitespace-pre-line border-t border-[var(--color-border)]">
                                             {f.answer}
                                         </div>
                                     </details>

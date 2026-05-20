@@ -35,7 +35,7 @@ export default function TermsPage() {
                 개인정보처리방침에 따라 처리됩니다.
             </p>
 
-            <p className="mt-8 text-xs text-zinc-500">
+            <p className="mt-8 text-xs text-[var(--color-fg-subtle)]">
                 * 본 약관의 상세 조항은 도급인 법무 검토 후 확정됩니다. 위 내용은 견본 텍스트입니다.
             </p>
         </DocPage>
