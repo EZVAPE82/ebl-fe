@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { validatePassword } from "@/lib/validation";
+import { Button, Checkbox, Input } from "@/components/ui";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -65,7 +66,6 @@ export default function SignupPage() {
                     youthAgreed: agree.youth,
                 }),
             });
-            // 가입 후 자동 로그인 페이지로
             router.replace("/login?redirect=/mypage");
         } catch (e) {
             setError(e instanceof ApiError ? e.message : "회원가입에 실패했습니다.");
@@ -74,84 +74,73 @@ export default function SignupPage() {
         }
     }
 
+    // Input과 동일 톤의 select className (Input.tsx base 참조)
+    const selectClass =
+        "block w-full bg-[var(--color-surface)] text-[var(--color-fg)] " +
+        "border border-[var(--color-border)] rounded-[var(--radius-sm)] px-4 py-3.5 text-sm " +
+        "focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)] focus:border-[var(--color-ring)] transition";
+
     return (
         <div className="mx-auto max-w-md px-4 py-10">
-            <h1 className="text-2xl font-bold mb-6">회원가입</h1>
+            <h1 className="text-2xl font-semibold mb-6 text-[var(--color-fg)]">회원가입</h1>
 
             <form onSubmit={onSubmit} className="space-y-3">
-                <Field label="이메일">
-                    <input type="email" required value={form.email} onChange={e => update("email", e.target.value)} className={inputClass} />
-                </Field>
-                <Field label="비밀번호 (10자 이상, 영문/숫자/특수문자)">
-                    <input type="password" required value={form.password} onChange={e => update("password", e.target.value)} className={inputClass} />
-                </Field>
-                <Field label="비밀번호 확인">
-                    <input type="password" required value={form.passwordConfirm} onChange={e => update("passwordConfirm", e.target.value)} className={inputClass} />
-                </Field>
-                <Field label="이름">
-                    <input type="text" required value={form.name} onChange={e => update("name", e.target.value)} className={inputClass} />
-                </Field>
-                <Field label="휴대폰 번호">
-                    <input type="tel" required placeholder="010-1234-5678" value={form.phone} onChange={e => update("phone", e.target.value)} className={inputClass} />
-                </Field>
-                <Field label="생년월일">
-                    <input type="date" required value={form.birthDate} onChange={e => update("birthDate", e.target.value)} className={inputClass} />
-                </Field>
-                <Field label="회원 유형">
-                    <select value={form.memberType} onChange={e => update("memberType", e.target.value as typeof form.memberType)} className={inputClass}>
+                <Input type="email" required label="이메일"
+                    value={form.email} onChange={e => update("email", e.target.value)} />
+                <Input type="password" required
+                    label="비밀번호"
+                    helperText="10자 이상, 영문·숫자·특수문자 포함"
+                    value={form.password} onChange={e => update("password", e.target.value)} />
+                <Input type="password" required label="비밀번호 확인"
+                    value={form.passwordConfirm} onChange={e => update("passwordConfirm", e.target.value)} />
+                <Input type="text" required label="이름"
+                    value={form.name} onChange={e => update("name", e.target.value)} />
+                <Input type="tel" required label="휴대폰 번호"
+                    placeholder="010-1234-5678"
+                    value={form.phone} onChange={e => update("phone", e.target.value)} />
+                <Input type="date" required label="생년월일"
+                    value={form.birthDate} onChange={e => update("birthDate", e.target.value)} />
+
+                <label className="block">
+                    <span className="block text-xs font-medium text-[var(--color-fg-muted)] mb-1">회원 유형</span>
+                    <select
+                        value={form.memberType}
+                        onChange={e => update("memberType", e.target.value as typeof form.memberType)}
+                        className={selectClass}
+                    >
                         <option value="KOREAN">내국인</option>
                         <option value="FOREIGN_RESIDENT">국내거주 외국인</option>
                         <option value="FOREIGN_OVERSEAS">해외거주 외국인</option>
                     </select>
-                </Field>
+                </label>
 
-                <fieldset className="space-y-1.5 rounded-md border border-zinc-200 p-3 text-sm">
-                    <legend className="px-1 text-zinc-500 text-xs">약관 동의</legend>
-                    <Check label="(필수) 이용약관" checked={agree.tos} onChange={v => setAgree(s => ({...s, tos: v}))} />
-                    <Check label="(필수) 개인정보 처리방침" checked={agree.privacy} onChange={v => setAgree(s => ({...s, privacy: v}))} />
-                    <Check label="(필수) 청소년 보호정책 — 만 19세 이상" checked={agree.youth} onChange={v => setAgree(s => ({...s, youth: v}))} />
-                    <Check label="(선택) 마케팅 정보 수신" checked={agree.marketing} onChange={v => setAgree(s => ({...s, marketing: v}))} />
+                <fieldset className="space-y-2 rounded-[var(--radius-md)] border border-[var(--color-border)] p-4 text-sm">
+                    <legend className="px-1 text-[var(--color-fg-muted)] text-xs">약관 동의</legend>
+                    <Checkbox label="(필수) 이용약관" checked={agree.tos}
+                        onChange={e => setAgree(s => ({ ...s, tos: e.target.checked }))} />
+                    <Checkbox label="(필수) 개인정보 처리방침" checked={agree.privacy}
+                        onChange={e => setAgree(s => ({ ...s, privacy: e.target.checked }))} />
+                    <Checkbox label="(필수) 청소년 보호정책 — 만 19세 이상" checked={agree.youth}
+                        onChange={e => setAgree(s => ({ ...s, youth: e.target.checked }))} />
+                    <Checkbox label="(선택) 마케팅 정보 수신" checked={agree.marketing}
+                        onChange={e => setAgree(s => ({ ...s, marketing: e.target.checked }))} />
                 </fieldset>
 
-                {error && <p className="text-sm text-rose-600">{error}</p>}
+                {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
 
-                <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full rounded-md bg-zinc-900 text-white py-2.5 text-sm font-medium hover:bg-zinc-800 disabled:opacity-50"
-                >
-                    {submitting ? "가입 중..." : "가입하기"}
-                </button>
+                <Button type="submit" loading={submitting} size="lg" fullWidth>
+                    가입하기
+                </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-zinc-500">
+            <p className="mt-6 text-center text-sm text-[var(--color-fg-muted)]">
                 이미 계정이 있으신가요?{" "}
-                <Link href="/login" className="text-zinc-900 underline">로그인</Link>
+                <Link href="/login" className="text-[var(--color-fg)] underline">로그인</Link>
             </p>
-            <p className="mt-4 text-xs text-zinc-400 leading-relaxed">
+            <p className="mt-4 text-xs text-[var(--color-fg-subtle)] leading-relaxed">
                 * 가입 후 PASS 본인인증을 완료해야 구매가 가능합니다.<br />
                 * 해외거주 외국인은 어드민의 여권 서류 승인 후 활성화됩니다.
             </p>
         </div>
-    );
-}
-
-const inputClass = "mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-    return (
-        <label className="block">
-            <span className="text-sm text-zinc-600">{label}</span>
-            {children}
-        </label>
-    );
-}
-
-function Check({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-    return (
-        <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} />
-            <span>{label}</span>
-        </label>
     );
 }
