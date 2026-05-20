@@ -31,7 +31,7 @@ export default async function Home() {
         <div className="mx-auto max-w-screen-xl px-4 py-6 space-y-12">
             {/* Hero */}
             {hero ? (
-                <Link href={safeLinkUrl(hero.linkUrl)} className="block overflow-hidden rounded-lg">
+                <Link href={safeLinkUrl(hero.linkUrl)} className="block overflow-hidden rounded-[var(--radius-lg)]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={safeImageUrl(hero.imageUrl)}
@@ -40,7 +40,7 @@ export default async function Home() {
                     />
                 </Link>
             ) : (
-                <div className="rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-700 px-6 py-10 md:py-16 text-white">
+                <div className="rounded-[var(--radius-lg)] bg-gradient-to-br from-[var(--color-fg)] to-[var(--color-fg-muted)] px-6 py-10 md:py-16 text-[var(--color-fg-inverse)]">
                     <p className="text-xs uppercase tracking-wider opacity-70 mb-2">elfbarlounge.co.kr</p>
                     <h1 className="text-2xl md:text-4xl font-bold leading-tight">
                         정품 전자담배 기기·액상 전문몰
@@ -68,9 +68,9 @@ export default async function Home() {
 
 function SectionTitle({ title, href }: { title: string; href: string }) {
     return (
-        <div className="flex items-end justify-between mb-3">
-            <h2 className="text-lg md:text-xl font-bold tracking-tight">{title}</h2>
-            <Link href={href} className="text-xs text-zinc-500 hover:text-black">더보기 →</Link>
+        <div className="flex items-end justify-between mb-4">
+            <h2 className="text-lg md:text-xl font-semibold tracking-tight text-[var(--color-fg)]">{title}</h2>
+            <Link href={href} className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">더보기 →</Link>
         </div>
     );
 }
@@ -78,7 +78,7 @@ function SectionTitle({ title, href }: { title: string; href: string }) {
 function ProductGrid({ items, emptyText }: { items: ProductSummary[]; emptyText: string }) {
     if (items.length === 0) {
         return (
-            <div className="rounded-md border border-dashed border-zinc-300 px-4 py-12 text-center text-sm text-zinc-500">
+            <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-12 text-center text-sm text-[var(--color-fg-subtle)]">
                 {emptyText}
             </div>
         );

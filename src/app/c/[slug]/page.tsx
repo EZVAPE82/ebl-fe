@@ -48,27 +48,28 @@ export default async function CategoryPage({
 
     return (
         <div className="mx-auto max-w-screen-xl px-4 py-6">
-            <header className="mb-4">
-                <h1 className="text-xl md:text-2xl font-bold">
+            <header className="mb-5">
+                <h1 className="text-xl md:text-2xl font-semibold text-[var(--color-fg)]">
                     {cat?.name ?? slug.toUpperCase()}
                 </h1>
-                <p className="text-xs text-zinc-500 mt-1">총 {list.totalElements}개</p>
+                <p className="text-xs text-[var(--color-fg-muted)] mt-1">총 {list.totalElements}개</p>
             </header>
 
             {/* 정렬 */}
-            <div className="flex flex-wrap gap-1 mb-4 text-xs">
+            <div className="flex flex-wrap gap-1.5 mb-5 text-xs">
                 {SORTS.map(s => {
                     const params = new URLSearchParams(qs);
                     params.set("sort", s.key);
                     params.delete("page");
+                    const active = sort === s.key;
                     return (
                         <Link
                             key={s.key}
                             href={`/c/${slug}?${params.toString()}`}
-                            className={`px-3 py-1.5 rounded-full border ${
-                                sort === s.key
-                                    ? "bg-zinc-900 text-white border-zinc-900"
-                                    : "bg-white text-zinc-700 border-zinc-300 hover:border-zinc-500"
+                            className={`px-3 py-1.5 rounded-[var(--radius-sm)] border transition ${
+                                active
+                                    ? "bg-[var(--color-brand)] text-[var(--color-brand-fg)] border-[var(--color-brand)]"
+                                    : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]"
                             }`}
                         >
                             {s.label}
@@ -79,7 +80,7 @@ export default async function CategoryPage({
 
             {/* 목록 */}
             {list.content.length === 0 ? (
-                <div className="rounded-md border border-dashed border-zinc-300 px-4 py-16 text-center text-sm text-zinc-500">
+                <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-16 text-center text-sm text-[var(--color-fg-subtle)]">
                     표시할 상품이 없습니다.
                 </div>
             ) : (
@@ -90,17 +91,19 @@ export default async function CategoryPage({
 
             {/* 페이지네이션 (간단) */}
             {list.totalPages > 1 && (
-                <div className="mt-8 flex justify-center gap-2 text-sm">
+                <div className="mt-8 flex justify-center gap-1.5 text-sm">
                     {Array.from({ length: list.totalPages }, (_, i) => i).map(i => {
                         const p = new URLSearchParams(qs);
                         p.set("page", String(i));
+                        const active = i === page;
                         return (
                             <Link
                                 key={i}
                                 href={`/c/${slug}?${p.toString()}`}
-                                className={`px-3 py-1 rounded border ${
-                                    i === page ? "bg-zinc-900 text-white border-zinc-900"
-                                              : "border-zinc-300 hover:border-zinc-500"
+                                className={`min-w-9 text-center px-3 py-1.5 rounded-[var(--radius-sm)] border transition ${
+                                    active
+                                        ? "bg-[var(--color-brand)] text-[var(--color-brand-fg)] border-[var(--color-brand)]"
+                                        : "border-[var(--color-border)] text-[var(--color-fg-muted)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]"
                                 }`}
                             >
                                 {i + 1}
