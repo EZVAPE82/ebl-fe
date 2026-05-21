@@ -23,7 +23,12 @@ type CartLine = CartItem & {
     unitPrice: number;
     thumbnailUrl: string | null;
     soldOut: boolean;
+    /** 프로모션 적용 시 받게 될 무료 증정 수량 (BOGO). 0 이면 미적용. */
+    freeQuantity: number;
+    promotionLabel: string | null;   // "2+1", "10+1" 등
 };
+
+type PromoBadge = { id: number; buyQuantity: number; getQuantity: number; label: string };
 
 export default function CartPage() {
     const { user, loading: authLoading } = useAuth();
@@ -40,16 +45,28 @@ export default function CartPage() {
             const detailed = await Promise.all(
                 c.items.map(async (it) => {
                     try {
-                        const p = await api<ProductDetail>(`/api/v1/public/products/${it.productId}`);
+                        const [p, promos] = await Promise.all([
+                            api<ProductDetail>(`/api/v1/public/products/${it.productId}`),
+                            api<PromoBadge[]>(`/api/v1/public/products/${it.productId}/promotions`).catch(() => []),
+                        ]);
                         const opt = it.productOptionId
                             ? p.options.find(o => o.id === it.productOptionId)
                             : null;
                         const unitPrice = p.price + (opt?.priceDelta ?? 0);
                         const optionText = opt ? `${opt.optionGroup}: ${opt.optionValue}` : null;
                         const soldOut = opt ? opt.stock <= 0 : p.status === "SOLD_OUT";
-                        return { ...it, name: p.name, unitPrice, optionText, thumbnailUrl: p.thumbnailUrl, soldOut } as CartLine;
+                        // 첫 프로모션만 적용 (백엔드와 동일 로직)
+                        const promo = promos[0];
+                        const freeQuantity = promo ? Math.floor(it.quantity / promo.buyQuantity) * promo.getQuantity : 0;
+                        return {
+                            ...it, name: p.name, unitPrice, optionText, thumbnailUrl: p.thumbnailUrl, soldOut,
+                            freeQuantity, promotionLabel: promo?.label ?? null,
+                        } as CartLine;
                     } catch {
-                        return { ...it, name: `상품 #${it.productId}`, unitPrice: 0, optionText: null, thumbnailUrl: null, soldOut: true } as CartLine;
+                        return {
+                            ...it, name: `상품 #${it.productId}`, unitPrice: 0, optionText: null, thumbnailUrl: null, soldOut: true,
+                            freeQuantity: 0, promotionLabel: null,
+                        } as CartLine;
                     }
                 })
             );
@@ -126,6 +143,14 @@ export default function CartPage() {
                                 {l.name}
                             </Link>
                             {l.optionText && <div className="text-xs text-[var(--color-fg-muted)] mt-1">{l.optionText}</div>}
+                            {l.promotionLabel && (
+                                <div className="mt-1.5 text-[11px] text-[var(--color-danger)]">
+                                    🎁 {l.promotionLabel} 프로모션
+                                    {l.freeQuantity > 0
+                                        ? <span className="font-semibold"> · 결제 시 {l.freeQuantity}개 무료 증정</span>
+                                        : <span className="text-[var(--color-fg-muted)]"> · 적용 수량 미달</span>}
+                                </div>
+                            )}
                             <div className="mt-2 flex items-center gap-2">
                                 <button
                                     onClick={() => changeQty(l.id, l.quantity - 1)}
