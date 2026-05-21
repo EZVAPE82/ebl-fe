@@ -33,6 +33,8 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
     const filter: Filter = sp.filter === "ended" ? "ended" : "active";
 
     const all = await fetchEvents();
+    // server component 라 요청마다 새 evaluation. impure 규칙 무해.
+    // eslint-disable-next-line react-hooks/purity
     const now = Date.now();
     const events = all.filter(e => {
         const ended = e.endsAt && new Date(e.endsAt).getTime() < now;

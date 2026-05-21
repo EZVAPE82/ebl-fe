@@ -20,7 +20,9 @@ export default async function NoticesPage({ searchParams }: { searchParams: Prom
     const list = await fetchNotices(page);
     const pages = compactPagination(page, list.totalPages);
 
-    // 최근 7일 이내 공지 = "새로운 소식" 뱃지
+    // 최근 7일 이내 공지 = "새로운 소식" 뱃지. server component 라 요청마다
+    // 새 evaluation 이므로 impure 규칙은 무해.
+    // eslint-disable-next-line react-hooks/purity
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
     return (
