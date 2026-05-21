@@ -1,6 +1,7 @@
 import { api, ApiError } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
+import { ProductGallery } from "@/components/ProductGallery";
 import { Button } from "@/components/ui";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
 import { formatPrice } from "@/lib/format";
@@ -31,49 +32,13 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
     const gallery = product.thumbnailUrl
         ? [product.thumbnailUrl, ...product.images.filter(i => i.type === "THUMBNAIL").map(i => i.url)]
         : product.images.map(i => i.url);
-    const mainImg = gallery[0];
 
     return (
         <div className="pb-28 md:pb-12">
             {/* ===== 상단: 갤러리 + 정보 ===== */}
             <div className="mx-auto max-w-screen-xl px-4 py-6 grid gap-8 md:grid-cols-2">
-                {/* 갤러리 */}
-                <div>
-                    <div className="aspect-square bg-[var(--color-bg-subtle)] rounded-[var(--radius-lg)] overflow-hidden relative">
-                        {mainImg ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={mainImg} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[var(--color-fg-subtle)] text-xs">no image</div>
-                        )}
-                        {/* 좌우 네비 화살표 (시각 only) */}
-                        {gallery.length > 1 && (
-                            <>
-                                <button
-                                    type="button"
-                                    aria-label="이전 이미지"
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg)] hover:bg-white"
-                                >‹</button>
-                                <button
-                                    type="button"
-                                    aria-label="다음 이미지"
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg)] hover:bg-white"
-                                >›</button>
-                            </>
-                        )}
-                    </div>
-                    {/* thumbnail dot indicator */}
-                    {gallery.length > 1 && (
-                        <div className="mt-3 flex justify-center gap-1.5">
-                            {gallery.map((_, i) => (
-                                <span
-                                    key={i}
-                                    className={`w-1.5 h-1.5 rounded-full ${i === 0 ? "bg-[var(--color-fg)]" : "bg-[var(--color-border-strong)]"}`}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
+                {/* 갤러리 (client island) */}
+                <ProductGallery images={gallery} alt={product.name} />
 
                 {/* 정보 */}
                 <div className="space-y-5">
