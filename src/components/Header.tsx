@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 import { useRouter, usePathname } from "next/navigation";
 
 const NAV: { href: string; label: string }[] = [
@@ -82,8 +83,9 @@ export function Header() {
                         />
                     </form>
 
-                    {/* 우측 액션 (검색·계정·장바구니) */}
+                    {/* 우측 액션 (테마·검색·계정·장바구니) */}
                     <div className="md:ml-2 ml-auto flex items-center gap-3 text-[var(--color-fg-muted)]">
+                        <ThemeToggle />
                         <Link href="/search" aria-label="검색" className="md:hidden hover:text-[var(--color-fg)]">🔍</Link>
                         {loading ? (
                             <span className="text-[var(--color-fg-subtle)]">···</span>
@@ -156,6 +158,23 @@ export function Header() {
                 </div>
             )}
         </>
+    );
+}
+
+function ThemeToggle() {
+    const { resolved, setTheme } = useTheme();
+    // 단순 토글: 현재 dark 면 light 로, 그 외엔 dark 로 (system 은 자동으로 light/dark 해석됨)
+    const next = resolved === "dark" ? "light" : "dark";
+    return (
+        <button
+            type="button"
+            onClick={() => setTheme(next)}
+            aria-label={`${next === "dark" ? "다크" : "라이트"} 모드로 전환`}
+            title={`현재: ${resolved === "dark" ? "다크" : "라이트"} (클릭하면 ${next === "dark" ? "다크" : "라이트"})`}
+            className="hover:text-[var(--color-fg)] text-sm leading-none"
+        >
+            {resolved === "dark" ? "☀️" : "🌙"}
+        </button>
     );
 }
 

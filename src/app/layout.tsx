@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Analytics } from "@/components/Analytics";
 import { AuthProvider } from "@/lib/auth";
+import { ThemeProvider, themeInitScript } from "@/lib/theme";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -46,13 +47,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <html
             lang="ko"
             className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+            suppressHydrationWarning
         >
+        <head>
+            {/* React hydration 전 data-theme 적용 → light flash 방지 */}
+            <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        </head>
         <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-fg)]">
-            <AuthProvider>
-                <Header />
-                <main className="flex-1">{children}</main>
-                <Footer />
-            </AuthProvider>
+            <ThemeProvider>
+                <AuthProvider>
+                    <Header />
+                    <main className="flex-1">{children}</main>
+                    <Footer />
+                </AuthProvider>
+            </ThemeProvider>
             <Analytics />
         </body>
         </html>

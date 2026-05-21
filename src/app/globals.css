@@ -82,12 +82,88 @@
   --header-h:      56px;
 }
 
-/* Dark mode 토큰 — 디자이너가 다크모드 지원할 때 채움.
-   현재는 명시 OFF (운영 첫 출시는 라이트 단일).
-@media (prefers-color-scheme: dark) {
-  :root { ... }
+/* ====================================================
+ * Dark mode 토큰
+ *
+ * 적용 방식 (둘 다 지원):
+ *  - [data-theme="dark"] : ThemeProvider 가 html 에 부여 (수동 토글)
+ *  - prefers-color-scheme : OS 설정 (data-theme 미설정 시 fallback)
+ *
+ * 토큰 값만 바뀌므로 JSX 어떤 수정 없이 전 페이지에 자동 반영.
+ * ==================================================== */
+
+[data-theme="dark"] {
+  /* Surface */
+  --color-bg:            #0a0a0a;
+  --color-bg-subtle:     #161616;
+  --color-bg-muted:      #1f1f1f;
+  --color-surface:       #161616;
+  --color-overlay:       rgba(0,0,0,.7);
+
+  /* Text */
+  --color-fg:            #f5f5f5;
+  --color-fg-muted:      #a3a3a3;
+  --color-fg-subtle:     #6b6b6b;
+  --color-fg-inverse:    #0a0a0a;
+
+  /* Brand (라이트의 검정 CTA → 다크에선 흰색 CTA) */
+  --color-brand:         #f5f5f5;
+  --color-brand-hover:   #ffffff;
+  --color-brand-fg:      #0a0a0a;
+  --color-accent:        #4a9eff;    /* 다크에서 시인성 위해 약간 밝게 */
+
+  /* Semantic — 다크 배경에 시인성 위해 살짝 톤업 */
+  --color-success:       #4ade80;
+  --color-warning:       #fbbf24;
+  --color-danger:        #f87171;
+  --color-danger-bg:     rgba(248,113,113,.12);
+  --color-info:          #4a9eff;
+
+  /* Border */
+  --color-border:        #2a2a2a;
+  --color-border-strong: #3a3a3a;
+  --color-ring:          #f5f5f5;
+
+  /* Shadow (다크 배경에선 라이트 그림자 무용 → 더 어둡게) */
+  --shadow-sm:           0 1px 2px 0 rgba(0,0,0,.4);
+  --shadow-md:           0 4px 6px -1px rgba(0,0,0,.5), 0 2px 4px -2px rgba(0,0,0,.3);
+  --shadow-lg:           0 10px 20px -3px rgba(0,0,0,.6), 0 4px 6px -4px rgba(0,0,0,.3);
 }
-*/
+
+/* OS 다크 모드 자동 적용 — data-theme 가 명시되지 않은 경우만 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg:            #0a0a0a;
+    --color-bg-subtle:     #161616;
+    --color-bg-muted:      #1f1f1f;
+    --color-surface:       #161616;
+    --color-overlay:       rgba(0,0,0,.7);
+    --color-fg:            #f5f5f5;
+    --color-fg-muted:      #a3a3a3;
+    --color-fg-subtle:     #6b6b6b;
+    --color-fg-inverse:    #0a0a0a;
+    --color-brand:         #f5f5f5;
+    --color-brand-hover:   #ffffff;
+    --color-brand-fg:      #0a0a0a;
+    --color-accent:        #4a9eff;
+    --color-success:       #4ade80;
+    --color-warning:       #fbbf24;
+    --color-danger:        #f87171;
+    --color-danger-bg:     rgba(248,113,113,.12);
+    --color-info:          #4a9eff;
+    --color-border:        #2a2a2a;
+    --color-border-strong: #3a3a3a;
+    --color-ring:          #f5f5f5;
+    --shadow-sm:           0 1px 2px 0 rgba(0,0,0,.4);
+    --shadow-md:           0 4px 6px -1px rgba(0,0,0,.5), 0 2px 4px -2px rgba(0,0,0,.3);
+    --shadow-lg:           0 10px 20px -3px rgba(0,0,0,.6), 0 4px 6px -4px rgba(0,0,0,.3);
+  }
+}
+
+/* 색상 전환 transition (테마 토글 시 부드럽게) */
+body {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
 
 /* Tailwind v4 @theme inline — utility class로도 노출 */
 @theme inline {
