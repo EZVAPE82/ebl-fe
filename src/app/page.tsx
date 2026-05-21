@@ -47,10 +47,10 @@ export default async function Home() {
 
                 {/* ===== 4. ELFBAR DUKE 풀폭 배너 ===== */}
                 <FullWidthPromo
-                    label="ELFBAR DUKE"
-                    title="새로운 차원의 흡연 경험"
-                    subtitle="묵직한 멘솔과 풍부한 향, DUKE 시리즈로 만나보세요."
-                    image="/images/duke-banner.png"
+                    label="Signature"
+                    title="ELFBAR DUKE"
+                    subtitle="더 깊게 매혹적인 풍미와 자연스러운 디자인의 조화"
+                    image="/images/duke-full-banner.png"
                     href="/c/disposable"
                 />
 
@@ -116,9 +116,12 @@ export default async function Home() {
                     <EventBox events={eventsRaw.content} />
                 </div>
 
-                {/* ===== 10. 베스트 셀러 리뷰 (시드 popular 재활용) ===== */}
+                {/* ===== 10. 베스트 셀러 보기 (Figma 시안 11:947 라이프스타일 4 카드) ===== */}
                 <Section title="베스트 셀러 보기" href="/c/best">
-                    <ProductGrid items={popular.content.slice(0, 4)} />
+                    <Link href="/c/best" className="block hover:opacity-95 transition">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/best-sellers-row.png" alt="베스트 셀러" className="w-full block rounded-[var(--radius-lg)]" />
+                    </Link>
                 </Section>
 
                 {/* ===== 11. 인스타그램 피드 ===== */}
@@ -345,29 +348,12 @@ function SeriesBanner({ label, sub, gradient, image, href }: { label: string; su
 /* ============================================================
  * WhyChooseUs — 8개 이유 그리드
  * ============================================================ */
-const REASONS = [
-    { emoji: "✅", title: "정품 인증",       sub: "공식 유통 채널 100%" },
-    { emoji: "🚚", title: "빠른 배송",       sub: "평일 1~3일 출고" },
-    { emoji: "🔒", title: "안전 결제",       sub: "PG 보안 + httpOnly 쿠키" },
-    { emoji: "💬", title: "1:1 CS",         sub: "평일 10:00~18:00" },
-    { emoji: "🎁", title: "적립금 혜택",     sub: "리뷰·구매 적립" },
-    { emoji: "🆔", title: "성인 인증",       sub: "만 19세 이상" },
-    { emoji: "🔄", title: "교환·환불",       sub: "수령 후 7일 이내" },
-    { emoji: "📦", title: "안전 포장",       sub: "파손 방지 박스" },
-];
-
 function WhyChooseUs() {
+    // Figma 시안 41:15605 — 6 일러스트 카드 (정품·배송·결제·혜택·CS·멤버십)
     return (
         <Section title="엘프바를 선택해야 하는 이유">
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                {REASONS.map(r => (
-                    <li key={r.title} className="rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-4 md:p-5 text-center">
-                        <div className="text-3xl mb-2">{r.emoji}</div>
-                        <p className="text-sm font-semibold text-[var(--color-fg)]">{r.title}</p>
-                        <p className="mt-1 text-xs text-[var(--color-fg-muted)]">{r.sub}</p>
-                    </li>
-                ))}
-            </ul>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/reasons-grid.png" alt="엘프바 선택 이유" className="w-full block" />
         </Section>
     );
 }
@@ -448,28 +434,11 @@ function InstagramFeed() {
  * ContactCTA — 하단 풀폭 보라 배너
  * ============================================================ */
 function ContactCTA() {
+    // Figma 시안 41:10474 — "엘프바에게 문의해주세요" 보라 그라데이션 + 선물 일러스트 + 입력창
     return (
-        <section className="bg-gradient-to-r from-[#7c4dff] via-[#9575cd] to-[#e1bee7] py-10 md:py-14 mt-16">
-            <div className="mx-auto max-w-screen-xl px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-white">
-                <div>
-                    <h3 className="text-xl md:text-2xl font-bold">엘프바에 문의해주세요</h3>
-                    <p className="mt-1 text-sm opacity-90">평일 10:00~18:00 · 점심 13:00~14:00</p>
-                </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    <Link
-                        href="/faq"
-                        className="flex-1 md:flex-none inline-flex items-center justify-center rounded-[var(--radius-sm)] bg-white text-[var(--color-fg)] px-5 py-3 text-sm font-medium hover:bg-white/90"
-                    >
-                        FAQ 보기
-                    </Link>
-                    <Link
-                        href="/notices"
-                        className="flex-1 md:flex-none inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-white/40 text-white px-5 py-3 text-sm font-medium hover:bg-white/10"
-                    >
-                        공지사항
-                    </Link>
-                </div>
-            </div>
-        </section>
+        <Link href="/faq" className="block mt-16 hover:opacity-95 transition">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/cta-bottom.png" alt="문의" className="w-full block" />
+        </Link>
     );
 }
