@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatDate, formatPrice } from "@/lib/format";
 import { Badge, Button } from "@/components/ui";
+import { MyPageSideNav } from "@/components/mypage/SideNav";
 
 type Order = {
     id: number; orderNo: string; status: string;
@@ -84,10 +85,7 @@ export default function MyPage() {
     return (
         <div className="mx-auto max-w-screen-xl px-4 py-8 grid gap-8 md:grid-cols-[220px_1fr]">
             {/* ===== 좌측 사이드바 (PC) ===== */}
-            <aside className="hidden md:block">
-                <h1 className="text-2xl font-bold mb-6 text-[var(--color-fg)]">마이페이지</h1>
-                <SideNav onLogout={async () => { await logout(); router.replace("/"); }} />
-            </aside>
+            <MyPageSideNav />
 
             {/* ===== 모바일 헤더 ===== */}
             <div className="md:hidden">
@@ -208,62 +206,6 @@ export default function MyPage() {
                     </Link>
                 </div>
             </main>
-        </div>
-    );
-}
-
-/* ============================================================
- * SideNav — 좌측 트리 메뉴 (시안 사이드바)
- * ============================================================ */
-function SideNav({ onLogout }: { onLogout: () => void | Promise<void> }) {
-    return (
-        <nav className="text-sm space-y-5">
-            <NavGroup icon="🛒" title="나의 쇼핑정보" items={[
-                { label: "주문 내역", href: "#" },
-                { label: "교환·반품·취소 내역", href: "#" },
-            ]} />
-            <NavGroup icon="📋" title="나의 참여내역" items={[
-                { label: "1:1 문의", href: "#" },
-                { label: "상품 Q&A", href: "#" },
-                { label: "제품리뷰", href: "/reviews/write" },
-            ]} />
-            <NavGroup icon="🛡️" title="나의 정보 관리" items={[
-                { label: "회원정보 수정", href: "/mypage/settings" },
-                { label: "적립금", href: "#" },
-                { label: "쿠폰", href: "#" },
-                { label: "배송지 관리", href: "/mypage/addresses" },
-                { label: "위시리스트", href: "/mypage/wishlist" },
-            ]} />
-            <button
-                type="button"
-                onClick={onLogout}
-                className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-danger)] pt-2"
-            >
-                로그아웃
-            </button>
-        </nav>
-    );
-}
-
-function NavGroup({ icon, title, items }: { icon: string; title: string; items: { label: string; href: string }[] }) {
-    return (
-        <div>
-            <div className="flex items-center gap-2 text-[var(--color-fg)] font-medium pb-2 border-b border-[var(--color-border)]">
-                <span>{icon}</span>
-                <span>{title}</span>
-            </div>
-            <ul className="mt-2 space-y-1.5">
-                {items.map(it => (
-                    <li key={it.label}>
-                        <Link
-                            href={it.href}
-                            className="block px-2 py-1 text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-subtle)]"
-                        >
-                            {it.label}
-                        </Link>
-                    </li>
-                ))}
-            </ul>
         </div>
     );
 }

@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Badge, Button, Checkbox, Input } from "@/components/ui";
+import { MyPageSideNav } from "@/components/mypage/SideNav";
 
 type AddressView = {
     id: number;
@@ -83,15 +83,18 @@ export default function AddressesPage() {
         });
     }
 
-    if (authLoading || !user) return <div className="mx-auto max-w-md px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+    if (authLoading || !user) return <div className="mx-auto max-w-screen-xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
 
     return (
-        <div className="mx-auto max-w-md px-4 py-8 space-y-6">
-            <div>
-                <Link href="/mypage" className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">← 마이페이지</Link>
-                <h1 className="text-xl md:text-2xl font-semibold mt-1 text-[var(--color-fg)]">배송지 관리</h1>
-                <p className="text-xs text-[var(--color-fg-muted)] mt-1">최대 5개까지 저장할 수 있습니다.</p>
-            </div>
+        <div className="mx-auto max-w-screen-xl px-4 py-8 grid gap-8 md:grid-cols-[220px_1fr]">
+            <MyPageSideNav />
+
+            <main className="max-w-2xl space-y-6">
+                <header className="flex items-end justify-between pb-3 border-b border-[var(--color-fg)]">
+                    <h2 className="text-xl md:text-2xl font-bold text-[var(--color-fg)]">배송지 관리</h2>
+                    <span className="text-xs text-[var(--color-accent)]">*필수입력사항</span>
+                </header>
+                <p className="text-xs text-[var(--color-fg-muted)]">최대 5개까지 저장할 수 있습니다.</p>
 
             <ul className="space-y-2">
                 {list.map(a => (
@@ -135,6 +138,7 @@ export default function AddressesPage() {
                     </Button>
                 </div>
             </form>
+            </main>
         </div>
     );
 }
