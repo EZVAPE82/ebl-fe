@@ -28,6 +28,12 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
         { content: [], totalElements: 0, totalPages: 0, number: 0, size: 8, first: true, last: true, empty: true }
     );
 
+    type PromoBadge = { id: number; name: string; buyQuantity: number; getQuantity: number; label: string };
+    const promos = await safeFetch<PromoBadge[]>(
+        `/api/v1/public/products/${id}/promotions`,
+        []
+    );
+
     const isSoldOut = product.status === "SOLD_OUT";
 
     // 갤러리: thumbnail + product images (없으면 thumbnail 만)
@@ -45,6 +51,20 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 {/* 정보 */}
                 <div className="space-y-5">
                     <div>
+                        {/* 프로모션 뱃지 (있을 때만) */}
+                        {promos.length > 0 && (
+                            <div className="mb-3 flex flex-wrap gap-1.5">
+                                {promos.map(p => (
+                                    <span
+                                        key={p.id}
+                                        className="inline-flex items-center rounded-[var(--radius-sm)] bg-[var(--color-danger)]/10 text-[var(--color-danger)] px-2.5 py-1 text-xs font-bold"
+                                        title={p.name}
+                                    >
+                                        🎁 {p.label} 진행 중
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                         <h1 className="text-xl md:text-2xl font-semibold leading-tight text-[var(--color-fg)]">{product.name}</h1>
                         <div className="mt-3 flex items-end gap-2">
                             <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">{formatPrice(product.price)}</span>
