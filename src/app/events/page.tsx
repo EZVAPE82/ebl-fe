@@ -58,7 +58,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                     {events.map(e => (
                         <Link
                             key={e.id}
-                            href="#"
+                            href={`/events/${e.id}`}
                             className="block rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-border-strong)] transition group"
                         >
                             <div className="aspect-[16/9] bg-[var(--color-bg-subtle)] overflow-hidden">
