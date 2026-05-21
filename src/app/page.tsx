@@ -294,33 +294,24 @@ function PromoPanel({ label, title, body, gradient, image, textTone, href }: {
 /* ============================================================
  * Ranking — 핫 아이템 순위 (3개)
  * ============================================================ */
-const RANK_GRADIENT = [
-    "from-[#7c4dff] to-[#b388ff]",
-    "from-[#ef6c00] to-[#ffb74d]",
-    "from-[#2e7d32] to-[#81c784]",
-];
-
-function Ranking({ items }: { items: ProductSummary[] }) {
-    if (items.length === 0) {
-        return (
-            <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-12 text-center text-sm text-[var(--color-fg-subtle)]">
-                인기 상품이 곧 추가됩니다.
-            </div>
-        );
-    }
+function Ranking({ items: _items }: { items: ProductSummary[] }) {
+    // Figma 시안: 핫 아이템 1·2·3 라이프스타일 카드 3개 (보라/오렌지/녹색 톤)
+    const ranks = [
+        { src: "/images/rank-1.png", label: "1위" },
+        { src: "/images/rank-2.png", label: "2위" },
+        { src: "/images/rank-3.png", label: "3위" },
+    ];
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {items.map((p, i) => (
+            {ranks.map((r, i) => (
                 <Link
-                    key={p.id}
-                    href={`/p/${p.id}`}
-                    className={`rounded-[var(--radius-lg)] bg-gradient-to-br ${RANK_GRADIENT[i]} p-5 md:p-6 text-white relative overflow-hidden hover:opacity-95 transition h-[200px] md:h-[240px] flex flex-col justify-between`}
+                    key={i}
+                    href="/c/best"
+                    aria-label={r.label}
+                    className="block rounded-[var(--radius-lg)] overflow-hidden hover:opacity-95 transition"
                 >
-                    <span className="text-5xl md:text-6xl font-bold opacity-70">{i + 1}</span>
-                    <div>
-                        <p className="text-sm md:text-base font-semibold line-clamp-2">{p.name}</p>
-                        <p className="mt-1 text-sm md:text-lg font-bold">{formatPrice(p.price)}</p>
-                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={r.src} alt={r.label} className="w-full block aspect-[464/300] object-cover" />
                 </Link>
             ))}
         </div>
