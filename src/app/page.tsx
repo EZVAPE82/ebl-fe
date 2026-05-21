@@ -61,7 +61,7 @@ export default async function Home() {
                         title="인기 액상 라인업"
                         body="ELFLIQ 30ml 시리즈, 한 병으로 풀 데이."
                         gradient="from-[#fce4ec] to-[#f8bbd0]"
-                        image="https://images.unsplash.com/photo-1493723843671-1d655e66ac1c?w=900&q=80"
+                        image="/images/liquid-popular.png"
                         href="/c/liquid"
                     />
                     <PromoPanel
@@ -69,7 +69,7 @@ export default async function Home() {
                         title="신상 액상 입고"
                         body="블루베리·워터멜론 등 시즌 한정 플레이버."
                         gradient="from-[#311b92] to-[#7c4dff]"
-                        image="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=900&q=80"
+                        image="/images/event-promo.png"
                         textTone="light"
                         href="/c/liquid"
                     />
@@ -86,14 +86,14 @@ export default async function Home() {
                         label="ICE COOL"
                         sub="A REFRESHING WAVE"
                         gradient="from-[#0288d1] to-[#26c6da]"
-                        image="https://images.unsplash.com/photo-1620207418302-439b387441b0?w=900&q=80"
+                        image="/images/series-ice.png"
                         href="/c/disposable"
                     />
                     <SeriesBanner
                         label="SHIMMERING"
                         sub="WITH A WARM AURORA"
                         gradient="from-[#ef6c00] to-[#ff8a65]"
-                        image="https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=900&q=80"
+                        image="/images/series-shimmering.png"
                         href="/c/disposable"
                     />
                 </div>
@@ -155,7 +155,7 @@ function Hero({ hero }: { hero: Banner | undefined }) {
             <div className="hidden md:block absolute right-12 top-1/2 -translate-y-1/2 w-72 h-72 opacity-90">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                    src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=400&q=80"
+                    src="/images/elfbar-product-1.png"
                     alt=""
                     className="w-full h-full object-contain"
                 />
@@ -426,26 +426,16 @@ function EventBox({ events }: { events: Event[] }) {
  * InstagramFeed — 8칸 정사각형 그리드
  * ============================================================ */
 function InstagramFeed() {
-    // 인스타 피드 임시 이미지 (Unsplash). 디자이너·운영자 자산 도착 시 교체.
-    const photos = [
-        "photo-1517048676732-d65bc937f952",
-        "photo-1556228720-195a672e8a03",
-        "photo-1551798507-629020c81463",
-        "photo-1567721913486-6585f069b332",
-        "photo-1535914254981-b5012eebbd15",
-        "photo-1551038247-3d9af20df552",
-        "photo-1606107557195-0e29a4b5b4aa",
-        "photo-1530981785497-a62037228fe9",
-    ];
+    // Figma 시안 노드 11:959~11:980 에서 추출한 라이프스타일 8장
     return (
         <Section title="Instagram">
             <ul className="grid grid-cols-4 md:grid-cols-8 gap-2">
-                {photos.map((p, i) => (
-                    <li key={i} className="aspect-square overflow-hidden rounded-[var(--radius-sm)] bg-[var(--color-bg-subtle)]">
+                {Array.from({ length: 8 }, (_, i) => i + 1).map(n => (
+                    <li key={n} className="aspect-square overflow-hidden rounded-[var(--radius-sm)] bg-[var(--color-bg-subtle)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                            src={`https://images.unsplash.com/${p}?w=200&q=70`}
-                            alt={`instagram ${i + 1}`}
+                            src={`/images/ig-${n}.png`}
+                            alt={`instagram ${n}`}
                             className="w-full h-full object-cover hover:scale-105 transition"
                         />
                     </li>
