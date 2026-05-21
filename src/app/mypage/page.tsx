@@ -173,7 +173,7 @@ export default function MyPage() {
                                 <li key={o.id}>
                                     <Link
                                         href={`/orders/${o.id}`}
-                                        className="grid grid-cols-[64px_1fr_100px_60px_120px] md:grid-cols-[80px_1fr_120px_80px_140px_100px] items-center gap-3 px-4 py-4 hover:bg-[var(--color-bg-subtle)]"
+                                        className="grid grid-cols-[56px_1fr_auto] md:grid-cols-[80px_1fr_120px_80px_140px_100px] items-center gap-3 px-4 py-4 hover:bg-[var(--color-bg-subtle)]"
                                     >
                                         <div className="w-14 h-14 md:w-16 md:h-16 bg-[var(--color-bg-subtle)] rounded-[var(--radius-sm)] flex-shrink-0" />
                                         <div className="min-w-0">
@@ -181,12 +181,19 @@ export default function MyPage() {
                                                 {o.items[0]?.productName ?? "-"}{o.items.length > 1 && ` 외 ${o.items.length - 1}건`}
                                             </p>
                                             <p className="text-xs text-[var(--color-fg-muted)] mt-0.5 font-mono">#{o.orderNo}</p>
+                                            {/* 모바일 한정: 가격·날짜 인라인 */}
+                                            <p className="md:hidden text-xs text-[var(--color-fg-muted)] mt-1">
+                                                <span className="text-[var(--color-fg)] font-semibold">{formatPrice(o.paidAmount)}</span>
+                                                <span className="mx-1.5">·</span>
+                                                {formatDate(o.orderedAt)}
+                                            </p>
                                         </div>
-                                        <div className="text-sm font-semibold text-[var(--color-fg)]">{formatPrice(o.paidAmount)}</div>
+                                        {/* PC 전용 컬럼 */}
+                                        <div className="hidden md:block text-sm font-semibold text-[var(--color-fg)]">{formatPrice(o.paidAmount)}</div>
                                         <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">
                                             {(o.items[0]?.quantity ?? 1)}개
                                         </div>
-                                        <div className="text-xs text-[var(--color-fg-muted)]">{formatDate(o.orderedAt)}</div>
+                                        <div className="hidden md:block text-xs text-[var(--color-fg-muted)]">{formatDate(o.orderedAt)}</div>
                                         <div className="text-right">
                                             <Badge size="sm" tone={STATUS_TONE[o.status] ?? "neutral"}>
                                                 ● {STATUS_LABEL[o.status] ?? o.status}

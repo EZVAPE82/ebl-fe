@@ -151,7 +151,7 @@ function OrderInner({ params }: { params: Promise<{ id: string }> }) {
                 <SectionTitle>주문상품정보</SectionTitle>
                 <ul className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] divide-y divide-[var(--color-border)] overflow-hidden">
                     {order.items.map(i => (
-                        <li key={i.id} className="grid grid-cols-[64px_1fr_100px_60px_100px] md:grid-cols-[80px_1fr_120px_80px_140px_100px] items-center gap-3 px-4 py-4">
+                        <li key={i.id} className="grid grid-cols-[56px_1fr_auto] md:grid-cols-[80px_1fr_120px_80px_140px_100px] items-center gap-3 px-4 py-4">
                             <div className="w-14 h-14 md:w-16 md:h-16 bg-[var(--color-bg-subtle)] rounded-[var(--radius-sm)] flex-shrink-0" />
                             <div className="min-w-0">
                                 <Link href={`/p/${i.productId}`} className="text-sm font-medium hover:underline line-clamp-1 text-[var(--color-fg)]">
@@ -159,8 +159,15 @@ function OrderInner({ params }: { params: Promise<{ id: string }> }) {
                                 </Link>
                                 {i.optionText && <p className="text-xs text-[var(--color-fg-muted)] mt-0.5">{i.optionText}</p>}
                                 <p className="text-xs text-[var(--color-fg-muted)] mt-0.5 font-mono md:hidden">#{order.orderNo}</p>
+                                {/* 모바일 한정: 가격·수량·날짜 인라인 */}
+                                <p className="md:hidden text-xs text-[var(--color-fg-muted)] mt-1">
+                                    <span className="text-[var(--color-fg)] font-semibold">{formatPrice(i.subtotal)}</span>
+                                    <span className="mx-1.5">·</span>{i.quantity}개
+                                    <span className="mx-1.5">·</span>{formatDate(order.orderedAt)}
+                                </p>
                             </div>
-                            <div className="text-sm font-semibold text-[var(--color-fg)]">{formatPrice(i.subtotal)}</div>
+                            {/* PC 전용 컬럼 */}
+                            <div className="hidden md:block text-sm font-semibold text-[var(--color-fg)]">{formatPrice(i.subtotal)}</div>
                             <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">{i.quantity}개</div>
                             <div className="hidden md:block text-xs text-[var(--color-fg-muted)]">{formatDate(order.orderedAt)}</div>
                             <div className="text-right">
