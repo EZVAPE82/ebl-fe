@@ -50,7 +50,7 @@ export default async function Home() {
                     label="ELFBAR DUKE"
                     title="새로운 차원의 흡연 경험"
                     subtitle="묵직한 멘솔과 풍부한 향, DUKE 시리즈로 만나보세요."
-                    image="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=1200&q=80"
+                    image="/images/duke-banner.png"
                     href="/c/disposable"
                 />
 
