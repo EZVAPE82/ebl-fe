@@ -116,13 +116,11 @@ export default async function Home() {
                     <EventBox events={eventsRaw.content} />
                 </div>
 
-                {/* ===== 10. 베스트 셀러 보기 (Figma 시안 11:947 라이프스타일 4 카드) ===== */}
-                <Section title="베스트 셀러 보기" href="/c/best">
-                    <Link href="/c/best" className="block hover:opacity-95 transition">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/best-sellers-row.png" alt="베스트 셀러" className="w-full block rounded-[var(--radius-lg)]" />
-                    </Link>
-                </Section>
+                {/* ===== 10. 베스트 셀러 보기 (Figma 시안 11:947 — 헤더 포함 통이미지) ===== */}
+                <Link href="/c/best" className="block hover:opacity-95 transition">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/images/best-sellers-row.png" alt="베스트 셀러 보기" className="w-full block" />
+                </Link>
 
                 {/* ===== 11. 인스타그램 피드 ===== */}
                 <InstagramFeed />
