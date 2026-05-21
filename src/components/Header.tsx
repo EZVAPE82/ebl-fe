@@ -27,7 +27,20 @@ export function Header() {
                     <Link href="/events" className="hover:text-[var(--color-fg)]">이벤트</Link>
                     <Link href="/notices" className="hover:text-[var(--color-fg)]">공지</Link>
                 </nav>
-                <div className="ml-auto flex items-center gap-3 text-sm">
+                {/* 검색 폼 (PC) */}
+                <form method="GET" action="/search" className="hidden md:flex items-center ml-auto mr-3">
+                    <input
+                        name="q"
+                        type="search"
+                        placeholder="검색"
+                        aria-label="상품 검색"
+                        className="w-48 lg:w-64 bg-[var(--color-bg-subtle)] border border-[var(--color-border)] rounded-[var(--radius-sm)] px-3 py-1.5 text-xs text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)] focus:border-[var(--color-ring)]"
+                    />
+                </form>
+
+                <div className="md:ml-0 ml-auto flex items-center gap-3 text-sm">
+                    {/* 모바일 검색 아이콘 */}
+                    <Link href="/search" aria-label="검색" className="md:hidden text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">🔍</Link>
                     {loading ? (
                         <span className="text-[var(--color-fg-subtle)]">···</span>
                     ) : user ? (
