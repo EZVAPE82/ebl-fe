@@ -13,7 +13,9 @@
  * - 실패: 토큰 정리 후 /login?redirect=현재경로 이동 (브라우저 환경 한정)
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+// .env.local 의 NEXT_PUBLIC_API_BASE_URL 가 우선. fallback 은 로컬 백엔드 기본 포트.
+// 다른 프로젝트와 충돌 회피해 8090 사용 (application-local.yml 의 server.port 와 일치).
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8090";
 
 const ACCESS_KEY = "accessToken";
 const REFRESH_KEY = "refreshToken";
