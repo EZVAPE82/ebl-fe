@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
     images: {
         remotePatterns: [
             { protocol: "https", hostname: "placehold.co" },
+            // 디자이너 자산 도착 전 임시 라이프스타일 이미지 (Unsplash CDN)
+            { protocol: "https", hostname: "images.unsplash.com" },
             // 운영 추가 자리 (도급인 가입 후 도메인 채울 것):
             // { protocol: "https", hostname: "elfbarlounge-assets.s3.ap-northeast-2.amazonaws.com" },
             // { protocol: "https", hostname: "cdn.elfbarlounge.co.kr" },

@@ -50,7 +50,7 @@ export default async function Home() {
                     label="ELFBAR DUKE"
                     title="새로운 차원의 흡연 경험"
                     subtitle="묵직한 멘솔과 풍부한 향, DUKE 시리즈로 만나보세요."
-                    image="https://placehold.co/1200x400/0d1117/c9a87a?text=ELFBAR+DUKE"
+                    image="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=1200&q=80"
                     href="/c/disposable"
                 />
 
@@ -61,6 +61,7 @@ export default async function Home() {
                         title="인기 액상 라인업"
                         body="ELFLIQ 30ml 시리즈, 한 병으로 풀 데이."
                         gradient="from-[#fce4ec] to-[#f8bbd0]"
+                        image="https://images.unsplash.com/photo-1493723843671-1d655e66ac1c?w=900&q=80"
                         href="/c/liquid"
                     />
                     <PromoPanel
@@ -68,6 +69,7 @@ export default async function Home() {
                         title="신상 액상 입고"
                         body="블루베리·워터멜론 등 시즌 한정 플레이버."
                         gradient="from-[#311b92] to-[#7c4dff]"
+                        image="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=900&q=80"
                         textTone="light"
                         href="/c/liquid"
                     />
@@ -84,12 +86,14 @@ export default async function Home() {
                         label="ICE COOL"
                         sub="A REFRESHING WAVE"
                         gradient="from-[#0288d1] to-[#26c6da]"
+                        image="https://images.unsplash.com/photo-1620207418302-439b387441b0?w=900&q=80"
                         href="/c/disposable"
                     />
                     <SeriesBanner
                         label="SHIMMERING"
                         sub="WITH A WARM AURORA"
                         gradient="from-[#ef6c00] to-[#ff8a65]"
+                        image="https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=900&q=80"
                         href="/c/disposable"
                     />
                 </div>
@@ -151,7 +155,7 @@ function Hero({ hero }: { hero: Banner | undefined }) {
             <div className="hidden md:block absolute right-12 top-1/2 -translate-y-1/2 w-72 h-72 opacity-90">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                    src="https://placehold.co/400x400/transparent/ffffff?text=ELFBAR+BC5000"
+                    src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=400&q=80"
                     alt=""
                     className="w-full h-full object-contain"
                 />
@@ -265,16 +269,22 @@ function FullWidthPromo({ label, title, subtitle, image, href }: {
 /* ============================================================
  * PromoPanel — 2분할 그라데이션 패널
  * ============================================================ */
-function PromoPanel({ label, title, body, gradient, textTone, href }: {
-    label: string; title: string; body: string; gradient: string; textTone?: "light"; href: string;
+function PromoPanel({ label, title, body, gradient, image, textTone, href }: {
+    label: string; title: string; body: string; gradient: string; image?: string; textTone?: "light"; href: string;
 }) {
     const tone = textTone === "light" ? "text-white" : "text-[var(--color-fg)]";
     const subTone = textTone === "light" ? "text-white/80" : "text-[var(--color-fg-muted)]";
     return (
-        <Link href={href} className={`block rounded-[var(--radius-lg)] bg-gradient-to-br ${gradient} p-6 md:p-8 h-[180px] md:h-[220px] flex flex-col justify-end hover:opacity-95 transition ${tone}`}>
-            <p className={`text-[11px] uppercase tracking-widest mb-2 ${subTone}`}>{label}</p>
-            <h3 className="text-lg md:text-2xl font-bold">{title}</h3>
-            <p className={`mt-1 text-sm ${subTone}`}>{body}</p>
+        <Link href={href} className={`relative block overflow-hidden rounded-[var(--radius-lg)] bg-gradient-to-br ${gradient} p-6 md:p-8 h-[180px] md:h-[220px] flex flex-col justify-end hover:opacity-95 transition ${tone}`}>
+            {image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay" />
+            )}
+            <div className="relative">
+                <p className={`text-[11px] uppercase tracking-widest mb-2 ${subTone}`}>{label}</p>
+                <h3 className="text-lg md:text-2xl font-bold">{title}</h3>
+                <p className={`mt-1 text-sm ${subTone}`}>{body}</p>
+            </div>
         </Link>
     );
 }
@@ -318,11 +328,17 @@ function Ranking({ items }: { items: ProductSummary[] }) {
 /* ============================================================
  * SeriesBanner — ICE COOL / SHIMMERING 풀폭
  * ============================================================ */
-function SeriesBanner({ label, sub, gradient, href }: { label: string; sub: string; gradient: string; href: string }) {
+function SeriesBanner({ label, sub, gradient, image, href }: { label: string; sub: string; gradient: string; image?: string; href: string }) {
     return (
-        <Link href={href} className={`block rounded-[var(--radius-lg)] bg-gradient-to-br ${gradient} h-[180px] md:h-[260px] p-6 md:p-10 text-white flex flex-col justify-end hover:opacity-95 transition relative overflow-hidden`}>
-            <h3 className="text-2xl md:text-4xl font-bold tracking-tight">{label}</h3>
-            <p className="mt-2 text-sm md:text-lg opacity-90 uppercase tracking-widest">{sub}</p>
+        <Link href={href} className={`block rounded-[var(--radius-lg)] bg-gradient-to-br ${gradient} h-[180px] md:h-[260px] p-6 md:p-10 text-white flex flex-col justify-end hover:opacity-95 transition relative overflow-hidden group`}>
+            {image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 transition" />
+            )}
+            <div className="relative">
+                <h3 className="text-2xl md:text-4xl font-bold tracking-tight">{label}</h3>
+                <p className="mt-2 text-sm md:text-lg opacity-90 uppercase tracking-widest">{sub}</p>
+            </div>
         </Link>
     );
 }
@@ -410,16 +426,26 @@ function EventBox({ events }: { events: Event[] }) {
  * InstagramFeed — 8칸 정사각형 그리드
  * ============================================================ */
 function InstagramFeed() {
-    const seeds = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    // 인스타 피드 임시 이미지 (Unsplash). 디자이너·운영자 자산 도착 시 교체.
+    const photos = [
+        "photo-1517048676732-d65bc937f952",
+        "photo-1556228720-195a672e8a03",
+        "photo-1551798507-629020c81463",
+        "photo-1567721913486-6585f069b332",
+        "photo-1535914254981-b5012eebbd15",
+        "photo-1551038247-3d9af20df552",
+        "photo-1606107557195-0e29a4b5b4aa",
+        "photo-1530981785497-a62037228fe9",
+    ];
     return (
         <Section title="Instagram">
             <ul className="grid grid-cols-4 md:grid-cols-8 gap-2">
-                {seeds.map(s => (
-                    <li key={s} className="aspect-square overflow-hidden rounded-[var(--radius-sm)] bg-[var(--color-bg-subtle)]">
+                {photos.map((p, i) => (
+                    <li key={i} className="aspect-square overflow-hidden rounded-[var(--radius-sm)] bg-[var(--color-bg-subtle)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                            src={`https://placehold.co/200x200/cccccc/666?text=IG`}
-                            alt="instagram"
+                            src={`https://images.unsplash.com/${p}?w=200&q=70`}
+                            alt={`instagram ${i + 1}`}
                             className="w-full h-full object-cover hover:scale-105 transition"
                         />
                     </li>
