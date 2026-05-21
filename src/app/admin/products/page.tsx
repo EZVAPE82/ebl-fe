@@ -25,7 +25,7 @@ export default function AdminProductsPage() {
         <div>
             <div className="flex items-center justify-between mb-4">
                 <h1 className="text-xl font-bold">상품 관리</h1>
-                <Link href="/admin/products/new" className="rounded-md bg-zinc-900 text-white px-3 py-1.5 text-sm">+ 신규 상품</Link>
+                <Link href="/admin/products/new" className="rounded-md bg-[var(--color-brand)] text-white px-3 py-1.5 text-sm">+ 신규 상품</Link>
             </div>
 
             <form onSubmit={e => { e.preventDefault(); load(0, keyword); }} className="mb-3 flex gap-2">
@@ -33,14 +33,14 @@ export default function AdminProductsPage() {
                     value={keyword}
                     onChange={e => setKeyword(e.target.value)}
                     placeholder="상품명 검색"
-                    className="flex-1 rounded-md border border-zinc-300 px-3 py-1.5 text-sm"
+                    className="flex-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm"
                 />
-                <button className="rounded-md border border-zinc-300 px-3 text-sm">검색</button>
+                <button className="rounded-md border border-[var(--color-border)] px-3 text-sm">검색</button>
             </form>
 
-            <div className="overflow-x-auto bg-white rounded-md border border-zinc-200">
+            <div className="overflow-x-auto bg-white rounded-md border border-[var(--color-border)]">
                 <table className="w-full text-sm">
-                    <thead className="bg-zinc-50 text-zinc-600 text-left">
+                    <thead className="bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)] text-left">
                         <tr>
                             <th className="px-3 py-2 w-16">ID</th>
                             <th className="px-3 py-2">상품명</th>
@@ -52,19 +52,19 @@ export default function AdminProductsPage() {
                     </thead>
                     <tbody>
                         {list?.content.map(p => (
-                            <tr key={p.id} className="border-t border-zinc-200">
-                                <td className="px-3 py-2 text-zinc-500">{p.id}</td>
+                            <tr key={p.id} className="border-t border-[var(--color-border)]">
+                                <td className="px-3 py-2 text-[var(--color-fg-muted)]">{p.id}</td>
                                 <td className="px-3 py-2 font-medium">{p.name}</td>
                                 <td className="px-3 py-2 text-right">{formatPrice(p.price)}</td>
                                 <td className="px-3 py-2"><StatusBadge status={p.status} /></td>
                                 <td className="px-3 py-2 text-center">{p.reviewCount}</td>
                                 <td className="px-3 py-2 text-right">
-                                    <Link href={`/admin/products/${p.id}`} className="text-xs text-zinc-600 hover:text-black">수정</Link>
+                                    <Link href={`/admin/products/${p.id}`} className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">수정</Link>
                                 </td>
                             </tr>
                         ))}
                         {list && list.content.length === 0 && (
-                            <tr><td colSpan={6} className="px-3 py-8 text-center text-zinc-500">상품이 없습니다.</td></tr>
+                            <tr><td colSpan={6} className="px-3 py-8 text-center text-[var(--color-fg-muted)]">상품이 없습니다.</td></tr>
                         )}
                     </tbody>
                 </table>
@@ -76,7 +76,7 @@ export default function AdminProductsPage() {
                         <button
                             key={i}
                             onClick={() => load(i)}
-                            className={`px-3 py-1 rounded border ${i === page ? "bg-zinc-900 text-white border-zinc-900" : "border-zinc-300"}`}
+                            className={`px-3 py-1 rounded border ${i === page ? "bg-[var(--color-brand)] text-white border-[var(--color-fg)]" : "border-[var(--color-border)]"}`}
                         >{i + 1}</button>
                     ))}
                 </div>
@@ -86,9 +86,9 @@ export default function AdminProductsPage() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-    const cls = status === "ACTIVE" ? "bg-emerald-100 text-emerald-700"
-        : status === "SOLD_OUT" ? "bg-amber-100 text-amber-700"
-        : status === "DRAFT" ? "bg-zinc-100 text-zinc-600"
-        : "bg-rose-100 text-rose-700";
+    const cls = status === "ACTIVE" ? "bg-[var(--color-success)]/10 text-[var(--color-success)]"
+        : status === "SOLD_OUT" ? "bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
+        : status === "DRAFT" ? "bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)]"
+        : "bg-[var(--color-danger)]/10 text-[var(--color-danger)]";
     return <span className={`inline-block rounded px-2 py-0.5 text-[10px] ${cls}`}>{status}</span>;
 }

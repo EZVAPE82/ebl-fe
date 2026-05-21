@@ -131,8 +131,8 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                 <F label="호환 정보"><textarea rows={2} value={f.compatibilityInfo} onChange={e => up("compatibilityInfo", e.target.value)} className={ic} /></F>
             </Section>
 
-            <Section title="옵션" right={<button type="button" onClick={addOption} className="text-xs rounded border border-zinc-300 px-2 py-1">+ 옵션 추가</button>}>
-                {f.options.length === 0 ? <p className="text-xs text-zinc-500">옵션 없음</p> : (
+            <Section title="옵션" right={<button type="button" onClick={addOption} className="text-xs rounded border border-[var(--color-border)] px-2 py-1">+ 옵션 추가</button>}>
+                {f.options.length === 0 ? <p className="text-xs text-[var(--color-fg-muted)]">옵션 없음</p> : (
                     <div className="space-y-2">
                         {f.options.map((o, i) => (
                             <div key={i} className="grid grid-cols-12 gap-1 items-center text-sm">
@@ -143,15 +143,15 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                                 <label className="col-span-2 text-xs flex items-center gap-1">
                                     <input type="checkbox" checked={o.required} onChange={e => updOption(i, { required: e.target.checked })} /> 필수
                                 </label>
-                                <button type="button" onClick={() => rmOption(i)} className="col-span-1 text-rose-500 text-xs">삭제</button>
+                                <button type="button" onClick={() => rmOption(i)} className="col-span-1 text-[var(--color-danger)] text-xs">삭제</button>
                             </div>
                         ))}
                     </div>
                 )}
             </Section>
 
-            <Section title="이미지" right={<button type="button" onClick={addImage} className="text-xs rounded border border-zinc-300 px-2 py-1">+ 이미지 추가</button>}>
-                {f.images.length === 0 ? <p className="text-xs text-zinc-500">이미지 없음</p> : (
+            <Section title="이미지" right={<button type="button" onClick={addImage} className="text-xs rounded border border-[var(--color-border)] px-2 py-1">+ 이미지 추가</button>}>
+                {f.images.length === 0 ? <p className="text-xs text-[var(--color-fg-muted)]">이미지 없음</p> : (
                     <div className="space-y-2">
                         {f.images.map((im, i) => (
                             <div key={i} className="grid grid-cols-12 gap-1 items-center text-sm">
@@ -161,32 +161,32 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                                     <option value="DETAIL">DETAIL</option>
                                 </select>
                                 <input type="number" value={im.sortOrder} onChange={e => updImage(i, { sortOrder: Number(e.target.value) })} className={`${ic} col-span-1`} />
-                                <button type="button" onClick={() => rmImage(i)} className="col-span-1 text-rose-500 text-xs">삭제</button>
+                                <button type="button" onClick={() => rmImage(i)} className="col-span-1 text-[var(--color-danger)] text-xs">삭제</button>
                             </div>
                         ))}
                     </div>
                 )}
             </Section>
 
-            {error && <p className="text-sm text-rose-600">{error}</p>}
+            {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
 
             <div className="flex gap-2">
-                <button type="submit" disabled={submitting} className="rounded-md bg-zinc-900 text-white px-4 py-2 text-sm disabled:opacity-50">
+                <button type="submit" disabled={submitting} className="rounded-md bg-[var(--color-brand)] text-white px-4 py-2 text-sm disabled:opacity-50">
                     {submitting ? "저장 중..." : mode === "create" ? "등록" : "저장"}
                 </button>
                 {mode === "edit" && (
-                    <button type="button" onClick={remove} className="rounded-md border border-rose-300 text-rose-600 px-4 py-2 text-sm">삭제</button>
+                    <button type="button" onClick={remove} className="rounded-md border border-[var(--color-danger)]/30 text-[var(--color-danger)] px-4 py-2 text-sm">삭제</button>
                 )}
             </div>
         </form>
     );
 }
 
-const ic = "w-full rounded border border-zinc-300 px-2 py-1.5 text-sm bg-white";
+const ic = "w-full rounded border border-[var(--color-border)] px-2 py-1.5 text-sm bg-white";
 
 function Section({ title, right, children }: { title: string; right?: React.ReactNode; children: React.ReactNode }) {
     return (
-        <section className="bg-white rounded-md border border-zinc-200 p-4 space-y-3">
+        <section className="bg-white rounded-md border border-[var(--color-border)] p-4 space-y-3">
             <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold">{title}</h2>
                 {right}
@@ -199,5 +199,5 @@ function Grid2({ children }: { children: React.ReactNode }) {
     return <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{children}</div>;
 }
 function F({ label, children }: { label: string; children: React.ReactNode }) {
-    return <label className="block"><span className="text-xs text-zinc-600">{label}</span>{children}</label>;
+    return <label className="block"><span className="text-xs text-[var(--color-fg-muted)]">{label}</span>{children}</label>;
 }

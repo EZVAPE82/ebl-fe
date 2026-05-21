@@ -43,28 +43,28 @@ export default function AdminDashboard() {
         <div>
             <h1 className="text-xl font-bold mb-5">대시보드</h1>
 
-            <h2 className="text-sm font-semibold text-zinc-600 mb-2">주문 상태 현황</h2>
+            <h2 className="text-sm font-semibold text-[var(--color-fg-muted)] mb-2">주문 상태 현황</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
                 {STATUS_BUCKETS.map(b => (
                     <Link
                         key={b.key}
                         href={`/admin/orders?status=${b.key}`}
-                        className="rounded-md bg-white border border-zinc-200 p-4 hover:border-zinc-400"
+                        className="rounded-md bg-white border border-[var(--color-border)] p-4 hover:border-[var(--color-border-strong)]"
                     >
-                        <div className="text-xs text-zinc-500">{b.label}</div>
+                        <div className="text-xs text-[var(--color-fg-muted)]">{b.label}</div>
                         <div className="text-2xl font-bold mt-1">{counts[b.key] ?? "-"}</div>
                     </Link>
                 ))}
             </div>
 
-            <h2 className="text-sm font-semibold text-zinc-600 mb-2">처리 대기</h2>
+            <h2 className="text-sm font-semibold text-[var(--color-fg-muted)] mb-2">처리 대기</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <Link
                     href="/admin/foreign-verifications"
-                    className="rounded-md bg-white border border-zinc-200 p-4 hover:border-rose-400"
+                    className="rounded-md bg-white border border-[var(--color-border)] p-4 hover:border-[var(--color-danger)]"
                 >
-                    <div className="text-xs text-zinc-500">외국인 승인 대기</div>
-                    <div className="text-2xl font-bold mt-1 text-rose-600">{pendingForeign}</div>
+                    <div className="text-xs text-[var(--color-fg-muted)]">외국인 승인 대기</div>
+                    <div className="text-2xl font-bold mt-1 text-[var(--color-danger)]">{pendingForeign}</div>
                 </Link>
             </div>
         </div>

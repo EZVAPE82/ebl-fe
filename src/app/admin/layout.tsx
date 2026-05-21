@@ -35,17 +35,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     }
 
     if (isLoginPage) {
-        return <div className="min-h-screen bg-zinc-50">{children}</div>;
+        return <div className="min-h-screen bg-[var(--color-bg-subtle)]">{children}</div>;
     }
     if (authed === null) {
-        return <div className="min-h-screen flex items-center justify-center text-zinc-500">확인 중...</div>;
+        return <div className="min-h-screen flex items-center justify-center text-[var(--color-fg-muted)]">확인 중...</div>;
     }
 
     return (
-        <div className="min-h-screen bg-zinc-50 flex">
+        <div className="min-h-screen bg-[var(--color-bg-subtle)] flex">
             {/* Sidebar */}
-            <aside className="w-56 bg-zinc-900 text-white flex flex-col">
-                <div className="px-4 py-5 border-b border-zinc-800">
+            <aside className="w-56 bg-[var(--color-brand)] text-white flex flex-col">
+                <div className="px-4 py-5 border-b border-white/10">
                     <Link href="/admin" className="font-bold text-base">엘프바 어드민</Link>
                 </div>
                 <nav className="flex-1 py-3">
@@ -55,9 +55,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                             <Link
                                 key={n.href}
                                 href={n.href}
-                                className={`block px-4 py-2 text-sm ${
-                                    active ? "bg-zinc-800 text-white border-l-2 border-rose-500"
-                                          : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                                className={`block px-4 py-2 text-sm transition ${
+                                    active ? "bg-white/10 text-white border-l-2 border-[var(--color-danger)] font-medium"
+                                          : "text-white/60 hover:bg-white/5 hover:text-white"
                                 }`}
                             >
                                 {n.label}
@@ -65,8 +65,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                         );
                     })}
                 </nav>
-                <div className="p-3 border-t border-zinc-800">
-                    <button onClick={logout} className="w-full text-xs text-zinc-400 hover:text-white py-1">로그아웃</button>
+                <div className="p-3 border-t border-white/10">
+                    <button onClick={logout} className="w-full text-xs text-white/60 hover:text-white py-1">로그아웃</button>
                 </div>
             </aside>
 

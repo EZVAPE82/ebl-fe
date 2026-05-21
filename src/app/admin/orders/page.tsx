@@ -17,7 +17,7 @@ type Order = {
 
 export default function AdminOrdersPage() {
     return (
-        <Suspense fallback={<p className="text-zinc-500">불러오는 중...</p>}>
+        <Suspense fallback={<p className="text-[var(--color-fg-muted)]">불러오는 중...</p>}>
             <OrdersInner />
         </Suspense>
     );
@@ -48,14 +48,14 @@ function OrdersInner() {
                     <button
                         key={s || "ALL"}
                         onClick={() => { setStatus(s); load(0, s); }}
-                        className={`px-3 py-1 rounded-full border ${status === s ? "bg-zinc-900 text-white border-zinc-900" : "bg-white border-zinc-300"}`}
+                        className={`px-3 py-1 rounded-full border ${status === s ? "bg-[var(--color-brand)] text-white border-[var(--color-fg)]" : "bg-white border-[var(--color-border)]"}`}
                     >{s || "전체"}</button>
                 ))}
             </div>
 
-            <div className="overflow-x-auto bg-white rounded-md border border-zinc-200">
+            <div className="overflow-x-auto bg-white rounded-md border border-[var(--color-border)]">
                 <table className="w-full text-sm">
-                    <thead className="bg-zinc-50 text-zinc-600 text-left">
+                    <thead className="bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)] text-left">
                         <tr>
                             <th className="px-3 py-2 w-12">ID</th>
                             <th className="px-3 py-2 w-40">주문번호</th>
@@ -68,22 +68,22 @@ function OrdersInner() {
                     </thead>
                     <tbody>
                         {list?.content.map(o => (
-                            <tr key={o.id} className="border-t border-zinc-200">
-                                <td className="px-3 py-2 text-zinc-500">{o.id}</td>
+                            <tr key={o.id} className="border-t border-[var(--color-border)]">
+                                <td className="px-3 py-2 text-[var(--color-fg-muted)]">{o.id}</td>
                                 <td className="px-3 py-2 font-mono text-xs">{o.orderNo}</td>
                                 <td className="px-3 py-2 truncate max-w-xs">
                                     {o.items[0]?.productName} {o.items.length > 1 && `외 ${o.items.length - 1}`}
                                 </td>
                                 <td className="px-3 py-2 text-right">{formatPrice(o.paidAmount)}</td>
                                 <td className="px-3 py-2 text-xs">{o.status}</td>
-                                <td className="px-3 py-2 text-xs text-zinc-500">{formatDate(o.orderedAt)}</td>
+                                <td className="px-3 py-2 text-xs text-[var(--color-fg-muted)]">{formatDate(o.orderedAt)}</td>
                                 <td className="px-3 py-2 text-right">
                                     <Link href={`/admin/orders/${o.id}`} className="text-xs">상세</Link>
                                 </td>
                             </tr>
                         ))}
                         {list && list.content.length === 0 && (
-                            <tr><td colSpan={7} className="px-3 py-8 text-center text-zinc-500">주문이 없습니다.</td></tr>
+                            <tr><td colSpan={7} className="px-3 py-8 text-center text-[var(--color-fg-muted)]">주문이 없습니다.</td></tr>
                         )}
                     </tbody>
                 </table>
@@ -95,7 +95,7 @@ function OrdersInner() {
                         <button
                             key={i}
                             onClick={() => load(i)}
-                            className={`px-3 py-1 rounded border ${i === page ? "bg-zinc-900 text-white border-zinc-900" : "border-zinc-300"}`}
+                            className={`px-3 py-1 rounded border ${i === page ? "bg-[var(--color-brand)] text-white border-[var(--color-fg)]" : "border-[var(--color-border)]"}`}
                         >{i + 1}</button>
                     ))}
                 </div>

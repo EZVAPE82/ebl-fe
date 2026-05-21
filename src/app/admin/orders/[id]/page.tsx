@@ -50,33 +50,33 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
         } catch (e) { alert(e instanceof ApiError ? e.message : "실패"); }
     }
 
-    if (!order) return <p className="text-zinc-500">불러오는 중...</p>;
+    if (!order) return <p className="text-[var(--color-fg-muted)]">불러오는 중...</p>;
 
     return (
         <div className="space-y-5 max-w-3xl">
-            <Link href="/admin/orders" className="text-xs text-zinc-500 hover:text-black">← 주문 목록</Link>
+            <Link href="/admin/orders" className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">← 주문 목록</Link>
 
-            <div className="bg-white rounded-md border border-zinc-200 p-4">
+            <div className="bg-white rounded-md border border-[var(--color-border)] p-4">
                 <div className="flex justify-between items-start mb-2">
                     <div>
-                        <div className="text-xs text-zinc-500">주문번호</div>
+                        <div className="text-xs text-[var(--color-fg-muted)]">주문번호</div>
                         <div className="font-mono">{order.orderNo}</div>
                     </div>
-                    <span className="text-sm rounded-full bg-zinc-100 px-3 py-1">{order.status}</span>
+                    <span className="text-sm rounded-full bg-[var(--color-bg-subtle)] px-3 py-1">{order.status}</span>
                 </div>
-                <div className="text-xs text-zinc-500">{formatDate(order.orderedAt)} 주문</div>
+                <div className="text-xs text-[var(--color-fg-muted)]">{formatDate(order.orderedAt)} 주문</div>
             </div>
 
             <Card title="주문 상품">
                 <table className="w-full text-sm">
                     <tbody>
                         {order.items.map(i => (
-                            <tr key={i.id} className="border-t border-zinc-100 first:border-t-0">
+                            <tr key={i.id} className="border-t border-[var(--color-border)] first:border-t-0">
                                 <td className="py-2">
                                     <div className="font-medium">{i.productName}</div>
-                                    {i.optionText && <div className="text-xs text-zinc-500">{i.optionText}</div>}
+                                    {i.optionText && <div className="text-xs text-[var(--color-fg-muted)]">{i.optionText}</div>}
                                 </td>
-                                <td className="py-2 text-right text-xs text-zinc-500">×{i.quantity}</td>
+                                <td className="py-2 text-right text-xs text-[var(--color-fg-muted)]">×{i.quantity}</td>
                                 <td className="py-2 text-right">{formatPrice(i.subtotal)}</td>
                             </tr>
                         ))}
@@ -89,7 +89,7 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
                 <Row label="배송비" value={order.shippingFee === 0 ? "무료" : formatPrice(order.shippingFee)} />
                 {order.discountAmount > 0 && <Row label="쿠폰" value={`- ${formatPrice(order.discountAmount)}`} />}
                 {order.pointUsed > 0 && <Row label="적립금" value={`- ${formatPrice(order.pointUsed)}`} />}
-                <div className="border-t border-zinc-200 pt-1 mt-1 flex justify-between font-bold">
+                <div className="border-t border-[var(--color-border)] pt-1 mt-1 flex justify-between font-bold">
                     <span>결제 금액</span><span>{formatPrice(order.paidAmount)}</span>
                 </div>
             </Card>
@@ -104,14 +104,14 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
             <Card title="액션">
                 <div className="space-y-2 text-sm">
                     <div className="flex gap-2">
-                        <input value={courier} onChange={e => setCourier(e.target.value)} placeholder="택배사" className="w-24 rounded border border-zinc-300 px-2 py-1.5" />
-                        <input value={trackingNo} onChange={e => setTrackingNo(e.target.value)} placeholder="송장번호" className="flex-1 rounded border border-zinc-300 px-2 py-1.5" />
-                        <button onClick={ship} className="rounded bg-zinc-900 text-white px-3 text-xs">송장 입력 + 배송 시작</button>
+                        <input value={courier} onChange={e => setCourier(e.target.value)} placeholder="택배사" className="w-24 rounded border border-[var(--color-border)] px-2 py-1.5" />
+                        <input value={trackingNo} onChange={e => setTrackingNo(e.target.value)} placeholder="송장번호" className="flex-1 rounded border border-[var(--color-border)] px-2 py-1.5" />
+                        <button onClick={ship} className="rounded bg-[var(--color-brand)] text-white px-3 text-xs">송장 입력 + 배송 시작</button>
                     </div>
                     <div className="flex gap-2">
-                        <button onClick={deliver} className="rounded border border-zinc-300 px-3 py-1.5 text-xs">배송완료 처리</button>
-                        <button onClick={() => changeStatus("PREPARING")} className="rounded border border-zinc-300 px-3 py-1.5 text-xs">→ 준비중</button>
-                        <button onClick={() => changeStatus("CANCELED")} className="rounded border border-rose-300 text-rose-600 px-3 py-1.5 text-xs">→ 취소</button>
+                        <button onClick={deliver} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs">배송완료 처리</button>
+                        <button onClick={() => changeStatus("PREPARING")} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs">→ 준비중</button>
+                        <button onClick={() => changeStatus("CANCELED")} className="rounded border border-[var(--color-danger)]/30 text-[var(--color-danger)] px-3 py-1.5 text-xs">→ 취소</button>
                     </div>
                 </div>
             </Card>
@@ -121,12 +121,12 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <div className="bg-white rounded-md border border-zinc-200 p-4">
+        <div className="bg-white rounded-md border border-[var(--color-border)] p-4">
             <h2 className="text-sm font-semibold mb-2">{title}</h2>
             <div className="text-sm space-y-1">{children}</div>
         </div>
     );
 }
 function Row({ label, value }: { label: string; value: string }) {
-    return <div className="flex justify-between"><span className="text-zinc-500">{label}</span><span>{value}</span></div>;
+    return <div className="flex justify-between"><span className="text-[var(--color-fg-muted)]">{label}</span><span>{value}</span></div>;
 }

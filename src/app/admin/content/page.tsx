@@ -13,12 +13,12 @@ export default function AdminContentPage() {
         <div>
             <h1 className="text-xl font-bold mb-4">콘텐츠 관리</h1>
 
-            <div className="border-b border-zinc-200 mb-4 flex gap-1 text-sm">
+            <div className="border-b border-[var(--color-border)] mb-4 flex gap-1 text-sm">
                 {(["notice", "faq", "event", "banner", "popup"] as Tab[]).map(t => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
-                        className={`px-3 py-2 border-b-2 ${tab === t ? "border-zinc-900 font-semibold" : "border-transparent text-zinc-500"}`}
+                        className={`px-3 py-2 border-b-2 ${tab === t ? "border-[var(--color-fg)] font-semibold" : "border-transparent text-[var(--color-fg-muted)]"}`}
                     >{LABEL[t]}</button>
                 ))}
             </div>
@@ -176,18 +176,18 @@ function SimpleForm<T extends Record<string, unknown>>({
                 try { await onSubmit(); } catch (e) { alert(e instanceof ApiError ? e.message : "저장 실패"); }
                 setSubmitting(false);
             }}
-            className="max-w-2xl space-y-3 bg-white rounded-md border border-zinc-200 p-4"
+            className="max-w-2xl space-y-3 bg-white rounded-md border border-[var(--color-border)] p-4"
         >
             {(Object.entries(schema) as [keyof T, Field][]).map(([key, f]) => (
                 <label key={String(key)} className="block">
-                    <span className="text-xs text-zinc-600">{f.label}</span>
+                    <span className="text-xs text-[var(--color-fg-muted)]">{f.label}</span>
                     {f.type === "text" && (
                         <input
                             type="text"
                             required={"required" in f && f.required}
                             value={(fields[key] as string) ?? ""}
                             onChange={e => update(key, e.target.value as T[keyof T])}
-                            className="mt-1 w-full rounded border border-zinc-300 px-2 py-1.5 text-sm"
+                            className="mt-1 w-full rounded border border-[var(--color-border)] px-2 py-1.5 text-sm"
                         />
                     )}
                     {f.type === "textarea" && (
@@ -196,7 +196,7 @@ function SimpleForm<T extends Record<string, unknown>>({
                             rows={"rows" in f ? f.rows : 4}
                             value={(fields[key] as string) ?? ""}
                             onChange={e => update(key, e.target.value as T[keyof T])}
-                            className="mt-1 w-full rounded border border-zinc-300 px-2 py-1.5 text-sm"
+                            className="mt-1 w-full rounded border border-[var(--color-border)] px-2 py-1.5 text-sm"
                         />
                     )}
                     {f.type === "number" && (
@@ -204,7 +204,7 @@ function SimpleForm<T extends Record<string, unknown>>({
                             type="number"
                             value={(fields[key] as number) ?? 0}
                             onChange={e => update(key, Number(e.target.value) as T[keyof T])}
-                            className="mt-1 w-full rounded border border-zinc-300 px-2 py-1.5 text-sm"
+                            className="mt-1 w-full rounded border border-[var(--color-border)] px-2 py-1.5 text-sm"
                         />
                     )}
                     {f.type === "datetime" && (
@@ -212,14 +212,14 @@ function SimpleForm<T extends Record<string, unknown>>({
                             type="datetime-local"
                             value={(fields[key] as string) ?? ""}
                             onChange={e => update(key, e.target.value as T[keyof T])}
-                            className="mt-1 w-full rounded border border-zinc-300 px-2 py-1.5 text-sm"
+                            className="mt-1 w-full rounded border border-[var(--color-border)] px-2 py-1.5 text-sm"
                         />
                     )}
                     {f.type === "select" && (
                         <select
                             value={(fields[key] as string) ?? ""}
                             onChange={e => update(key, e.target.value as T[keyof T])}
-                            className="mt-1 w-full rounded border border-zinc-300 px-2 py-1.5 text-sm"
+                            className="mt-1 w-full rounded border border-[var(--color-border)] px-2 py-1.5 text-sm"
                         >
                             {f.options.map(o => <option key={o} value={o}>{o}</option>)}
                         </select>
@@ -235,7 +235,7 @@ function SimpleForm<T extends Record<string, unknown>>({
                     )}
                 </label>
             ))}
-            <button type="submit" disabled={submitting} className="rounded-md bg-zinc-900 text-white px-4 py-2 text-sm disabled:opacity-50">
+            <button type="submit" disabled={submitting} className="rounded-md bg-[var(--color-brand)] text-white px-4 py-2 text-sm disabled:opacity-50">
                 {submitting ? "저장 중..." : "등록"}
             </button>
         </form>

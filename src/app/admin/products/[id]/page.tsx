@@ -54,7 +54,7 @@ export default function AdminProductEdit({ params }: { params: Promise<{ id: str
         })();
     }, [id]);
 
-    if (!initial) return <p className="text-zinc-500">불러오는 중...</p>;
+    if (!initial) return <p className="text-[var(--color-fg-muted)]">불러오는 중...</p>;
 
     return (
         <div>
