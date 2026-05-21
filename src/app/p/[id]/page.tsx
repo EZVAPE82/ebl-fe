@@ -2,6 +2,7 @@ import { api, ApiError } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
 import { ProductGallery } from "@/components/ProductGallery";
+import { DetailTabs } from "@/components/DetailTabs";
 import { Button } from "@/components/ui";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
 import { formatPrice } from "@/lib/format";
@@ -163,6 +164,27 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 </div>
             </section>
 
+            {/* ===== 배송·교환·반품 안내 ===== */}
+            <section id="ship" className="mx-auto max-w-screen-xl px-4 mt-10">
+                <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">배송·교환·반품 안내</h2>
+                <dl className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] divide-y divide-[var(--color-border)] overflow-hidden text-sm">
+                    {[
+                        ["배송 방법",      "택배 (CJ대한통운 / 우체국 택배)"],
+                        ["배송 지역",      "전국 (제주·도서산간 추가 배송비 3,000원)"],
+                        ["배송 기간",      "평일 13시 이전 주문 시 당일 출고, 1~3일 내 수령"],
+                        ["배송비",         "3만원 이상 무료, 미만 시 3,000원"],
+                        ["교환·반품 신청", "수령 후 7일 이내 마이페이지에서 신청"],
+                        ["교환·반품 불가", "사용 흔적 있는 상품, 액상 개봉품, 단순 변심 시 반송 택배비 차감"],
+                        ["환불 처리",      "반품 도착·검수 완료 후 영업일 기준 3~5일 내 환급"],
+                    ].map(([k, v]) => (
+                        <div key={k} className="grid grid-cols-[120px_1fr] md:grid-cols-[180px_1fr] gap-3 px-4 py-3">
+                            <dt className="text-[var(--color-fg-muted)]">{k}</dt>
+                            <dd className="text-[var(--color-fg)]">{v}</dd>
+                        </div>
+                    ))}
+                </dl>
+            </section>
+
             {/* ===== Q&A placeholder ===== */}
             <section id="qna" className="mx-auto max-w-screen-xl px-4 mt-10">
                 <div className="flex items-center justify-between mb-4">
@@ -201,38 +223,6 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 </div>
             </div>
         </div>
-    );
-}
-
-/* ============================================================
- * DetailTabs — 4개 탭 (정적, server component 호환)
- * ============================================================ */
-function DetailTabs() {
-    const tabs = [
-        { id: "info",    label: "상세정보", href: "#info" },
-        { id: "reviews", label: "상품후기", href: "#reviews" },
-        { id: "ship",    label: "배송·교환·반품", href: "#ship" },
-        { id: "qna",     label: "Q&A", href: "#qna" },
-    ];
-    return (
-        <nav className="mt-10 border-y border-[var(--color-border)] bg-[var(--color-surface)] sticky top-14 z-10">
-            <ul className="mx-auto max-w-screen-xl px-4 flex">
-                {tabs.map((t, i) => (
-                    <li key={t.id} className="flex-1">
-                        <a
-                            href={t.href}
-                            className={`block text-center text-sm py-4 transition border-b-2 ${
-                                i === 0
-                                    ? "border-[var(--color-fg)] text-[var(--color-fg)] font-semibold"
-                                    : "border-transparent text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
-                            }`}
-                        >
-                            {t.label}
-                        </a>
-                    </li>
-                ))}
-            </ul>
-        </nav>
     );
 }
 
