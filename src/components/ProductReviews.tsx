@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
+import { useAuth } from "@/lib/auth";
 
 type Review = {
     id: number;
@@ -16,6 +18,19 @@ type Review = {
 };
 
 type Page<T> = { content: T[]; totalElements: number };
+
+function ReviewWriteCta() {
+    const { user } = useAuth();
+    return (
+        <Link
+            href={user ? "/mypage" : "/login?redirect=/mypage"}
+            className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] underline"
+            title="배송 완료된 주문에서 작성 가능합니다"
+        >
+            리뷰 작성하기 →
+        </Link>
+    );
+}
 
 export function ProductReviews({ productId }: { productId: number }) {
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -31,9 +46,12 @@ export function ProductReviews({ productId }: { productId: number }) {
 
     return (
         <section>
-            <h2 className="text-lg font-semibold mb-3 text-[var(--color-fg)]">
-                리뷰 {total > 0 && <span className="text-[var(--color-fg-muted)] text-sm font-normal">({total})</span>}
-            </h2>
+            <div className="flex items-end justify-between mb-3">
+                <h2 className="text-lg font-semibold text-[var(--color-fg)]">
+                    리뷰 {total > 0 && <span className="text-[var(--color-fg-muted)] text-sm font-normal">({total})</span>}
+                </h2>
+                <ReviewWriteCta />
+            </div>
             {loading ? (
                 <p className="text-sm text-[var(--color-fg-subtle)]">불러오는 중...</p>
             ) : reviews.length === 0 ? (

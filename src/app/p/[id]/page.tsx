@@ -2,6 +2,7 @@ import { api, ApiError } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
 import { ProductGallery } from "@/components/ProductGallery";
+import { ProductQna } from "@/components/ProductQna";
 import { DetailTabs } from "@/components/DetailTabs";
 import { Button } from "@/components/ui";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
@@ -185,17 +186,10 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 </dl>
             </section>
 
-            {/* ===== Q&A placeholder ===== */}
+            {/* ===== Q&A ===== */}
             <section id="qna" className="mx-auto max-w-screen-xl px-4 mt-10">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg md:text-xl font-semibold text-[var(--color-fg)]">Q&amp;A</h2>
-                    <button className="text-xs rounded-[var(--radius-sm)] border border-[var(--color-fg)] text-[var(--color-fg)] px-3 py-1.5 hover:bg-[var(--color-fg)] hover:text-[var(--color-fg-inverse)] transition">
-                        문의 작성
-                    </button>
-                </div>
-                <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-10 text-center text-sm text-[var(--color-fg-subtle)]">
-                    아직 문의가 없습니다. 상품에 대해 궁금한 점을 남겨주세요.
-                </div>
+                <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">Q&amp;A</h2>
+                <ProductQna productId={product.id} />
             </section>
 
             {/* ===== 연관 상품 ===== */}
