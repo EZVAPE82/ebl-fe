@@ -75,25 +75,34 @@ export default async function Home() {
                     />
                 </div>
 
+                {/* ===== 5-b. 우리의 이벤트 (시안 events-promo 영역) ===== */}
+                <Section title="우리의 이벤트" href="/events">
+                    <Link href="/events" className="block rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] hover:opacity-95 transition">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/events-promo.png" alt="진행 중 이벤트" className="w-full block" />
+                    </Link>
+                </Section>
+
                 {/* ===== 6. 핫한 아이템 순위 ===== */}
                 <Section title="핫한 아이템 순위" href="/c/best">
                     <Ranking items={popular.content.slice(0, 3)} />
                 </Section>
 
                 {/* ===== 7. 시리즈 풀폭 배너 (ICE COOL / SHIMMERING) ===== */}
+                {/* 시안 색감: ICE COOL = 밝은 하늘색, SHIMMERING = 분홍·코랄 → 노랑 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <SeriesBanner
                         label="ICE COOL"
-                        sub="A REFRESHING WAVE"
-                        gradient="from-[#0288d1] to-[#26c6da]"
-                        image="/images/series-ice.png"
+                        sub="AS YOU WANT"
+                        gradient="from-[#a9d6ff] via-[#7ec4ff] to-[#4fa7ff]"
+                        image="/images/elfbar-product-1.png"
                         href="/c/disposable"
                     />
                     <SeriesBanner
                         label="SHIMMERING"
-                        sub="WITH A WARM AURORA"
-                        gradient="from-[#ef6c00] to-[#ff8a65]"
-                        image="/images/series-shimmering.png"
+                        sub="IN YOUR HAND"
+                        gradient="from-[#ffafc8] via-[#ffb78f] to-[#ffd96b]"
+                        image="/images/elfbar-product-2.png"
                         href="/c/disposable"
                     />
                 </div>
@@ -165,16 +174,8 @@ function Hero({ hero }: { hero: Banner | undefined }) {
 }
 
 /* ============================================================
- * 카테고리 아이콘 (원형 컬러)
+ * 카테고리 아이콘 (Figma 시안 통이미지)
  * ============================================================ */
-const CATEGORY_VISUAL: Record<string, { bg: string; emoji: string }> = {
-    best:       { bg: "bg-[#ffe0e6]", emoji: "🔥" },
-    new:        { bg: "bg-[#dbe9ff]", emoji: "✨" },
-    disposable: { bg: "bg-[#e0f7e7]", emoji: "💨" },
-    liquid:     { bg: "bg-[#fff3c4]", emoji: "💧" },
-    devices:    { bg: "bg-[#ffe0c4]", emoji: "🔋" },
-    accessory:  { bg: "bg-[#ffd6e7]", emoji: "🎀" },
-};
 
 const DEFAULT_CATEGORIES: Category[] = [
     { id: 1, parentId: null, name: "베스트",  slug: "best",       sortOrder: 1, visible: true },
@@ -185,31 +186,29 @@ const DEFAULT_CATEGORIES: Category[] = [
     { id: 6, parentId: null, name: "악세서리", slug: "accessory",  sortOrder: 6, visible: true },
 ];
 
-function CategoryIcons({ categories }: { categories: Category[] }) {
-    // 시드에는 4개만 있지만 시안 6개를 채우기 위해 default 보강
-    const merged = [...categories];
-    for (const def of DEFAULT_CATEGORIES) {
-        if (!merged.find(c => c.slug === def.slug)) merged.push(def);
-    }
-    const list = merged.slice(0, 6);
-
+function CategoryIcons({ categories: _categories }: { categories: Category[] }) {
+    // Figma 시안의 카테고리 아이콘 영역 통이미지 + 7개 클릭 zone overlay
+    // (시안 라벨: BEST/NEW/이벤트/일회용/액상/공지사항/구매후기)
+    const links = [
+        "/c/best", "/c/new", "/events", "/c/disposable", "/c/liquid", "/notices", "#",
+    ];
+    const labels = ["BEST", "NEW", "이벤트", "일회용", "액상", "공지사항", "구매후기"];
     return (
         <section className="mx-auto max-w-screen-xl px-4 py-8">
-            <ul className="grid grid-cols-6 gap-2 md:gap-4">
-                {list.map(c => {
-                    const v = CATEGORY_VISUAL[c.slug] ?? { bg: "bg-[var(--color-bg-subtle)]", emoji: "🛒" };
-                    return (
-                        <li key={c.id}>
-                            <Link href={`/c/${c.slug}`} className="flex flex-col items-center gap-2 group">
-                                <span className={`${v.bg} w-14 h-14 md:w-20 md:h-20 rounded-full flex items-center justify-center text-2xl md:text-3xl group-hover:scale-105 transition`}>
-                                    {v.emoji}
-                                </span>
-                                <span className="text-xs md:text-sm text-[var(--color-fg)] font-medium">{c.name}</span>
-                            </Link>
-                        </li>
-                    );
-                })}
-            </ul>
+            <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/categories-bar.png" alt="카테고리" className="w-full block" />
+                <div className="absolute inset-0 grid grid-cols-7">
+                    {links.map((href, i) => (
+                        <Link
+                            key={i}
+                            href={href}
+                            aria-label={labels[i]}
+                            className="block hover:bg-[var(--color-fg)]/5 transition rounded-[var(--radius-sm)]"
+                        />
+                    ))}
+                </div>
+            </div>
         </section>
     );
 }
