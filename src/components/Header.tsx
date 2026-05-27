@@ -16,7 +16,7 @@ const NAV: { href: string; label: string }[] = [
     { href: "/events",       label: "기획전" },
 ];
 
-export function Header() {
+export function Header({ transparent = false }: { transparent?: boolean }) {
     const { user, loading, logout } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
@@ -40,16 +40,30 @@ export function Header() {
         router.push("/");
     }
 
+    // 투명 모드 (홈 + 스크롤 top): 배경/보더 제거, 텍스트 화이트.
+    // 솔리드 모드: 기존 흰 배경 + 보더.
+    const headerCls = transparent
+        ? "relative z-30 bg-transparent text-white"
+        : "relative z-30 bg-[var(--color-surface)]/95 backdrop-blur border-b border-[var(--color-border)] text-[var(--color-fg)]";
+
+    // 투명 모드에서는 내비/링크 톤도 화이트 기반으로 조정
+    const navTone = transparent ? "text-white/80 hover:text-white" : "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]";
+    const actionTone = transparent ? "text-white/80" : "text-[var(--color-fg-muted)]";
+    const logoTone = transparent ? "text-white" : "text-[var(--color-fg)]";
+    const searchBg = transparent
+        ? "bg-white/10 border border-white/30 placeholder:text-white/60 text-white focus:bg-white/15"
+        : "bg-[var(--color-bg-subtle)] border border-[var(--color-border)] placeholder:text-[var(--color-fg-subtle)] text-[var(--color-fg)]";
+
     return (
         <>
-            <header className="sticky top-0 z-30 bg-[var(--color-surface)]/95 backdrop-blur border-b border-[var(--color-border)]">
+            <header className={headerCls}>
                 <div className="mx-auto max-w-screen-xl flex items-center gap-3 md:gap-4 px-4 h-14">
                     {/* 햄버거 */}
                     <button
                         type="button"
                         onClick={() => setMenuOpen(true)}
                         aria-label="메뉴 열기"
-                        className="text-[var(--color-fg)] hover:opacity-70 -ml-1 p-1"
+                        className={`${transparent ? "text-white" : "text-[var(--color-fg)]"} hover:opacity-70 -ml-1 p-1`}
                     >
                         <span className="block w-5 leading-none">
                             <span className="block h-0.5 bg-current mb-1.5" />
@@ -59,14 +73,14 @@ export function Header() {
                     </button>
 
                     {/* 로고 */}
-                    <Link href="/" className="font-bold text-base md:text-lg tracking-[0.15em] text-[var(--color-fg)]">
+                    <Link href="/" className={`font-bold text-base md:text-lg tracking-[0.15em] ${logoTone}`}>
                         ELFBAR
                     </Link>
 
                     {/* PC 카테고리 메뉴 */}
-                    <nav className="hidden lg:flex items-center gap-5 text-sm text-[var(--color-fg-muted)] ml-2">
+                    <nav className={`hidden lg:flex items-center gap-5 text-sm ml-2 ${navTone}`}>
                         {NAV.map(n => (
-                            <Link key={n.label} href={n.href} className="hover:text-[var(--color-fg)]">
+                            <Link key={n.label} href={n.href} className="hover:opacity-100">
                                 {n.label}
                             </Link>
                         ))}
@@ -79,24 +93,24 @@ export function Header() {
                             type="search"
                             placeholder="검색"
                             aria-label="상품 검색"
-                            className="w-40 lg:w-56 bg-[var(--color-bg-subtle)] border border-[var(--color-border)] rounded-[var(--radius-sm)] px-3 py-1.5 text-xs text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)] focus:border-[var(--color-ring)]"
+                            className={`w-40 lg:w-56 rounded-[var(--radius-sm)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)] ${searchBg}`}
                         />
                     </form>
 
                     {/* 우측 액션 (테마·검색·계정·장바구니) */}
-                    <div className="md:ml-2 ml-auto flex items-center gap-3 text-[var(--color-fg-muted)]">
+                    <div className={`md:ml-2 ml-auto flex items-center gap-3 ${actionTone}`}>
                         <ThemeToggle />
-                        <Link href="/search" aria-label="검색" className="md:hidden hover:text-[var(--color-fg)]">🔍</Link>
+                        <Link href="/search" aria-label="검색" className="md:hidden hover:opacity-100">🔍</Link>
                         {loading ? (
-                            <span className="text-[var(--color-fg-subtle)]">···</span>
+                            <span className="opacity-60">···</span>
                         ) : user ? (
                             <>
-                                <Link href="/mypage" aria-label="마이페이지" className="hover:text-[var(--color-fg)]">👤</Link>
+                                <Link href="/mypage" aria-label="마이페이지" className="hover:opacity-100">👤</Link>
                                 <CartIcon />
                             </>
                         ) : (
                             <>
-                                <Link href="/login" aria-label="로그인" className="hover:text-[var(--color-fg)]">👤</Link>
+                                <Link href="/login" aria-label="로그인" className="hover:opacity-100">👤</Link>
                                 <CartIcon />
                             </>
                         )}

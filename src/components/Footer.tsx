@@ -8,15 +8,15 @@ export function Footer() {
                 <div className="text-xs text-[var(--color-fg-muted)] leading-relaxed">
                     <p className="font-bold tracking-[0.15em] text-[var(--color-fg)] mb-4">ELFBAR</p>
                     <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5">
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">상호: </dt><dd className="inline">엘프바 코리아</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">대표: </dt><dd className="inline">홍길동</dd></div>
-                        <div className="md:col-span-2"><dt className="inline text-[var(--color-fg-subtle)]">주소: </dt><dd className="inline">서울특별시 강남구 테헤란로 ●●●</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">전화번호: </dt><dd className="inline">123-456-78910</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">사업자등록번호: </dt><dd className="inline">홍길동</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">개인정보관리책임자: </dt><dd className="inline">홍길동</dd></div>
+                        <div><dt className="inline text-[var(--color-fg-subtle)]">상호: </dt><dd className="inline">유한회사 전담이지</dd></div>
+                        <div><dt className="inline text-[var(--color-fg-subtle)]">대표: </dt><dd className="inline">이상헌</dd></div>
+                        <div className="md:col-span-2"><dt className="inline text-[var(--color-fg-subtle)]">주소: </dt><dd className="inline">서울특별시 중구 명동8길 22-4, 1003호 (명동2가, 대한빌딩)</dd></div>
+                        <div><dt className="inline text-[var(--color-fg-subtle)]">사업자등록번호: </dt><dd className="inline tabular-nums">419-86-03748</dd></div>
+                        <div><dt className="inline text-[var(--color-fg-subtle)]">개업일: </dt><dd className="inline">2025년 7월 1일</dd></div>
+                        <div><dt className="inline text-[var(--color-fg-subtle)]">전화번호: </dt><dd className="inline">02-1234-5678</dd></div>
                         <div><dt className="inline text-[var(--color-fg-subtle)]">이메일: </dt><dd className="inline">elfbar@naver.com</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">통신판매업신고번호: </dt><dd className="inline">123456789</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">계좌정보: </dt><dd className="inline">123456789</dd></div>
+                        <div><dt className="inline text-[var(--color-fg-subtle)]">개인정보관리책임자: </dt><dd className="inline">이상헌</dd></div>
+                        <div><dt className="inline text-[var(--color-fg-subtle)]">배송사: </dt><dd className="inline">로젠택배</dd></div>
                     </dl>
 
                     <nav className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-xs">
@@ -28,7 +28,7 @@ export function Footer() {
                     </nav>
 
                     <p className="mt-4 text-[11px] text-[var(--color-fg-subtle)]">
-                        © HEALTHPRO LAB ALL RIGHTS RESERVED. 본 사이트는 만 19세 이상 성인만 이용 가능합니다.
+                        © {new Date().getFullYear()} 유한회사 전담이지 ALL RIGHTS RESERVED. 본 사이트는 만 19세 이상 성인만 이용 가능합니다.
                     </p>
                 </div>
 
