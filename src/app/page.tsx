@@ -282,8 +282,20 @@ function Ranking({ items }: { items: ProductSummary[] }) {
     const PHOTOS = ["/images/rank-1-photo.png", "/images/rank-2-photo.png", "/images/rank-3-photo.png"];
     const LABELS = ["변치 않는 기본", "단순한 풍미 그 이상", "직관적 강한 힘"];
     const BRANDS = ["ELFBAR 8000", "ELFLIQ", "ELFBAR BC10000"];
-    // popular 9개를 3 그룹으로
-    const top = items.slice(0, 9);
+
+    // popular API 응답이 비어있어도 시안에 보이는 mini list (각 카드 3 row) 가 안 빈
+    // 줄로 떨어지지 않게 fallback mock 9개 항상 보장.
+    const FALLBACK_MOCK: ProductSummary[] = Array.from({ length: 9 }, (_, i) => ({
+        id: -(i + 1),
+        name: ["BC5000 그린애플","BC10000 블루라즈","DUKE 멘솔","BC5000 워터멜론","BC10000 망고","DUKE 그레이프","BC5000 피치","BC10000 코코넛","DUKE 라임"][i],
+        thumbnailUrl: `/images/elfbar-product-${(i % 2) + 1}.png`,
+        price: 25000,
+    })) as unknown as ProductSummary[];
+
+    const source = items.length >= 9 ? items : (items.length > 0
+        ? [...items, ...FALLBACK_MOCK].slice(0, 9)
+        : FALLBACK_MOCK);
+    const top = source.slice(0, 9);
     const groups: ProductSummary[][] = [
         top.slice(0, 3),
         top.slice(3, 6),
@@ -294,7 +306,7 @@ function Ranking({ items }: { items: ProductSummary[] }) {
             {groups.map((group, gi) => (
                 <div
                     key={gi}
-                    className="flex flex-col rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-surface)] shadow-sm"
+                    className="flex flex-col rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-surface)]"
                 >
                     <Link href="/c/best" aria-label={LABELS[gi]} className="relative block group">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -323,10 +335,6 @@ function Ranking({ items }: { items: ProductSummary[] }) {
                                 </Link>
                             </li>
                         ))}
-                        {/* 빈 슬롯 채우기 (3개 미만일 때) */}
-                        {Array.from({ length: Math.max(0, 3 - group.length) }, (_, i) => (
-                            <li key={`empty-${i}`} className="px-3 py-2.5 text-xs text-[var(--color-fg-subtle)]">—</li>
-                        ))}
                     </ul>
                 </div>
             ))}
@@ -338,28 +346,27 @@ function Ranking({ items }: { items: ProductSummary[] }) {
  * WhyChooseUs — 6 카드 3×2 그리드 (시안 41:15605 매칭)
  * 각 카드: 컬러 박스 + 짧은 카피 + 부연 설명
  * ============================================================ */
-const REASONS: { title: string; body: string; icon: string; selected?: boolean }[] = [
-    { title: "정품 100%",     body: "공식 인증 제품인 인해",                  icon: "/images/reason-genuine.png",    selected: true },
+/* 시안 매칭: 6 카드 = 통일된 흰 배경 + 1px 보더만. 첫 카드 highlight (파란 보더) 제거. */
+const REASONS: { title: string; body: string; icon: string }[] = [
+    { title: "정품 100%",     body: "공식 인증 제품만 판매합니다",              icon: "/images/reason-genuine.png" },
     { title: "빠른 배송",     body: "오후 2시 이전 주문 시 당일 출고",          icon: "/images/reason-fast.png" },
-    { title: "안전한 결제",   body: "24개 보안 시스템으로 안전한 거래",         icon: "/images/reason-secure.png" },
-    { title: "다양한 혜택",   body: "적립금 / 쿠폰 / 회원등급 다양한 혜택",     icon: "/images/reason-benefit.png" },
-    { title: "전문 고객센터", body: "평일 10:00 ~ 18:00 (점심 13:00 ~ 14:00)", icon: "/images/reason-cs.png" },
-    { title: "멤버십 혜택",   body: "구매할수록 더 커지는 혜택",                icon: "/images/reason-membership.png" },
+    { title: "안전한 결제",   body: "다중 보안 시스템으로 안전한 거래",         icon: "/images/reason-secure.png" },
+    { title: "다양한 혜택",   body: "적립금 / 쿠폰 / 회원등급\n다양한 혜택",    icon: "/images/reason-benefit.png" },
+    { title: "전문 고객센터", body: "평일 10:00 ~ 18:00\n(점심 13:00 ~ 14:00)", icon: "/images/reason-cs.png" },
+    { title: "멤버십 혜택",   body: "구매할수록 더 커지는\n혜택",               icon: "/images/reason-membership.png" },
 ];
 function WhyChooseUs() {
     return (
         <section>
             <div className="mb-4">
-                <p className="text-xs text-[var(--color-fg-muted)]">Benfit</p>
+                <p className="text-xs text-[var(--color-fg-muted)]">Benefit</p>
                 <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">엘프바를 선택해야하는 이유</h2>
             </div>
             <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                 {REASONS.map(r => (
                     <li
                         key={r.title}
-                        className={`rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-5 md:p-6 flex items-center justify-between gap-4 hover:shadow-md transition ${
-                            r.selected ? "border-2 border-blue-500 bg-[var(--color-surface)]" : "border border-transparent"
-                        }`}
+                        className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border)] p-5 md:p-6 flex items-center justify-between gap-4 hover:border-[var(--color-border-strong)] transition"
                     >
                         <div className="min-w-0">
                             <p className="text-sm md:text-base font-bold text-[var(--color-fg)]">{r.title}</p>
@@ -467,6 +474,22 @@ function CalendarIconMini() {
     );
 }
 
+/* 시안 매칭: 섹션 헤더 우측 ‹ › 화살표 (decoration, 단일 페이지라 비활성). */
+function CarouselArrow({ direction }: { direction: "prev" | "next" }) {
+    return (
+        <button
+            type="button"
+            aria-label={direction === "prev" ? "이전" : "다음"}
+            disabled
+            className="w-9 h-9 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] disabled:opacity-100 transition"
+        >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {direction === "prev" ? <polyline points="15 18 9 12 15 6" /> : <polyline points="9 18 15 12 9 6" />}
+            </svg>
+        </button>
+    );
+}
+
 /* ============================================================
  * BestReviewsSection — 시안 11:947 4 카드 (각 카드: 라이프스타일 사진 + 평점 + 후기 + 제품 미니)
  * 후기 텍스트는 한국어 목데이터, 사진은 review-photo-1~4.png 사용.
@@ -508,13 +531,20 @@ const REVIEW_MOCKS = [
 function BestReviewsSection() {
     return (
         <section id="best-reviews" className="scroll-mt-24">
-            <div className="mb-4">
-                <p className="text-xs text-[var(--color-fg-muted)]">Best Review</p>
-                <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">베스트 제품 후기</h2>
+            {/* 시안 매칭: 헤더 우측 ‹ › 화살표 (decoration). 카드 외곽선/그림자 없음, 흰 배경만. */}
+            <div className="mb-4 flex items-end justify-between">
+                <div>
+                    <p className="text-xs text-[var(--color-fg-muted)]">Best Review</p>
+                    <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">베스트 제품 후기</h2>
+                </div>
+                <div className="flex items-center gap-2">
+                    <CarouselArrow direction="prev" />
+                    <CarouselArrow direction="next" />
+                </div>
             </div>
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {REVIEW_MOCKS.map((r, i) => (
-                    <li key={i} className="rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-surface)] shadow-sm">
+                    <li key={i} className="rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-surface)]">
                         <Link href="/c/best" className="block">
                             <div className="aspect-[4/5] overflow-hidden bg-[var(--color-bg-subtle)]">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}

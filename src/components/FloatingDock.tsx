@@ -16,12 +16,13 @@ export function FloatingDock() {
     const [badgeOpen, setBadgeOpen] = useState(true);
     const profileHref = user ? "/mypage" : "/login";
 
-    // 화면 우측 fixed 이되, max-w-screen-xl 컨테이너 안쪽 우측 끝에 머물도록
-    // wrapper 로 max-width 잡고 내부 dock 을 우측 정렬. 와이드 모니터에서 hero 영역 안에 정렬됨.
+    // viewport 우측 끝에 fixed (콘텐츠 컨테이너 침범 안 함 — DUKE 4번째 카드 가림 방지).
+    // 와이드 모니터에선 컨테이너 우측 바깥 여백에 들어가고, 좁은 화면에선 자연스럽게 가장자리.
+    // z-20 으로 헤더(z-40) / 모달(z-50) 보다 낮춤.
     return (
-        <div className="hidden md:block fixed inset-x-0 top-1/2 -translate-y-1/2 z-30 pointer-events-none">
+        <div className="hidden md:block fixed right-3 lg:right-5 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
             <aside
-                className="mx-auto max-w-screen-xl px-4 lg:px-6 flex justify-end pointer-events-none"
+                className="flex justify-end pointer-events-none"
                 aria-label="빠른 메뉴"
             >
                 <div className="flex flex-col gap-2 pointer-events-auto">
