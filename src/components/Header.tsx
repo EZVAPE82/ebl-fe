@@ -40,19 +40,16 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         router.push("/");
     }
 
-    // 투명 모드 (홈 + 스크롤 top): 살짝 흰색 + blur 로 배너와 layer 구분, 텍스트 화이트.
+    // 투명 모드 (홈 only): hero 그라데이션 그대로 비치고 텍스트만 흰색. 보더 X, 배경 X.
     // 솔리드 모드: 기존 흰 배경 + 보더.
     const headerCls = transparent
-        ? "relative z-30 bg-white/10 backdrop-blur-md border-b border-white/15 text-white"
+        ? "relative z-30 bg-transparent text-white"
         : "relative z-30 bg-[var(--color-surface)]/95 backdrop-blur border-b border-[var(--color-border)] text-[var(--color-fg)]";
 
     // 투명 모드에서는 내비/링크 톤도 화이트 기반으로 조정
-    const navTone = transparent ? "text-white/80 hover:text-white" : "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]";
-    const actionTone = transparent ? "text-white/80" : "text-[var(--color-fg-muted)]";
+    const navTone = transparent ? "text-white/90 hover:text-white" : "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]";
+    const actionTone = transparent ? "text-white" : "text-[var(--color-fg-muted)]";
     const logoTone = transparent ? "text-white" : "text-[var(--color-fg)]";
-    const searchBg = transparent
-        ? "bg-white/10 border border-white/30 placeholder:text-white/60 text-white focus:bg-white/15"
-        : "bg-[var(--color-bg-subtle)] border border-[var(--color-border)] placeholder:text-[var(--color-fg-subtle)] text-[var(--color-fg)]";
 
     return (
         <>
@@ -86,32 +83,22 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                         ))}
                     </nav>
 
-                    {/* 검색 (PC) — lg 이상이면 NAV 가 flex-1 로 가운데 차지하므로 자연스럽게 우측 */}
-                    <form method="GET" action="/search" className="hidden md:flex items-center lg:ml-0 ml-auto">
-                        <input
-                            name="q"
-                            type="search"
-                            placeholder="검색"
-                            aria-label="상품 검색"
-                            className={`w-40 lg:w-56 rounded-[var(--radius-sm)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)] ${searchBg}`}
-                        />
-                    </form>
-
-                    {/* 우측 액션 (테마·검색·계정·장바구니) */}
-                    <div className={`md:ml-2 ml-auto md:ml-2 flex items-center gap-3 ${actionTone}`}>
-                        <ThemeToggle />
-                        <Link href="/search" aria-label="검색" className="md:hidden hover:opacity-100">🔍</Link>
+                    {/* 우측 액션 — 시안 매칭: 🔍 검색 / 👤 계정 / 🛍️ 카트(뱃지)
+                        검색은 input 박스 대신 아이콘 → /search 로 이동 (시안 11:797 매칭).
+                        다크 토글은 사이드 메뉴 안으로 이동 (시안 헤더엔 없음). */}
+                    <div className={`ml-auto flex items-center gap-3.5 md:gap-4 ${actionTone}`}>
+                        <SearchIcon transparent={transparent} />
                         {loading ? (
                             <span className="opacity-60">···</span>
                         ) : user ? (
                             <>
-                                <Link href="/mypage" aria-label="마이페이지" className="hover:opacity-100">👤</Link>
-                                <CartIcon />
+                                <UserIcon transparent={transparent} href="/mypage" label="마이페이지" />
+                                <CartIcon transparent={transparent} />
                             </>
                         ) : (
                             <>
-                                <Link href="/login" aria-label="로그인" className="hover:opacity-100">👤</Link>
-                                <CartIcon />
+                                <UserIcon transparent={transparent} href="/login" label="로그인" />
+                                <CartIcon transparent={transparent} />
                             </>
                         )}
                     </div>
@@ -167,6 +154,9 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                                     <Link href="/signup" className="block text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">회원가입</Link>
                                 </>
                             )}
+                            <div className="pt-2 mt-2 border-t border-[var(--color-border)]">
+                                <DrawerThemeToggle />
+                            </div>
                         </div>
                     </aside>
                 </div>
@@ -175,28 +165,77 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
     );
 }
 
-function ThemeToggle() {
+/* ===== Drawer 내부 다크/라이트 토글 (시안 헤더엔 없으니 메뉴 안으로) ===== */
+function DrawerThemeToggle() {
     const { resolved, setTheme } = useTheme();
-    // 단순 토글: 현재 dark 면 light 로, 그 외엔 dark 로 (system 은 자동으로 light/dark 해석됨)
     const next = resolved === "dark" ? "light" : "dark";
     return (
         <button
             type="button"
             onClick={() => setTheme(next)}
             aria-label={`${next === "dark" ? "다크" : "라이트"} 모드로 전환`}
-            title={`현재: ${resolved === "dark" ? "다크" : "라이트"} (클릭하면 ${next === "dark" ? "다크" : "라이트"})`}
-            className="hover:text-[var(--color-fg)] text-sm leading-none"
+            className="w-full flex items-center justify-between text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
         >
-            {resolved === "dark" ? "☀️" : "🌙"}
+            <span>{resolved === "dark" ? "라이트 모드" : "다크 모드"}</span>
+            <span aria-hidden="true">{resolved === "dark" ? "☀️" : "🌙"}</span>
         </button>
     );
 }
 
-function CartIcon() {
-    // 카트 카운트는 백엔드 호출 비용·CORS 고려해 미연결. 시각 자리만 (시안 12 뱃지 위치 매칭)
+/* ===== 헤더 우측 아이콘들 — SVG (시안 11:797 매칭) ===== */
+function SearchIcon({ transparent }: { transparent?: boolean }) {
     return (
-        <Link href="/cart" aria-label="장바구니" className="relative hover:text-[var(--color-fg)]">
-            🛒
+        <Link
+            href="/search"
+            aria-label="검색"
+            className={`hover:opacity-100 ${transparent ? "text-white" : "text-[var(--color-fg)]"} hover:opacity-80 transition`}
+        >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+        </Link>
+    );
+}
+
+function UserIcon({ transparent, href, label }: { transparent?: boolean; href: string; label: string }) {
+    return (
+        <Link
+            href={href}
+            aria-label={label}
+            className={`${transparent ? "text-white" : "text-[var(--color-fg)]"} hover:opacity-80 transition`}
+        >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21a8 8 0 0 1 16 0" />
+            </svg>
+        </Link>
+    );
+}
+
+/* 시안 매칭: 카트 아이콘 + 우측 상단 빨간 동그라미 12 뱃지 (placeholder).
+   실제 카운트는 향후 cart API 연동 시 useCart() 같은 hook 으로 교체. */
+function CartIcon({ transparent }: { transparent?: boolean }) {
+    const count = 12; // TODO: cart API 연결 시 실제 개수로 교체
+    return (
+        <Link
+            href="/cart"
+            aria-label={`장바구니 (${count}개)`}
+            className={`relative ${transparent ? "text-white" : "text-[var(--color-fg)]"} hover:opacity-80 transition`}
+        >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+            {count > 0 && (
+                <span
+                    aria-hidden="true"
+                    className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--color-danger,#e23744)] text-white text-[10px] font-semibold flex items-center justify-center leading-none"
+                >
+                    {count > 99 ? "99+" : count}
+                </span>
+            )}
         </Link>
     );
 }
