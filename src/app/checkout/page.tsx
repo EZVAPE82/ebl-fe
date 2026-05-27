@@ -240,6 +240,33 @@ export default function CheckoutPage() {
             <div className="text-center text-xs text-[var(--color-fg-subtle)]">
                 <Link href="/cart" className="underline hover:text-[var(--color-fg)]">장바구니로 돌아가기</Link>
             </div>
+
+            {/* 추천상품 (시안 14:9910 checkout-recommend 영역) */}
+            <section className="mt-10 pt-8 border-t border-[var(--color-border)]">
+                <div className="mb-4">
+                    <p className="text-xs text-[var(--color-fg-muted)]">Recommended</p>
+                    <h2 className="text-lg md:text-xl font-bold text-[var(--color-fg)]">함께 보면 좋은 상품</h2>
+                </div>
+                <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                    {[
+                        { id: 1, name: "ELFBAR Apple Ice",     src: "/images/prod-apple-ice.png" },
+                        { id: 2, name: "ELFBAR Blue Razz Ice", src: "/images/prod-blue-razz.png" },
+                        { id: 3, name: "ELFBAR Cola Ice",      src: "/images/prod-cola-ice.png" },
+                        { id: 4, name: "ELFBAR Grape Cherry",  src: "/images/prod-grape-cherry.png" },
+                    ].map(p => (
+                        <li key={p.id}>
+                            <Link href={`/p/${p.id}`} className="block group">
+                                <div className="rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)]">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={p.src} alt={p.name} className="w-full block group-hover:scale-105 transition-transform" />
+                                </div>
+                                <p className="mt-2 text-sm text-[var(--color-fg)] line-clamp-1">{p.name}</p>
+                                <p className="text-xs text-[var(--color-fg-muted)] tabular-nums">25,000원</p>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </section>
         </div>
     );
 }

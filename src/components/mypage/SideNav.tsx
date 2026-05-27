@@ -33,7 +33,8 @@ const GROUPS: { icon: string; title: string; items: { label: string; href: strin
         items: [
             { label: "회원정보 수정", href: "/mypage/settings" },
             { label: "적립금",        href: "/mypage" },
-            { label: "쿠폰",          href: "/mypage" },
+            { label: "쿠폰",          href: "/mypage/coupons" },
+            { label: "회원등급",       href: "/mypage/grade" },
             { label: "배송지 관리",   href: "/mypage/addresses" },
             { label: "위시리스트",     href: "/mypage/wishlist" },
         ],

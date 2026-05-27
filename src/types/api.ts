@@ -68,7 +68,7 @@ export type Brand = {
 
 export type Banner = {
     id: number;
-    placement: "MAIN_HERO" | "TOP_STRIP" | "SECTION";
+    placement: "MAIN_HERO" | "MID_HERO" | "TOP_STRIP" | "SECTION";
     imageUrl: string;
     linkUrl: string | null;
     altText: string | null;

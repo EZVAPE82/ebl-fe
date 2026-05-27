@@ -111,7 +111,7 @@ function BannerForm() {
             fields={f}
             update={(k, v) => setF(s => ({ ...s, [k]: v }))}
             schema={{
-                placement: { type: "select", label: "위치", options: ["MAIN_HERO", "TOP_STRIP", "SECTION"] },
+                placement: { type: "select", label: "위치", options: ["MAIN_HERO", "MID_HERO", "TOP_STRIP", "SECTION"] },
                 imageUrl: { type: "text", label: "이미지 URL", required: true },
                 linkUrl: { type: "text", label: "링크 URL" },
                 altText: { type: "text", label: "대체 텍스트" },
