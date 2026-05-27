@@ -34,6 +34,10 @@ export default async function Home() {
 
     return (
         <div>
+            {/* 헤더 fixed 영역 보정 + 시각 breathing room 위한 spacer
+                (PromoStrip ~32px + Header h-14 56px ≈ 88px) + 추가 여백 */}
+            <div className="h-[120px] md:h-[140px]" />
+
             {/* ===== 1. Hero 캐러셀 (MAIN_HERO 다중 슬라이드) ===== */}
             <HeroCarousel banners={heroSlides} fallbackImage="/images/hero.png" />
 

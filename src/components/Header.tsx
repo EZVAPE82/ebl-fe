@@ -40,10 +40,10 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         router.push("/");
     }
 
-    // 투명 모드 (홈 + 스크롤 top): 배경/보더 제거, 텍스트 화이트.
+    // 투명 모드 (홈 + 스크롤 top): 살짝 흰색 + blur 로 배너와 layer 구분, 텍스트 화이트.
     // 솔리드 모드: 기존 흰 배경 + 보더.
     const headerCls = transparent
-        ? "relative z-30 bg-transparent text-white"
+        ? "relative z-30 bg-white/10 backdrop-blur-md border-b border-white/15 text-white"
         : "relative z-30 bg-[var(--color-surface)]/95 backdrop-blur border-b border-[var(--color-border)] text-[var(--color-fg)]";
 
     // 투명 모드에서는 내비/링크 톤도 화이트 기반으로 조정
@@ -77,8 +77,8 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                         ELFBAR
                     </Link>
 
-                    {/* PC 카테고리 메뉴 */}
-                    <nav className={`hidden lg:flex items-center gap-5 text-sm ml-2 ${navTone}`}>
+                    {/* PC 카테고리 메뉴 — 가운데 정렬 (시안 매칭) */}
+                    <nav className={`hidden lg:flex flex-1 items-center justify-center gap-5 text-sm ${navTone}`}>
                         {NAV.map(n => (
                             <Link key={n.label} href={n.href} className="hover:opacity-100">
                                 {n.label}
@@ -86,8 +86,8 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                         ))}
                     </nav>
 
-                    {/* 검색 (PC) */}
-                    <form method="GET" action="/search" className="hidden md:flex items-center ml-auto">
+                    {/* 검색 (PC) — lg 이상이면 NAV 가 flex-1 로 가운데 차지하므로 자연스럽게 우측 */}
+                    <form method="GET" action="/search" className="hidden md:flex items-center lg:ml-0 ml-auto">
                         <input
                             name="q"
                             type="search"
@@ -98,7 +98,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                     </form>
 
                     {/* 우측 액션 (테마·검색·계정·장바구니) */}
-                    <div className={`md:ml-2 ml-auto flex items-center gap-3 ${actionTone}`}>
+                    <div className={`md:ml-2 ml-auto md:ml-2 flex items-center gap-3 ${actionTone}`}>
                         <ThemeToggle />
                         <Link href="/search" aria-label="검색" className="md:hidden hover:opacity-100">🔍</Link>
                         {loading ? (

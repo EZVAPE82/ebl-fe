@@ -16,11 +16,15 @@ export function FloatingDock() {
     const [badgeOpen, setBadgeOpen] = useState(true);
     const profileHref = user ? "/mypage" : "/login";
 
+    // 화면 우측 fixed 이되, max-w-screen-xl 컨테이너 안쪽 우측 끝에 머물도록
+    // wrapper 로 max-width 잡고 내부 dock 을 우측 정렬. 와이드 모니터에서 hero 영역 안에 정렬됨.
     return (
-        <aside
-            className="hidden md:flex fixed right-4 lg:right-6 top-1/2 -translate-y-1/2 z-30 flex-col gap-2"
-            aria-label="빠른 메뉴"
-        >
+        <div className="hidden md:block fixed inset-x-0 top-1/2 -translate-y-1/2 z-30 pointer-events-none">
+            <aside
+                className="mx-auto max-w-screen-xl px-4 lg:px-6 flex justify-end pointer-events-none"
+                aria-label="빠른 메뉴"
+            >
+                <div className="flex flex-col gap-2 pointer-events-auto">
             {/* 프로필 + 개인정보 바로가기 배지 */}
             <div className="relative">
                 {badgeOpen && (
@@ -61,7 +65,9 @@ export function FloatingDock() {
             <DockButton href="/notices" label="공지·소식">
                 <CommentIcon />
             </DockButton>
-        </aside>
+                </div>
+            </aside>
+        </div>
     );
 }
 
