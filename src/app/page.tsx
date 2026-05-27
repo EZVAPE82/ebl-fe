@@ -642,37 +642,56 @@ function InstagramFeed() {
 }
 
 /* ============================================================
- * ContactCTA — 좌측 통이미지(텍스트+선물상자 일러스트) + 우측 HTML form
- * 통이미지의 보라 그라데이션이 좌→우로 연결되도록 background-image 로 사용,
- * 우측은 같은 보라 그라데이션 그대로 이어지도록 background-color 매칭.
+ * ContactCTA — 1:1 문의 카드 (시안 41:10474 frame + 41:10454/41:10495 일러스트)
+ *
+ * 시안 정합:
+ *  - cta-card-full.png : 카드 통이미지 (보라 그라데이션 + 별빛 + 선물박스 + input + 문의하기 버튼)
+ *  - cta-illust-left.png  : 노란 바구니+선물박스 일러스트 (카드 위로 튀어나옴)
+ *  - cta-illust-right.png : 보라 구슬 구름 일러스트 (카드 위로 튀어나옴)
+ *
+ * 좌표 (frame 1920x280 기준 →  % 매핑):
+ *  - left illust : left=30.78%, top=-26.07%, w=5.42%, h=47.14% (frame y=8240, illust y=8167)
+ *  - right illust: left=86.04%, top=-17.86%, w=7.08%, h=37.86%
+ *
+ * 카드 우측 input 영역 (대략 frame 폭 55~95% / 35~70% h) 클릭 → /faq 이동.
+ * HTML form input 은 통이미지와 중복되므로 제거 (사용자가 input 위 그림자 지적 fix).
  * ============================================================ */
 function ContactCTA() {
-    // cta-purple-clean.png = 통이미지 전체 (input 영역 PIL 로 지움) + HTML form overlay
     return (
-        <section className="mt-16 relative w-full">
+        <section className="mt-24 relative w-full">
+            {/* 카드 통이미지 */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/cta-purple-clean.png" alt="엘프바에게 문의해주세요" className="w-full block" />
-            {/* 우측 input 영역 — 통이미지의 input 자리에 정확히 정렬 */}
-            <form
-                action="/faq"
-                method="GET"
-                className="absolute hidden md:flex items-stretch top-1/2 -translate-y-1/2"
-                style={{ left: "55%", right: "5%", maxWidth: "560px" }}
-            >
-                <input
-                    name="q"
-                    type="text"
-                    placeholder="문의사항을 입력해주세요"
-                    aria-label="문의 내용"
-                    className="flex-1 min-w-0 px-4 py-3 rounded-l-md bg-white text-sm text-[#1a0f3d] placeholder:text-[#1a0f3d]/50 focus:outline-none focus:ring-2 focus:ring-[#1a0f3d]/40 border border-r-0 border-[#1a0f3d]/15"
-                />
-                <button
-                    type="submit"
-                    className="px-5 md:px-7 py-3 rounded-r-md bg-[#1a0f3d] text-white text-sm font-semibold hover:bg-[#2a1855] transition flex-shrink-0"
-                >
-                    문의하기
-                </button>
-            </form>
+            <img src="/images/cta-card-full.png" alt="엘프바에게 문의해주세요" className="w-full block" />
+
+            {/* 좌측 일러스트 — 노란 바구니 + 선물박스 (카드 위로 솟음) */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+                src="/images/cta-illust-left.png"
+                alt=""
+                aria-hidden="true"
+                className="absolute pointer-events-none select-none"
+                style={{ left: "30.78%", top: "-26.07%", width: "5.42%", height: "47.14%" }}
+                draggable={false}
+            />
+
+            {/* 우측 일러스트 — 보라 구슬 구름 */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+                src="/images/cta-illust-right.png"
+                alt=""
+                aria-hidden="true"
+                className="absolute pointer-events-none select-none"
+                style={{ left: "86.04%", top: "-17.86%", width: "7.08%", height: "37.86%" }}
+                draggable={false}
+            />
+
+            {/* 우측 input/버튼 영역 invisible click → /faq */}
+            <Link
+                href="/faq"
+                aria-label="1:1 문의하기"
+                className="absolute z-10 focus:outline-none focus-visible:bg-white/5 transition"
+                style={{ left: "55%", right: "5%", top: "25%", bottom: "25%" }}
+            />
         </section>
     );
 }
