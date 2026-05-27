@@ -1,0 +1,271 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { safeImageUrl, safeLinkUrl } from "@/lib/url";
+import type { Banner } from "@/types/api";
+
+/**
+ * 메인 히어로 캐러셀 (Figma 시안 매칭)
+ *
+ * 시안 구성:
+ *  - 좌측 텍스트 오버레이: New Arrival 라벨 + 2줄 메인 카피 + 서브 카피
+ *  - 우측 상하 풀폭으로 product 이미지 (banner image)
+ *  - 좌하단: "01 ─── 05" 진행 인디케이터 + < > 화살표 원형 버튼
+ *  - 자동 회전 5s, 호버 일시정지, 좌측 텍스트는 슬라이드별 alt/title 사용
+ *
+ * Banner DB가 title/subtitle 컬럼을 가지지 않으므로, 1번 슬라이드(또는 alt가 비어있는 슬라이드)는
+ * design 기본 카피를 사용한다. 이후 도급인이 admin에서 alt(=헤드라인)·linkUrl 만 갱신해도 시안 유지.
+ */
+export function HeroCarousel({
+    banners,
+    fallbackImage = "/images/hero.png",
+    heightClass = "aspect-[12/5] min-h-[300px] md:min-h-[440px] max-h-[720px]",
+    showOverlay = true,
+    defaultOverlay = DESIGN_DEFAULT_OVERLAY,
+}: {
+    banners: Banner[];
+    fallbackImage?: string;
+    /**
+     * Tailwind 높이 클래스. 기본은 hero.png 자연 비율(2.4:1 = 12/5)에 맞춰
+     * viewport width 에 따라 자동으로 늘어남. cover crop 최소화.
+     * 모바일 최소 300, 데스크톱 최소 440, 최대 720 으로 클램프.
+     */
+    heightClass?: string;
+    /** false면 텍스트/인디케이터 오버레이를 숨기고 풀폭 이미지만 노출 (중간 DUKE 등 풀이미지 슬라이드용) */
+    showOverlay?: boolean;
+    /** 텍스트 컬럼이 비어있을 때 쓸 기본 카피 */
+    defaultOverlay?: { label: string; title: React.ReactNode; subtitle: string };
+}) {
+    type Slide = { id: number; img: string; href: string; alt: string };
+
+    const slides = useMemo<Slide[]>(() => {
+        if (banners.length > 0) {
+            return banners.map((b, i) => ({
+                id: b.id ?? i,
+                img: safeImageUrl(b.imageUrl),
+                href: safeLinkUrl(b.linkUrl),
+                alt: b.altText ?? "",
+            }));
+        }
+        return [{ id: 0, img: fallbackImage, href: "#", alt: "" }];
+    }, [banners, fallbackImage]);
+
+    const [index, setIndex] = useState(0);
+    const [paused, setPaused] = useState(false);
+    const total = slides.length;
+    const timerRef = useRef<number | null>(null);
+
+    // 자동 회전 (slides.length > 1 일 때만)
+    useEffect(() => {
+        if (total <= 1 || paused) return;
+        timerRef.current = window.setTimeout(() => {
+            setIndex(i => (i + 1) % total);
+        }, 5000);
+        return () => {
+            if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+        };
+    }, [index, paused, total]);
+
+    function go(delta: number) {
+        setIndex(i => (i + delta + total) % total);
+    }
+
+    return (
+        <section
+            className={`relative w-full overflow-hidden bg-[#1a0f3d] ${heightClass}`}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            aria-roledescription="carousel"
+            aria-label="메인 히어로 슬라이드"
+        >
+            {/* 슬라이드 (배경 이미지) — fade transition */}
+            {slides.map((s, i) => {
+                const isActive = i === index;
+                return (
+                    <div
+                        key={s.id}
+                        className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${isActive ? "opacity-100" : "opacity-0"}`}
+                        aria-hidden={!isActive}
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={s.img}
+                            alt={s.alt}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            draggable={false}
+                        />
+                        {/* 좌측 어두운 그라데이션 — 텍스트 가독성 확보 (시안의 deep purple 톤) */}
+                        {showOverlay && (
+                            <div
+                                className="absolute inset-0 pointer-events-none"
+                                style={{
+                                    background:
+                                        "linear-gradient(90deg, rgba(20,8,60,0.65) 0%, rgba(20,8,60,0.35) 35%, rgba(20,8,60,0) 65%)",
+                                }}
+                            />
+                        )}
+                    </div>
+                );
+            })}
+
+            <div className="relative mx-auto max-w-screen-xl h-full px-4 md:px-8 lg:px-12">
+                {/* 좌측 텍스트 오버레이 — 시안 매칭 (showOverlay=true 일 때만) */}
+                {showOverlay && (
+                    <div className="absolute inset-y-0 left-4 md:left-8 lg:left-12 flex flex-col justify-center text-white max-w-md md:max-w-lg z-10">
+                        <p className="text-xs md:text-sm tracking-[0.2em] uppercase opacity-90 mb-3 md:mb-4">
+                            {defaultOverlay.label}
+                        </p>
+                        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                            {defaultOverlay.title}
+                        </h1>
+                        <p className="mt-3 md:mt-5 text-xs md:text-sm opacity-80 leading-relaxed">
+                            {defaultOverlay.subtitle}
+                        </p>
+                    </div>
+                )}
+
+                {/* 인디케이터·화살표 — showOverlay 와 독립, total>1 일 때만 노출 */}
+                {total > 1 && (
+                    <div
+                        className={
+                            showOverlay
+                                ? "absolute left-4 md:left-8 lg:left-12 bottom-6 md:bottom-10 z-10"
+                                : "absolute right-4 md:right-8 lg:right-12 bottom-3 md:bottom-5 z-10"
+                        }
+                    >
+                        <SlideIndicator
+                            index={index}
+                            total={total}
+                            onPrev={() => go(-1)}
+                            onNext={() => go(1)}
+                            onPick={(i) => setIndex(i)}
+                        />
+                    </div>
+                )}
+
+                {/* 현재 슬라이드 링크 영역 — 우측 빈 공간 클릭으로 이동 (오버레이 모드에서만) */}
+                {showOverlay && slides[index].href !== "#" && (
+                    <Link
+                        href={slides[index].href}
+                        aria-label="현재 슬라이드 자세히 보기"
+                        className="absolute right-0 top-0 h-full w-1/2 z-0"
+                    />
+                )}
+
+                {/* 풀이미지 모드: 전체 클릭 영역 */}
+                {!showOverlay && slides[index].href !== "#" && (
+                    <Link
+                        href={slides[index].href}
+                        aria-label="슬라이드 링크"
+                        className="absolute inset-0 z-0"
+                    />
+                )}
+            </div>
+        </section>
+    );
+}
+
+/**
+ * "01 ─── 05" 진행 인디케이터 + 좌/우 원형 화살표
+ *  - 시안: 좌측 정렬, 흰색 톤, 가는 진행바 + 짙은 트랙
+ *  - total = 1 이면 화살표 숨김 (정적 fallback 케이스)
+ */
+function SlideIndicator({
+    index,
+    total,
+    onPrev,
+    onNext,
+    onPick,
+}: {
+    index: number;
+    total: number;
+    onPrev: () => void;
+    onNext: () => void;
+    onPick: (i: number) => void;
+}) {
+    const progress = total > 1 ? (index / (total - 1)) * 100 : 0;
+    return (
+        <div className="flex items-center gap-3 md:gap-4 text-white">
+            {/* 진행바 트랙 + 채워진 영역 */}
+            <div className="flex items-center gap-3 select-none">
+                <span className="text-xs md:text-sm tabular-nums font-medium opacity-90">
+                    {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="relative h-px w-24 md:w-32 bg-white/30">
+                    <div
+                        className="absolute inset-y-0 left-0 bg-white transition-[width] duration-500 ease-out"
+                        style={{ width: `${progress}%` }}
+                    />
+                    {/* 클릭 가능한 슬라이드 마커 (접근성) */}
+                    {total > 1 && (
+                        <div className="absolute inset-0 flex justify-between">
+                            {Array.from({ length: total }, (_, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    aria-label={`슬라이드 ${i + 1}로 이동`}
+                                    aria-current={i === index}
+                                    onClick={() => onPick(i)}
+                                    className="w-3 h-3 -mt-1.5 rounded-full hover:bg-white/40"
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <span className="text-xs md:text-sm tabular-nums opacity-60">
+                    {String(total).padStart(2, "0")}
+                </span>
+            </div>
+
+            {/* 좌/우 원형 화살표 — 시안의 outline 스타일 */}
+            {total > 1 && (
+                <div className="flex items-center gap-1.5 md:gap-2 ml-2">
+                    <button
+                        type="button"
+                        aria-label="이전 슬라이드"
+                        onClick={onPrev}
+                        className="w-8 h-8 md:w-9 md:h-9 rounded-full border border-white/50 hover:border-white hover:bg-white/10 flex items-center justify-center transition"
+                    >
+                        <ArrowLeft />
+                    </button>
+                    <button
+                        type="button"
+                        aria-label="다음 슬라이드"
+                        onClick={onNext}
+                        className="w-8 h-8 md:w-9 md:h-9 rounded-full border border-white/50 hover:border-white hover:bg-white/10 flex items-center justify-center transition"
+                    >
+                        <ArrowRight />
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+const DESIGN_DEFAULT_OVERLAY = {
+    label: "New Arrival",
+    title: (
+        <>
+            새로워진 엘프바를
+            <br />
+            가장 먼저 만나보세요
+        </>
+    ),
+    subtitle: "더 강력해진 맛과 비프, 새로운 경험의 시작",
+};
+
+function ArrowLeft() {
+    return (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-white">
+            <polyline points="15 18 9 12 15 6" />
+        </svg>
+    );
+}
+function ArrowRight() {
+    return (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-white">
+            <polyline points="9 18 15 12 9 6" />
+        </svg>
+    );
+}
