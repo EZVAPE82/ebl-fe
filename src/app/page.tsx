@@ -496,7 +496,7 @@ function CarouselArrow({ direction }: { direction: "prev" | "next" }) {
  * ============================================================ */
 const REVIEW_MOCKS = [
     {
-        photo: "/images/review-photo-1.png",
+        photo: "/images/review-photo-1-v2.png",
         review: "야외 캠핑 갈 때 챙겨갔는데 가벼워서 부담 없고, 한 번 충전으로 정말 오래 가요. 친구들이 다 어디서 샀냐고 물어볼 정도였습니다.",
         author: "김** 님",
         date: "2026.05.18",
@@ -504,7 +504,7 @@ const REVIEW_MOCKS = [
         productThumb: "/images/elfbar-product-1.png",
     },
     {
-        photo: "/images/review-photo-2.png",
+        photo: "/images/review-photo-2-v2.png",
         review: "디자인이 너무 깔끔해서 데일리로 쓰기 좋아요. 그립감도 편하고 손에 쥐기 딱 좋은 사이즈예요. 재구매 의사 있음.",
         author: "이** 님",
         date: "2026.05.15",
@@ -512,7 +512,7 @@ const REVIEW_MOCKS = [
         productThumb: "/images/elfbar-product-2.png",
     },
     {
-        photo: "/images/review-photo-3.png",
+        photo: "/images/review-photo-3-v2.png",
         review: "출장 다닐 때 가방에 쏙 들어가서 너무 편해요. 맛도 깔끔하고 향이 진하면서도 텁텁하지 않아서 마음에 듭니다.",
         author: "박** 님",
         date: "2026.05.10",
@@ -520,7 +520,7 @@ const REVIEW_MOCKS = [
         productThumb: "/images/elfbar-product-1.png",
     },
     {
-        photo: "/images/review-photo-4.png",
+        photo: "/images/review-photo-4-v2.png",
         review: "선물용으로 샀는데 포장도 깔끔하고 받으신 분이 너무 좋아하셨어요. 다음에도 또 살 것 같아요. 강추!",
         author: "최** 님",
         date: "2026.05.08",
