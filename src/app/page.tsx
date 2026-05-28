@@ -312,19 +312,20 @@ function Ranking({ items }: { items: ProductSummary[] }) {
                         </div>
                     </Link>
                     <ul className="divide-y divide-[var(--color-border)]">
-                        {group.map((p, i) => (
+                        {group.map((p) => (
                             <li key={p.id}>
-                                <Link href={`/p/${p.id}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-[var(--color-bg-subtle)]">
-                                    <span className="flex-shrink-0 w-5 text-xs font-semibold text-[var(--color-accent)] tabular-nums">{i + 1}</span>
-                                    <div className="w-9 h-9 rounded bg-[var(--color-bg-subtle)] flex-shrink-0 overflow-hidden">
+                                <Link href={`/p/${p.id}`} className="flex items-center gap-3 px-3 py-3 hover:bg-[var(--color-bg-subtle)]">
+                                    {/* 썸네일 - 사진 다 보이게 object-contain + 박스 크게 */}
+                                    <div className="w-14 h-14 rounded bg-[var(--color-bg-subtle)] flex-shrink-0 overflow-hidden flex items-center justify-center p-1">
                                         {p.thumbnailUrl && (
                                             // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={p.thumbnailUrl} alt={p.name} className="w-full h-full object-cover" />
+                                            <img src={p.thumbnailUrl} alt={p.name} className="max-w-full max-h-full object-contain" />
                                         )}
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-xs text-[var(--color-fg)] line-clamp-1">{p.name}</p>
-                                        <p className="text-[11px] text-[var(--color-fg-muted)] tabular-nums">{formatPrice(p.price)}</p>
+                                    {/* 텍스트 (이름 + 가격 세로) */}
+                                    <div className="min-w-0 flex-1 space-y-1">
+                                        <p className="text-xs md:text-sm text-[var(--color-fg)] line-clamp-1 font-medium">{p.name}</p>
+                                        <p className="text-xs text-[var(--color-fg-muted)] tabular-nums">{formatPrice(p.price)}</p>
                                     </div>
                                 </Link>
                             </li>
