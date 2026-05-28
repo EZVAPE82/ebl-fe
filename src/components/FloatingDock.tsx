@@ -20,7 +20,7 @@ export function FloatingDock() {
     // 와이드 모니터에선 컨테이너 우측 바깥 여백에 들어가고, 좁은 화면에선 자연스럽게 가장자리.
     // z-20 으로 헤더(z-40) / 모달(z-50) 보다 낮춤.
     return (
-        <div className="hidden md:block fixed right-3 lg:right-5 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+        <div className="hidden xl:block fixed right-3 2xl:right-5 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
             <aside
                 className="flex justify-end pointer-events-none"
                 aria-label="빠른 메뉴"
