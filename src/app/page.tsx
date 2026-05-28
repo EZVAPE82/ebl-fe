@@ -474,19 +474,18 @@ function CalendarIconMini() {
     );
 }
 
-/* 시안 매칭: 섹션 헤더 우측 ‹ › 화살표 (decoration, 단일 페이지라 비활성). */
+/* 섹션 헤더 우측 ‹ › 화살표 — 클릭하면 베스트 후기 전체보기 (/c/best) 로 이동. */
 function CarouselArrow({ direction }: { direction: "prev" | "next" }) {
     return (
-        <button
-            type="button"
+        <Link
+            href="/c/best"
             aria-label={direction === "prev" ? "이전" : "다음"}
-            disabled
-            className="w-9 h-9 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] disabled:opacity-100 transition"
+            className="w-9 h-9 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition cursor-pointer"
         >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {direction === "prev" ? <polyline points="15 18 9 12 15 6" /> : <polyline points="9 18 15 12 9 6" />}
             </svg>
-        </button>
+        </Link>
     );
 }
 
@@ -531,8 +530,8 @@ const REVIEW_MOCKS = [
 function BestReviewsSection() {
     return (
         <section id="best-reviews" className="scroll-mt-24">
-            {/* 시안 매칭: 헤더 우측 ‹ › 화살표 (decoration). 카드 외곽선/그림자 없음, 흰 배경만. */}
-            <div className="mb-4 flex items-end justify-between">
+            {/* 시안 매칭: 헤더 우측 ‹ › 화살표 (클릭 시 /c/best 이동). 카드 외곽선/그림자 없음. */}
+            <div className="mb-3 flex items-end justify-between">
                 <div>
                     <p className="text-xs text-[var(--color-fg-muted)]">Best Review</p>
                     <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">베스트 제품 후기</h2>
