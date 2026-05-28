@@ -386,35 +386,34 @@ function NoticeBox({ notices }: { notices: Notice[] }) {
     const display = notices.slice(0, 4);
     return (
         <div>
-            <div className="flex items-end mb-3">
-                <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)]">공지사항</h3>
-            </div>
-            <div className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] overflow-hidden shadow-sm">
-                <ul className="divide-y divide-[var(--color-border)]">
-                    {display.length === 0 && (
-                        <li className="px-4 py-6 text-center text-xs text-[var(--color-fg-subtle)]">등록된 공지가 없습니다.</li>
-                    )}
-                    {display.map(n => (
-                        <li key={n.id}>
-                            <Link href={`/notices/${n.id}`} className="flex items-center gap-2 px-4 py-3.5 hover:bg-[var(--color-bg-subtle)]">
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-[var(--color-fg)] line-clamp-1">
-                                        {n.pinned && <span className="text-[10px] mr-1 px-1.5 py-0.5 rounded bg-[var(--color-danger)]/10 text-[var(--color-danger)] font-medium">필독</span>}
-                                        {n.title}
-                                    </p>
-                                    <p className="mt-1 flex items-center gap-1 text-[11px] text-[var(--color-fg-subtle)]">
-                                        <CalendarIconMini />
-                                        <span>{formatDate(n.createdAt)}</span>
-                                    </p>
-                                </div>
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-                <Link href="/notices" className="block py-3 text-center text-xs text-[var(--color-fg-muted)] bg-[var(--color-bg-subtle)] hover:text-[var(--color-fg)]">
-                    더 알아보기
-                </Link>
-            </div>
+            {/* 시안 매칭: 외곽 박스 없음. 헤더 + 굵은 하단 보더 + row list + 회색 button. */}
+            <h3 className="text-xl md:text-2xl font-bold text-[var(--color-fg)] pb-4 border-b-2 border-[var(--color-fg)]">
+                공지사항
+            </h3>
+            <ul className="divide-y divide-[var(--color-border)]">
+                {display.length === 0 && (
+                    <li className="px-1 py-6 text-center text-xs text-[var(--color-fg-subtle)]">등록된 공지가 없습니다.</li>
+                )}
+                {display.map(n => (
+                    <li key={n.id}>
+                        <Link href={`/notices/${n.id}`} className="flex items-center gap-2 px-1 py-4 hover:opacity-70 transition">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm md:text-base text-[var(--color-fg)] line-clamp-1 font-medium">
+                                    {n.pinned && <span className="text-[10px] mr-1 px-1.5 py-0.5 rounded bg-[var(--color-danger)]/10 text-[var(--color-danger)] font-medium">필독</span>}
+                                    {n.title}
+                                </p>
+                                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-[var(--color-fg-subtle)]">
+                                    <CalendarIconMini />
+                                    <span>{formatDate(n.createdAt)}</span>
+                                </p>
+                            </div>
+                        </Link>
+                    </li>
+                ))}
+            </ul>
+            <Link href="/notices" className="mt-4 block py-3.5 text-center text-sm text-[var(--color-fg-muted)] bg-[var(--color-bg-subtle)] hover:text-[var(--color-fg)] transition">
+                더 알아보기
+            </Link>
         </div>
     );
 }
@@ -431,32 +430,31 @@ function FaqBox() {
     ];
     return (
         <div>
-            <div className="flex items-end mb-3">
-                <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)]">FAQ</h3>
-            </div>
-            <div className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] overflow-hidden shadow-sm">
-                <ul className="divide-y divide-[var(--color-border)]">
-                    {items.map(f => (
-                        <li key={f.id}>
-                            <Link href="/faq" className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--color-bg-subtle)]">
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-[var(--color-fg)] line-clamp-1">FAQ 질문입니다</p>
-                                    <p className="mt-1 flex items-center gap-1 text-[11px] text-[var(--color-fg-subtle)]">
-                                        <CalendarIconMini />
-                                        <span>{f.date}</span>
-                                    </p>
-                                </div>
-                                {f.answered && (
-                                    <span className="text-[11px] px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 font-medium flex-shrink-0">답변완료</span>
-                                )}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-                <Link href="/faq" className="block py-3 text-center text-xs text-[var(--color-fg-muted)] bg-[var(--color-bg-subtle)] hover:text-[var(--color-fg)]">
-                    더 알아보기
-                </Link>
-            </div>
+            {/* 시안 매칭: 외곽 박스 없음. 헤더 + 굵은 하단 보더 + row list + 회색 button. */}
+            <h3 className="text-xl md:text-2xl font-bold text-[var(--color-fg)] pb-4 border-b-2 border-[var(--color-fg)]">
+                FAQ
+            </h3>
+            <ul className="divide-y divide-[var(--color-border)]">
+                {items.map(f => (
+                    <li key={f.id}>
+                        <Link href="/faq" className="flex items-center gap-3 px-1 py-4 hover:opacity-70 transition">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm md:text-base text-[var(--color-fg)] line-clamp-1 font-medium">FAQ 질문입니다</p>
+                                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-[var(--color-fg-subtle)]">
+                                    <CalendarIconMini />
+                                    <span>{f.date}</span>
+                                </p>
+                            </div>
+                            {f.answered && (
+                                <span className="text-[11px] px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 font-medium flex-shrink-0">답변완료</span>
+                            )}
+                        </Link>
+                    </li>
+                ))}
+            </ul>
+            <Link href="/faq" className="mt-4 block py-3.5 text-center text-sm text-[var(--color-fg-muted)] bg-[var(--color-bg-subtle)] hover:text-[var(--color-fg)] transition">
+                더 알아보기
+            </Link>
         </div>
     );
 }
