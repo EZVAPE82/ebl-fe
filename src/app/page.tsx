@@ -546,7 +546,9 @@ function BestReviewsSection() {
                 {REVIEW_MOCKS.map((r, i) => (
                     <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* 사진 1:1 정사각형 (PIL crop). 박스와 사진 크기 100% 일치. */}
+                            {/* 사진 1:1 정사각형 (PIL crop). 박스와 사진 크기 100% 일치.
+                                inset box-shadow 로 라운딩 시각 강조 — 사진 위쪽이 흰색/하늘색일 때
+                                흰 페이지 배경과 대비 X 라 라운딩 안 보이던 문제 fix. */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={r.photo}
@@ -556,6 +558,7 @@ function BestReviewsSection() {
                                     width: "100%",
                                     height: "auto",
                                     borderRadius: 16,
+                                    boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
                                 }}
                             />
                             <div className="mt-3 space-y-1.5">
