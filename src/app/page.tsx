@@ -545,15 +545,29 @@ function BestReviewsSection() {
                 {REVIEW_MOCKS.map((r, i) => (
                     <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* Tailwind v4 default 의 --radius-lg(0.5rem) 가 사용자 정의 (12px) 와 충돌하고
-                                둘 다 작아서 시각적으로 거의 안 보였음 → inline style 16px 강제. */}
-                            <div style={{ borderRadius: 16, overflow: "hidden" }}>
+                            {/* aspect-ratio CSS 가 적용 안 되는 환경 대비 padding-bottom 트릭으로 4:5 박스
+                                강제. img 는 absolute 로 박스 내부를 완전히 채움 (object-fit: cover).
+                                결과: 사진과 박스 크기 100% 일치 → 위쪽 흰 영역 생기지 않음. */}
+                            <div
+                                style={{
+                                    position: "relative",
+                                    paddingBottom: "125%",        // 5/4 = 125% → 4:5 aspect ratio
+                                    borderRadius: 16,
+                                    overflow: "hidden",
+                                }}
+                            >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={r.photo}
                                     alt={r.product}
-                                    className="block w-full"
-                                    style={{ aspectRatio: "4 / 5", objectFit: "cover" }}
+                                    style={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                        display: "block",
+                                    }}
                                 />
                             </div>
                             <div className="mt-2.5 md:mt-3 space-y-1.5">
