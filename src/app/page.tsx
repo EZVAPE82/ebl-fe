@@ -473,8 +473,7 @@ function CalendarIconMini() {
  * ============================================================ */
 const REVIEW_MOCKS = [
     {
-        // 디버그: 사진 대신 단색(핫핑크)으로 채워서 사진박스 자체가 정상인지 확인
-        photo: "#FF3D8A",
+        photo: "/images/review-photo-1-v2.png",
         review: "야외 캠핑 갈 때 챙겨갔는데 가벼워서 부담 없고, 한 번 충전으로 정말 오래 가요. 친구들이 다 어디서 샀냐고 물어볼 정도였습니다.",
         author: "김** 님",
         date: "2026.05.18",
@@ -561,8 +560,9 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
     // photo 가 "#RRGGBB" 헥스코드면 단색 배경(디버그용), 아니면 이미지로 렌더
     const isColor = review.photo.startsWith("#");
     return (
-        <li>
-            <Link href="/c/best" className="block">
+        // 카드 4 장 높이 통일 — grid stretch + flex column 으로 상품줄을 카드 하단에 고정
+        <li className="flex h-full">
+            <Link href="/c/best" className="flex flex-col w-full h-full">
                 {/* 사진 박스 — aspect-ratio 1:1 명시 + img/색 + object-fit cover (모든 환경 호환) */}
                 <div
                     style={{
@@ -571,6 +571,7 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
                         overflow: "hidden",
                         borderRadius: 12,
                         backgroundColor: isColor ? review.photo : undefined,
+                        flexShrink: 0,
                     }}
                 >
                     {!isColor && (
@@ -589,19 +590,26 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
                     )}
                 </div>
 
-                {/* 텍스트 영역 (시안 Frame 1707487878, 342x214) */}
-                <div className="mt-4 space-y-2">
+                {/* 텍스트 영역 — flex column 으로 상품줄을 카드 하단에 mt-auto 로 푸시 */}
+                <div className="mt-4 flex flex-col flex-1 space-y-2">
                     <div className="flex items-center gap-1 text-xs">
                         <span className="text-yellow-400">★★★★★</span>
                         <span className="text-[var(--color-fg)] font-medium">5.0</span>
                     </div>
-                    <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-3">{review.review}</p>
+                    {/* 후기 — 항상 3 줄 분량 자리 확보 (text-xs 0.75rem * leading-relaxed 1.625 * 3 ≈ 3.66em) */}
+                    <p
+                        className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-3"
+                        style={{ minHeight: "3.66em" }}
+                    >
+                        {review.review}
+                    </p>
                     <p className="text-[11px] text-[var(--color-fg-muted)] flex items-center gap-1.5">
                         <span>{review.author}</span>
                         <span>|</span>
                         <span>{review.date}</span>
                     </p>
-                    <div className="pt-2 border-t border-[var(--color-border)] flex items-center gap-2">
+                    {/* 상품줄 — mt-auto 로 카드 맨 아래 고정, 4 장 정렬됨 */}
+                    <div className="mt-auto pt-2 border-t border-[var(--color-border)] flex items-center gap-2">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={review.productThumb}
