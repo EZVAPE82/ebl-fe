@@ -473,7 +473,8 @@ function CalendarIconMini() {
  * ============================================================ */
 const REVIEW_MOCKS = [
     {
-        photo: "/images/review-photo-1-v2.png",
+        // 디버그: 사진 대신 단색(핫핑크)으로 채워서 사진박스 자체가 정상인지 확인
+        photo: "#FF3D8A",
         review: "야외 캠핑 갈 때 챙겨갔는데 가벼워서 부담 없고, 한 번 충전으로 정말 오래 가요. 친구들이 다 어디서 샀냐고 물어볼 정도였습니다.",
         author: "김** 님",
         date: "2026.05.18",
@@ -557,30 +558,35 @@ function ReviewArrow({ direction }: { direction: "prev" | "next" }) {
 }
 
 function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
+    // photo 가 "#RRGGBB" 헥스코드면 단색 배경(디버그용), 아니면 이미지로 렌더
+    const isColor = review.photo.startsWith("#");
     return (
         <li>
             <Link href="/c/best" className="block">
-                {/* 사진 박스 — aspect-ratio 1:1 명시 + img + object-fit cover (모든 환경 호환) */}
+                {/* 사진 박스 — aspect-ratio 1:1 명시 + img/색 + object-fit cover (모든 환경 호환) */}
                 <div
                     style={{
                         aspectRatio: "1 / 1",
                         width: "100%",
                         overflow: "hidden",
                         borderRadius: 12,
+                        backgroundColor: isColor ? review.photo : undefined,
                     }}
                 >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={review.photo}
-                        alt={review.product}
-                        style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            objectPosition: "center",
-                            display: "block",
-                        }}
-                    />
+                    {!isColor && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                            src={review.photo}
+                            alt={review.product}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                objectPosition: "center",
+                                display: "block",
+                            }}
+                        />
+                    )}
                 </div>
 
                 {/* 텍스트 영역 (시안 Frame 1707487878, 342x214) */}

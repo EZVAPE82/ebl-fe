@@ -13,7 +13,7 @@ export function Footer() {
                         <div className="md:col-span-2"><dt className="inline text-[var(--color-fg-subtle)]">주소: </dt><dd className="inline">서울특별시 중구 명동8길 22-4, 1003호 (명동2가, 대한빌딩)</dd></div>
                         <div><dt className="inline text-[var(--color-fg-subtle)]">사업자등록번호: </dt><dd className="inline tabular-nums">419-86-03748</dd></div>
                         <div><dt className="inline text-[var(--color-fg-subtle)]">개업일: </dt><dd className="inline">2025년 7월 1일</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">전화번호: </dt><dd className="inline">02-1234-5678</dd></div>
+                        <div><dt className="inline text-[var(--color-fg-subtle)]">전화번호: </dt><dd className="inline">02-773-4114</dd></div>
                         <div><dt className="inline text-[var(--color-fg-subtle)]">이메일: </dt><dd className="inline">elfbar@naver.com</dd></div>
                         <div><dt className="inline text-[var(--color-fg-subtle)]">개인정보관리책임자: </dt><dd className="inline">이상헌</dd></div>
                         <div><dt className="inline text-[var(--color-fg-subtle)]">배송사: </dt><dd className="inline">로젠택배</dd></div>
@@ -35,7 +35,7 @@ export function Footer() {
                 {/* 우측: 고객센터 + SNS */}
                 <div className="md:text-right">
                     <p className="text-xs text-[var(--color-fg-muted)] mb-1">고객센터</p>
-                    <p className="text-xl md:text-2xl font-bold text-[var(--color-fg)] tracking-tight">02-1234-5678</p>
+                    <p className="text-xl md:text-2xl font-bold text-[var(--color-fg)] tracking-tight">02-773-4114</p>
                     <dl className="mt-2 text-[11px] text-[var(--color-fg-muted)] space-y-0.5">
                         <div className="flex md:justify-end gap-1">
                             <dt className="text-[var(--color-fg-subtle)]">평일</dt>

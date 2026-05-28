@@ -166,7 +166,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         ["인증번호", "도급인 인증서 수령 후 게재 예정"],
                         ["니코틴 함량", "옵션 참조 (0mg / 3mg)"],
                         ["사용 연령", "만 19세 이상 (성인 인증 필수)"],
-                        ["A/S 책임자", "엘프바 라운지 고객센터 02-1234-5678"],
+                        ["A/S 책임자", "엘프바 라운지 고객센터 02-773-4114"],
                     ].map(([k, v]) => (
                         <div key={k} className="grid grid-cols-[140px_1fr] md:grid-cols-[180px_1fr] gap-3 px-4 py-3">
                             <dt className="text-[var(--color-fg-muted)]">{k}</dt>
