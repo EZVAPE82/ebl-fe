@@ -545,11 +545,11 @@ function BestReviewsSection() {
             {/* items-start: li 들이 height stretch 안 되도록 (짧은 카드 아래 빈 영역 + a 클릭 영역 확장 방지) */}
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 items-start">
                 {REVIEW_MOCKS.map((r, i) => (
-                    <li key={i} style={{ userSelect: "none" }}>
+                    <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* aspect-ratio CSS 가 적용 안 되는 환경 대비 padding-bottom 트릭으로 4:5 박스
-                                강제. img 는 absolute 로 박스 내부를 완전히 채움 (object-fit: cover).
-                                결과: 사진과 박스 크기 100% 일치 → 위쪽 흰 영역 생기지 않음. */}
+                            {/* 박스(4:5) 안에 사진이 정상 fit. 이전 시도에서 img 가 박스 위쪽에 빈 영역
+                                남기던 문제는 inset:0 shorthand 미적용 가능성 → top/left/right/bottom
+                                풀어서 명시. */}
                             <div
                                 style={{
                                     position: "relative",
@@ -564,7 +564,10 @@ function BestReviewsSection() {
                                     alt={r.product}
                                     style={{
                                         position: "absolute",
-                                        inset: 0,
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
                                         width: "100%",
                                         height: "100%",
                                         objectFit: "cover",
