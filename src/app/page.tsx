@@ -76,23 +76,17 @@ export default async function Home() {
                     </Link>
                 </div>
 
-                {/* ===== 8. 엘프바를 선택해야 하는 이유 ===== */}
-                <WhyChooseUs />
-
-                {/* ===== 9. 공지사항 + FAQ 2컬럼 ===== */}
+                {/* ===== 공지사항 + FAQ 2컬럼 ===== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <NoticeBox notices={notices.content} />
                     <FaqBox />
                 </div>
 
-                {/* ===== 10. 베스트 제품 후기 (4 카드 컴포넌트 + 한국어 목데이터) ===== */}
+                {/* ===== 베스트 제품 후기 (4 카드 컴포넌트 + 한국어 목데이터) ===== */}
                 <BestReviewsSection />
             </div>
 
-            {/* ===== 11. 인스타그램 8 그리드 ===== 시안 11:956 — 가로 풀폭(viewport 끝까지) */}
-            <InstagramFeed />
-
-            {/* ===== 12. CTA 풀폭 배너 ===== */}
+            {/* ===== CTA 풀폭 배너 ===== */}
             <ContactCTA />
 
             {/* ===== 이벤트 팝업 (홈 진입 시 1회) ===== */}
