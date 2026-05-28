@@ -87,10 +87,10 @@ export default async function Home() {
 
                 {/* ===== 10. 베스트 제품 후기 (4 카드 컴포넌트 + 한국어 목데이터) ===== */}
                 <BestReviewsSection />
-
-                {/* ===== 11. 인스타그램 8 그리드 ===== */}
-                <InstagramFeed />
             </div>
+
+            {/* ===== 11. 인스타그램 8 그리드 ===== 시안 11:956 — 가로 풀폭(viewport 끝까지) */}
+            <InstagramFeed />
 
             {/* ===== 12. CTA 풀폭 배너 ===== */}
             <ContactCTA />
@@ -650,13 +650,16 @@ function BestReviews({ items }: { items: ProductSummary[] }) {
  * InstagramFeed — 8칸 정사각형 그리드
  * ============================================================ */
 function InstagramFeed() {
+    // 시안 11:956 — 그리드 폭 2218 (viewport 1920 보다 큼) → 풀폭 + 우측 일부 viewport 밖.
+    // 헤더는 max-w-screen-xl 컨테이너 정렬, 그리드는 viewport 끝까지 흘러나가게.
     return (
-        <section>
-            <div className="mb-4">
+        <section className="mt-16">
+            <div className="mx-auto max-w-screen-xl px-4 mb-4">
                 <p className="text-xs text-[var(--color-fg-muted)]">@elfbar</p>
                 <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">Instagram</h2>
             </div>
-            <ul className="grid grid-cols-4 md:grid-cols-8 gap-2">
+            {/* 그리드 풀폭 — px 만 약간, max-w 없음. viewport 끝까지 8 cell 균등 분배. */}
+            <ul className="grid grid-cols-4 md:grid-cols-8 gap-2 px-2 md:px-4">
                 {Array.from({ length: 8 }, (_, i) => i + 1).map(n => (
                     <li key={n} className="relative aspect-square overflow-hidden rounded-[var(--radius-sm)] bg-[var(--color-bg-subtle)] group">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
