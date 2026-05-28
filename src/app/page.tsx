@@ -567,21 +567,28 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
     return (
         <li>
             <Link href="/c/best" className="block">
-                {/* 사진 박스 342x342 정사각형 (시안 Rectangle 33222 명세 그대로:
-                    width:100% height:auto-via-aspect, border-radius:12, background url cover) */}
+                {/* 사진 박스 — aspect-ratio 1:1 명시 + img + object-fit cover (모든 환경 호환) */}
                 <div
-                    role="img"
-                    aria-label={review.product}
                     style={{
+                        aspectRatio: "1 / 1",
                         width: "100%",
-                        paddingBottom: "100%",
-                        backgroundImage: `url(${review.photo})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
+                        overflow: "hidden",
                         borderRadius: 12,
                     }}
-                />
+                >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={review.photo}
+                        alt={review.product}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            objectPosition: "center",
+                            display: "block",
+                        }}
+                    />
+                </div>
 
                 {/* 텍스트 영역 (시안 Frame 1707487878, 342x214) */}
                 <div className="mt-4 space-y-2">
