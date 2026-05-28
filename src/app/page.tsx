@@ -474,18 +474,19 @@ function CalendarIconMini() {
     );
 }
 
-/* 섹션 헤더 우측 ‹ › 화살표 — 클릭하면 베스트 후기 전체보기 (/c/best) 로 이동. */
+/* 베스트 후기 캐러셀 화살표 — 페이지 이동 X, 현재 4 카드 fit 이라 visual only (button no-op).
+   향후 후기 5+ 추가되면 client state 로 슬라이드 전환. */
 function CarouselArrow({ direction }: { direction: "prev" | "next" }) {
     return (
-        <Link
-            href="/c/best"
+        <button
+            type="button"
             aria-label={direction === "prev" ? "이전" : "다음"}
             className="w-9 h-9 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition cursor-pointer"
         >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {direction === "prev" ? <polyline points="15 18 9 12 15 6" /> : <polyline points="9 18 15 12 9 6" />}
             </svg>
-        </Link>
+        </button>
     );
 }
 
@@ -541,9 +542,10 @@ function BestReviewsSection() {
                     <CarouselArrow direction="next" />
                 </div>
             </div>
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {/* items-start: li 들이 height stretch 안 되도록 (짧은 카드 아래 빈 영역 + a 클릭 영역 확장 방지) */}
+            <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 items-start">
                 {REVIEW_MOCKS.map((r, i) => (
-                    <li key={i}>
+                    <li key={i} style={{ userSelect: "none" }}>
                         <Link href="/c/best" className="block">
                             {/* aspect-ratio CSS 가 적용 안 되는 환경 대비 padding-bottom 트릭으로 4:5 박스
                                 강제. img 는 absolute 로 박스 내부를 완전히 채움 (object-fit: cover).
