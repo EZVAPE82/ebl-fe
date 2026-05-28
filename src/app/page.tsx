@@ -547,32 +547,15 @@ function BestReviewsSection() {
                 {REVIEW_MOCKS.map((r, i) => (
                     <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* 박스(4:5) 안에 사진이 정상 fit. 이전 시도에서 img 가 박스 위쪽에 빈 영역
-                                남기던 문제는 inset:0 shorthand 미적용 가능성 → top/left/right/bottom
-                                풀어서 명시. */}
-                            <div
-                                style={{
-                                    position: "relative",
-                                    paddingBottom: "125%",        // 5/4 = 125% → 4:5 aspect ratio
-                                    borderRadius: 16,
-                                    overflow: "hidden",
-                                }}
-                            >
+                            {/* 박스 height 강제 비율 안 줌 — 사진 자연 비율(680x636) 그대로.
+                                박스와 사진 크기 100% 일치 → 박스 안 빈 영역 0 (이전 위쪽 빈 영역 fix).
+                                4 카드 모두 동일 raster 비율이라 자동 height 균등. */}
+                            <div style={{ borderRadius: 16, overflow: "hidden" }}>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={r.photo}
                                     alt={r.product}
-                                    style={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        width: "100%",
-                                        height: "100%",
-                                        objectFit: "cover",
-                                        display: "block",
-                                    }}
+                                    style={{ display: "block", width: "100%", height: "auto" }}
                                 />
                             </div>
                             <div className="mt-2.5 md:mt-3 space-y-1.5">
