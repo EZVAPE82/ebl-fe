@@ -474,22 +474,6 @@ function CalendarIconMini() {
     );
 }
 
-/* 베스트 후기 캐러셀 화살표 — 페이지 이동 X, 현재 4 카드 fit 이라 visual only (button no-op).
-   향후 후기 5+ 추가되면 client state 로 슬라이드 전환. */
-function CarouselArrow({ direction }: { direction: "prev" | "next" }) {
-    return (
-        <button
-            type="button"
-            aria-label={direction === "prev" ? "이전" : "다음"}
-            className="w-9 h-9 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition cursor-pointer"
-        >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                {direction === "prev" ? <polyline points="15 18 9 12 15 6" /> : <polyline points="9 18 15 12 9 6" />}
-            </svg>
-        </button>
-    );
-}
-
 /* ============================================================
  * BestReviewsSection — 시안 11:947 4 카드 (각 카드: 라이프스타일 사진 + 평점 + 후기 + 제품 미니)
  * 후기 텍스트는 한국어 목데이터, 사진은 review-photo-1~4.png 사용.
@@ -528,61 +512,101 @@ const REVIEW_MOCKS = [
         productThumb: "/images/elfbar-product-2.png",
     },
 ];
+/* ============================================================
+ * BestReviewsSection — 처음부터 새로 작성 (시안 11:948 / 11:949 규격 그대로)
+ *
+ * 시안 11:948 전체 (1440 x 684):
+ *   ├─ 11:949 헤더 (1440 x 80)
+ *   │   ├─ 좌: Best Item + 가장 인기있는 제품 (323 x 80)
+ *   │   └─ 우: 슬라이드 버튼 2개 (108 x 48, 각 48 x 48)
+ *   └─ 11:950 카드 그리드 (1440 x 572)
+ *       └─ 4 카드 (각 342 x 572, gap 24)
+ *           ├─ 사진 (342 x 342, border-radius 12, background url)
+ *           └─ 텍스트 (342 x 214)
+ * ============================================================ */
 function BestReviewsSection() {
-    // 시안 11:948 정확 매칭: 4 카드 1:1 정사각형 사진 + 아래 텍스트. 사진은 PIL 로 정사각형 crop 됨.
     return (
         <section id="best-reviews" className="scroll-mt-24">
-            <div className="mb-4 flex items-end justify-between">
+            {/* 헤더 */}
+            <header className="flex items-end justify-between mb-6">
                 <div>
-                    <p className="text-xs text-[var(--color-fg-muted)]">Best Review</p>
+                    <p className="text-xs text-[var(--color-fg-muted)] mb-1">Best Review</p>
                     <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">베스트 제품 후기</h2>
                 </div>
-                <div className="flex items-center gap-2">
-                    <CarouselArrow direction="prev" />
-                    <CarouselArrow direction="next" />
-                </div>
-            </div>
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                <nav className="flex gap-2" aria-label="베스트 후기 캐러셀">
+                    <ReviewArrow direction="prev" />
+                    <ReviewArrow direction="next" />
+                </nav>
+            </header>
+
+            {/* 카드 그리드 4 균등 (모바일 2 col) */}
+            <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {REVIEW_MOCKS.map((r, i) => (
-                    <li key={i}>
-                        <Link href="/c/best" className="block">
-                            {/* 프레임/박스 없음. 사진 자연 사이즈 그대로 + 라운딩만. */}
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={r.photo}
-                                alt={r.product}
-                                style={{ display: "block", width: "100%", borderRadius: 12 }}
-                            />
-                            <div className="mt-3 space-y-1.5">
-                                <div className="flex items-center gap-1 text-xs">
-                                    <span className="text-yellow-400">★★★★★</span>
-                                    <span className="text-[var(--color-fg)] font-medium">5.0</span>
-                                </div>
-                                <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-3">{r.review}</p>
-                                <p className="text-[11px] text-[var(--color-fg-muted)] flex items-center gap-1.5">
-                                    <span>{r.author}</span><span>|</span><span>{r.date}</span>
-                                </p>
-                                <div className="pt-2 border-t border-[var(--color-border)] flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded bg-[var(--color-bg-subtle)] overflow-hidden flex-shrink-0">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={r.productThumb} alt="" className="w-full h-full object-cover" />
-                                    </div>
-                                    <p className="text-[11px] text-[var(--color-fg)] line-clamp-2 flex-1 min-w-0">{r.product}</p>
-                                </div>
-                            </div>
-                        </Link>
-                    </li>
+                    <ReviewCard key={i} review={r} />
                 ))}
             </ul>
-            <div className="mt-6 flex justify-center">
-                <Link
-                    href="/c/best"
-                    className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border-strong)] px-6 py-2.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)]"
-                >
-                    더 알아보기
-                </Link>
-            </div>
         </section>
+    );
+}
+
+function ReviewArrow({ direction }: { direction: "prev" | "next" }) {
+    return (
+        <button
+            type="button"
+            aria-label={direction === "prev" ? "이전" : "다음"}
+            className="w-12 h-12 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition"
+        >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {direction === "prev" ? <polyline points="15 18 9 12 15 6" /> : <polyline points="9 18 15 12 9 6" />}
+            </svg>
+        </button>
+    );
+}
+
+function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
+    return (
+        <li>
+            <Link href="/c/best" className="block">
+                {/* 사진 박스 342x342 정사각형 (시안 Rectangle 33222 명세 그대로:
+                    width:100% height:auto-via-aspect, border-radius:12, background url cover) */}
+                <div
+                    role="img"
+                    aria-label={review.product}
+                    style={{
+                        width: "100%",
+                        paddingBottom: "100%",
+                        backgroundImage: `url(${review.photo})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        borderRadius: 12,
+                    }}
+                />
+
+                {/* 텍스트 영역 (시안 Frame 1707487878, 342x214) */}
+                <div className="mt-4 space-y-2">
+                    <div className="flex items-center gap-1 text-xs">
+                        <span className="text-yellow-400">★★★★★</span>
+                        <span className="text-[var(--color-fg)] font-medium">5.0</span>
+                    </div>
+                    <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-3">{review.review}</p>
+                    <p className="text-[11px] text-[var(--color-fg-muted)] flex items-center gap-1.5">
+                        <span>{review.author}</span>
+                        <span>|</span>
+                        <span>{review.date}</span>
+                    </p>
+                    <div className="pt-2 border-t border-[var(--color-border)] flex items-center gap-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={review.productThumb}
+                            alt=""
+                            className="w-8 h-8 rounded object-cover bg-[var(--color-bg-subtle)] flex-shrink-0"
+                        />
+                        <p className="text-[11px] text-[var(--color-fg)] line-clamp-2 flex-1 min-w-0">{review.product}</p>
+                    </div>
+                </div>
+            </Link>
+        </li>
     );
 }
 
