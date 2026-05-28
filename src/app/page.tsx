@@ -544,27 +544,32 @@ function BestReviewsSection() {
             </div>
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {REVIEW_MOCKS.map((r, i) => (
-                    <li key={i} className="rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-surface)]">
+                    <li
+                        key={i}
+                        // rounded 12px 명시 (CSS var 미반영 보호) + isolate 로 painting context 분리해 사진 모서리 잘림 보장
+                        className="rounded-[12px] overflow-hidden bg-[var(--color-surface)] isolate"
+                        style={{ borderRadius: 12 }}
+                    >
                         <Link href="/c/best" className="block">
-                            {/* 사진을 li 직속에 두고 wrapper div 의 bg-subtle (회색 띠 원인) 제거.
-                                li 의 rounded-lg + overflow-hidden 이 사진 위 모서리까지 자연스럽게 자름. */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={r.photo}
                                 alt={r.product}
-                                className="block w-full aspect-[4/5] object-cover"
+                                // img 자체에 위쪽 rounded 직접 — overflow-hidden 못 미치는 경우 대비
+                                className="block w-full aspect-[4/5] object-cover rounded-t-[12px]"
                             />
-                            <div className="p-3 md:p-4 space-y-2">
+                            {/* 사진 → 텍스트 간격 줄임 + 요소 간 space 축소 + min-h 제거로 빈 공간 fix */}
+                            <div className="px-3 pt-2.5 pb-3 md:px-3.5 md:pt-3 md:pb-3.5 space-y-1.5">
                                 <div className="flex items-center gap-1 text-xs">
                                     <span className="text-yellow-400">★★★★★</span>
                                     <span className="text-[var(--color-fg)] font-medium">5.0</span>
                                 </div>
-                                <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-3 min-h-[3.6em]">{r.review}</p>
+                                <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-3">{r.review}</p>
                                 <p className="text-[11px] text-[var(--color-fg-muted)] flex items-center gap-1.5">
                                     <span>{r.author}</span><span>|</span><span>{r.date}</span>
                                 </p>
-                                <div className="pt-2 mt-1 border-t border-[var(--color-border)] flex items-center gap-2">
-                                    <div className="w-9 h-9 rounded bg-[var(--color-bg-subtle)] overflow-hidden flex-shrink-0">
+                                <div className="pt-2 border-t border-[var(--color-border)] flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded bg-[var(--color-bg-subtle)] overflow-hidden flex-shrink-0">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={r.productThumb} alt="" className="w-full h-full object-cover" />
                                     </div>
