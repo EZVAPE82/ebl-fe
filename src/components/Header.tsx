@@ -54,7 +54,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
     return (
         <>
             <header className={headerCls}>
-                <div className="mx-auto max-w-screen-xl flex items-center gap-3 md:gap-4 px-4 h-14">
+                <div className="mx-auto max-w-screen-2xl flex items-center gap-3 md:gap-4 px-4 h-14">
                     {/* 햄버거 */}
                     <button
                         type="button"

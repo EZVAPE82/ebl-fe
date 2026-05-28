@@ -49,7 +49,7 @@ export default async function CategoryPage({
     const pages = compactPagination(page, list.totalPages);
 
     return (
-        <div className="mx-auto max-w-screen-xl px-4 py-8">
+        <div className="mx-auto max-w-screen-2xl px-4 py-8">
             {/* 헤더: 타이틀 큰 글씨 (시안 "아이템리스트" 톤) */}
             <header className="mb-6">
                 <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">

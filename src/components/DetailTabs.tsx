@@ -50,7 +50,7 @@ export function DetailTabs() {
 
     return (
         <nav className="mt-10 border-y border-[var(--color-border)] bg-[var(--color-surface)] sticky top-14 z-10">
-            <ul className="mx-auto max-w-screen-xl px-4 flex">
+            <ul className="mx-auto max-w-screen-2xl px-4 flex">
                 {TABS.map(t => {
                     const isActive = t.id === active;
                     return (

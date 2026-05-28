@@ -31,7 +31,7 @@ export function PromoStrip() {
 
     return (
         <div className="w-full bg-black text-white text-xs">
-            <div className="mx-auto max-w-screen-xl px-4 py-2 flex items-center justify-center relative">
+            <div className="mx-auto max-w-screen-2xl px-4 py-2 flex items-center justify-center relative">
                 <Link href="/signup" className="flex items-center gap-2 hover:opacity-80 transition">
                     <HomeIcon />
                     <span>신규 회원 가입 시 <strong className="font-semibold">3,000원 적립금</strong> 지급</span>

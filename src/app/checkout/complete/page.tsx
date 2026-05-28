@@ -14,7 +14,7 @@ export default async function CheckoutCompletePage({ searchParams }: { searchPar
         <div className="bg-[var(--color-bg)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/page-checkout-complete.png" alt="결제완료" className="w-full block" />
-            <div className="mx-auto max-w-screen-xl px-4 py-8">
+            <div className="mx-auto max-w-screen-2xl px-4 py-8">
                 {orderNo && (
                     <p className="text-center text-sm text-[var(--color-fg-muted)] mb-4">
                         주문번호 <span className="font-mono text-[var(--color-fg)]">{orderNo}</span>

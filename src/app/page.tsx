@@ -41,7 +41,7 @@ export default async function Home() {
             {/* ===== 2. 카테고리 아이콘 ===== */}
             <CategoryIcons categories={categories} />
 
-            <div className="mx-auto max-w-screen-xl px-4 space-y-16 pb-16">
+            <div className="mx-auto max-w-screen-2xl px-4 space-y-16 pb-16">
                 {/* ===== 3. 엘프바의 추천 아이템 (시안 11:864 4 카드 통이미지) ===== */}
                 <section>
                     <div className="mb-4">
@@ -141,7 +141,7 @@ function CategoryIcons({ categories: _categories }: { categories: Category[] }) 
         { label: "구매후기", href: "/reviews/best", src: "/images/cat-review.png" },
     ];
     return (
-        <section className="mx-auto max-w-screen-xl px-4 py-8 md:py-12">
+        <section className="mx-auto max-w-screen-2xl px-4 py-8 md:py-12">
             <ul className="grid grid-cols-4 md:grid-cols-7 gap-3 md:gap-4">
                 {items.map(it => (
                     <li key={it.label}>
@@ -673,7 +673,7 @@ function InstagramFeed() {
     // cell 268px 고정, viewport 보다 wide 한 flex row → 사용자가 좌우 스크롤/swipe 로 이동.
     return (
         <section className="mt-16">
-            <div className="mx-auto max-w-screen-xl px-4 mb-4">
+            <div className="mx-auto max-w-screen-2xl px-4 mb-4">
                 <p className="text-xs text-[var(--color-fg-muted)]">@elfbar</p>
                 <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">Instagram</h2>
             </div>

@@ -64,11 +64,11 @@ export default function MyPageSettings() {
     }
 
     if (authLoading || !user) {
-        return <div className="mx-auto max-w-screen-xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+        return <div className="mx-auto max-w-screen-2xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
     }
 
     return (
-        <div className="mx-auto max-w-screen-xl px-4 py-8 grid gap-8 md:grid-cols-[220px_1fr]">
+        <div className="mx-auto max-w-screen-2xl px-4 py-8 grid gap-8 md:grid-cols-[220px_1fr]">
             <MyPageSideNav />
 
             <main className="max-w-2xl space-y-10">

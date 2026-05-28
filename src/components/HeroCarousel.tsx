@@ -109,7 +109,7 @@ export function HeroCarousel({
                 );
             })}
 
-            <div className="relative mx-auto max-w-screen-xl h-full px-4 md:px-8 lg:px-12">
+            <div className="relative mx-auto max-w-screen-2xl h-full px-4 md:px-8 lg:px-12">
                 {/* 좌측 텍스트 오버레이 — 시안 매칭 (showOverlay=true 일 때만) */}
                 {showOverlay && (
                     <div className="absolute inset-y-0 left-4 md:left-8 lg:left-12 flex flex-col justify-center text-white max-w-md md:max-w-lg z-10">

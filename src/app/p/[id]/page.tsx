@@ -44,7 +44,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
     return (
         <div className="pb-28 md:pb-12">
             {/* ===== 상단: 갤러리 + 정보 ===== */}
-            <div className="mx-auto max-w-screen-xl px-4 py-6 grid gap-8 md:grid-cols-2">
+            <div className="mx-auto max-w-screen-2xl px-4 py-6 grid gap-8 md:grid-cols-2">
                 {/* 갤러리 (client island) */}
                 <ProductGallery images={gallery} alt={product.name} />
 
@@ -140,7 +140,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             <DetailTabs />
 
             {/* ===== 상세 설명 (큰 라이프스타일 이미지 + 텍스트) ===== */}
-            <section id="info" className="mx-auto max-w-screen-xl px-4 mt-10">
+            <section id="info" className="mx-auto max-w-screen-2xl px-4 mt-10">
                 <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">상세 정보</h2>
                 <div className="rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)] aspect-[16/9] md:aspect-[16/7]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -156,7 +156,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             </section>
 
             {/* ===== 상품정보고시 ===== */}
-            <section className="mx-auto max-w-screen-xl px-4 mt-10">
+            <section className="mx-auto max-w-screen-2xl px-4 mt-10">
                 <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">상품정보고시</h2>
                 <dl className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden divide-y divide-[var(--color-border)] text-sm">
                     {[
@@ -177,7 +177,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             </section>
 
             {/* ===== 리뷰 통계 ===== */}
-            <section id="reviews" className="mx-auto max-w-screen-xl px-4 mt-10">
+            <section id="reviews" className="mx-auto max-w-screen-2xl px-4 mt-10">
                 <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">상품 리뷰</h2>
                 <ReviewStats avg={product.ratingAvg ?? 0} count={product.reviewCount ?? 0} />
                 <div className="mt-6">
@@ -186,7 +186,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             </section>
 
             {/* ===== 배송·교환·반품 안내 ===== */}
-            <section id="ship" className="mx-auto max-w-screen-xl px-4 mt-10">
+            <section id="ship" className="mx-auto max-w-screen-2xl px-4 mt-10">
                 <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">배송·교환·반품 안내</h2>
                 <dl className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] divide-y divide-[var(--color-border)] overflow-hidden text-sm">
                     {[
@@ -207,14 +207,14 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             </section>
 
             {/* ===== Q&A ===== */}
-            <section id="qna" className="mx-auto max-w-screen-xl px-4 mt-10">
+            <section id="qna" className="mx-auto max-w-screen-2xl px-4 mt-10">
                 <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">Q&amp;A</h2>
                 <ProductQna productId={product.id} />
             </section>
 
             {/* ===== 연관 상품 ===== */}
             {related.content.length > 0 && (
-                <section className="mx-auto max-w-screen-xl px-4 mt-10">
+                <section className="mx-auto max-w-screen-2xl px-4 mt-10">
                     <h2 className="text-lg md:text-xl font-semibold mb-3 text-[var(--color-fg)]">관련 상품</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                         {related.content.map(p => <ProductCard key={p.id} p={p} />)}

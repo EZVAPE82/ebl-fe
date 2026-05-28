@@ -3,7 +3,7 @@ import Link from "next/link";
 export function Footer() {
     return (
         <footer className="mt-16 border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
-            <div className="mx-auto max-w-screen-xl px-4 py-10 grid gap-8 md:grid-cols-[1fr_auto]">
+            <div className="mx-auto max-w-screen-2xl px-4 py-10 grid gap-8 md:grid-cols-[1fr_auto]">
                 {/* 좌측: 회사정보 */}
                 <div className="text-xs text-[var(--color-fg-muted)] leading-relaxed">
                     <p className="font-bold tracking-[0.15em] text-[var(--color-fg)] mb-4">ELFBAR</p>

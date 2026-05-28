@@ -41,11 +41,11 @@ export default function CouponsPage() {
     /* eslint-enable react-hooks/set-state-in-effect */
 
     if (loading || !user) {
-        return <div className="mx-auto max-w-screen-xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+        return <div className="mx-auto max-w-screen-2xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
     }
 
     return (
-        <div className="mx-auto max-w-screen-xl px-4 py-8 md:py-10 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 md:gap-12">
+        <div className="mx-auto max-w-screen-2xl px-4 py-8 md:py-10 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 md:gap-12">
             <MyPageSideNav />
 
             <section>

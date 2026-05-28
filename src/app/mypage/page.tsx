@@ -67,7 +67,7 @@ export default function MyPage() {
         })();
     }, [user, authLoading, router]);
 
-    if (authLoading || !user) return <div className="mx-auto max-w-screen-xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+    if (authLoading || !user) return <div className="mx-auto max-w-screen-2xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
 
     const usableCoupons = coupons.filter(c => !c.usedAt && new Date(c.expiresAt) > new Date());
 
@@ -83,7 +83,7 @@ export default function MyPage() {
     };
 
     return (
-        <div className="mx-auto max-w-screen-xl px-4 py-8 grid gap-8 md:grid-cols-[220px_1fr]">
+        <div className="mx-auto max-w-screen-2xl px-4 py-8 grid gap-8 md:grid-cols-[220px_1fr]">
             {/* ===== 좌측 사이드바 (PC) ===== */}
             <MyPageSideNav />
 
