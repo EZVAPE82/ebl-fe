@@ -546,22 +546,12 @@ function BestReviewsSection() {
                 {REVIEW_MOCKS.map((r, i) => (
                     <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* 시안 11:948 정확 매칭 — Rectangle 33222 width:342px height:342px
-                                border-radius:12px background:url(image). img element 아니라
-                                div + background-image + cover. 정사각형 박스 + cover 라
-                                사진 raster 자연 비율 그대로 (PIL 손상 X) + 박스에 자동 fit. */}
-                            <div
-                                role="img"
-                                aria-label={r.product}
-                                style={{
-                                    width: "100%",
-                                    paddingBottom: "100%",  // 1:1 정사각형
-                                    backgroundImage: `url(${r.photo})`,
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center",
-                                    backgroundRepeat: "no-repeat",
-                                    borderRadius: 12,
-                                }}
+                            {/* 프레임/박스 없음. 사진 자연 사이즈 그대로 + 라운딩만. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={r.photo}
+                                alt={r.product}
+                                style={{ display: "block", width: "100%", borderRadius: 12 }}
                             />
                             <div className="mt-3 space-y-1.5">
                                 <div className="flex items-center gap-1 text-xs">
