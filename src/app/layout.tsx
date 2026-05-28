@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { HeaderStack } from "@/components/HeaderStack";
-import { Footer } from "@/components/Footer";
-import { FloatingDock } from "@/components/FloatingDock";
+import { LayoutChrome } from "@/components/LayoutChrome";
 import { Analytics } from "@/components/Analytics";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider, themeInitScript } from "@/lib/theme";
@@ -57,10 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-fg)]">
             <ThemeProvider>
                 <AuthProvider>
-                    <HeaderStack />
-                    <main className="flex-1">{children}</main>
-                    <Footer />
-                    <FloatingDock />
+                    <LayoutChrome>{children}</LayoutChrome>
                 </AuthProvider>
             </ThemeProvider>
             <Analytics />
