@@ -546,19 +546,21 @@ function BestReviewsSection() {
                 {REVIEW_MOCKS.map((r, i) => (
                     <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* 사진 1:1 정사각형 (PIL crop). 박스와 사진 크기 100% 일치.
-                                inset box-shadow 로 라운딩 시각 강조 — 사진 위쪽이 흰색/하늘색일 때
-                                흰 페이지 배경과 대비 X 라 라운딩 안 보이던 문제 fix. */}
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={r.photo}
-                                alt={r.product}
+                            {/* 시안 11:948 정확 매칭 — Rectangle 33222 width:342px height:342px
+                                border-radius:12px background:url(image). img element 아니라
+                                div + background-image + cover. 정사각형 박스 + cover 라
+                                사진 raster 자연 비율 그대로 (PIL 손상 X) + 박스에 자동 fit. */}
+                            <div
+                                role="img"
+                                aria-label={r.product}
                                 style={{
-                                    display: "block",
                                     width: "100%",
-                                    height: "auto",
-                                    borderRadius: 16,
-                                    boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)",
+                                    paddingBottom: "100%",  // 1:1 정사각형
+                                    backgroundImage: `url(${r.photo})`,
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                    backgroundRepeat: "no-repeat",
+                                    borderRadius: 12,
                                 }}
                             />
                             <div className="mt-3 space-y-1.5">
