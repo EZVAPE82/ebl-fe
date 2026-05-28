@@ -529,10 +529,10 @@ const REVIEW_MOCKS = [
     },
 ];
 function BestReviewsSection() {
+    // 시안 11:948 정확 매칭: 4 카드 1:1 정사각형 사진 + 아래 텍스트. 사진은 PIL 로 정사각형 crop 됨.
     return (
         <section id="best-reviews" className="scroll-mt-24">
-            {/* 시안 매칭: 헤더 우측 ‹ › 화살표 (클릭 시 /c/best 이동). 카드 외곽선/그림자 없음. */}
-            <div className="mb-3 flex items-end justify-between">
+            <div className="mb-4 flex items-end justify-between">
                 <div>
                     <p className="text-xs text-[var(--color-fg-muted)]">Best Review</p>
                     <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">베스트 제품 후기</h2>
@@ -542,23 +542,23 @@ function BestReviewsSection() {
                     <CarouselArrow direction="next" />
                 </div>
             </div>
-            {/* items-start: li 들이 height stretch 안 되도록 (짧은 카드 아래 빈 영역 + a 클릭 영역 확장 방지) */}
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 items-start">
+            <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {REVIEW_MOCKS.map((r, i) => (
                     <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* 박스 height 강제 비율 안 줌 — 사진 자연 비율(680x636) 그대로.
-                                박스와 사진 크기 100% 일치 → 박스 안 빈 영역 0 (이전 위쪽 빈 영역 fix).
-                                4 카드 모두 동일 raster 비율이라 자동 height 균등. */}
-                            <div style={{ borderRadius: 16, overflow: "hidden" }}>
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                    src={r.photo}
-                                    alt={r.product}
-                                    style={{ display: "block", width: "100%", height: "auto" }}
-                                />
-                            </div>
-                            <div className="mt-2.5 md:mt-3 space-y-1.5">
+                            {/* 사진 1:1 정사각형 (PIL crop). 박스와 사진 크기 100% 일치. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={r.photo}
+                                alt={r.product}
+                                style={{
+                                    display: "block",
+                                    width: "100%",
+                                    height: "auto",
+                                    borderRadius: 16,
+                                }}
+                            />
+                            <div className="mt-3 space-y-1.5">
                                 <div className="flex items-center gap-1 text-xs">
                                     <span className="text-yellow-400">★★★★★</span>
                                     <span className="text-[var(--color-fg)] font-medium">5.0</span>
@@ -650,18 +650,26 @@ function BestReviews({ items }: { items: ProductSummary[] }) {
  * InstagramFeed — 8칸 정사각형 그리드
  * ============================================================ */
 function InstagramFeed() {
-    // 시안 11:956 — 그리드 폭 2218 (viewport 1920 보다 큼) → 풀폭 + 우측 일부 viewport 밖.
-    // 헤더는 max-w-screen-xl 컨테이너 정렬, 그리드는 viewport 끝까지 흘러나가게.
+    // 시안 11:956 — 그리드 폭 2218 (viewport 1920 보다 큼) → 가로 스크롤 캐러셀.
+    // cell 268px 고정, viewport 보다 wide 한 flex row → 사용자가 좌우 스크롤/swipe 로 이동.
     return (
         <section className="mt-16">
             <div className="mx-auto max-w-screen-xl px-4 mb-4">
                 <p className="text-xs text-[var(--color-fg-muted)]">@elfbar</p>
                 <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">Instagram</h2>
             </div>
-            {/* 그리드 풀폭 — px 만 약간, max-w 없음. viewport 끝까지 8 cell 균등 분배. */}
-            <ul className="grid grid-cols-4 md:grid-cols-8 gap-2 px-2 md:px-4">
+            {/* 가로 스크롤 캐러셀 — overflow-x: auto + cell flex-shrink-0 고정 width.
+                스크롤바는 hide (scrollbar-none) + snap-x 로 부드러운 swipe. */}
+            <ul
+                className="flex gap-2 overflow-x-auto px-4 pb-2 snap-x snap-mandatory"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
                 {Array.from({ length: 8 }, (_, i) => i + 1).map(n => (
-                    <li key={n} className="relative aspect-square overflow-hidden rounded-[var(--radius-sm)] bg-[var(--color-bg-subtle)] group">
+                    <li
+                        key={n}
+                        className="relative flex-shrink-0 aspect-square overflow-hidden rounded-[var(--radius-sm)] bg-[var(--color-bg-subtle)] group snap-start"
+                        style={{ width: "min(268px, 35vw)" }}
+                    >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={`/images/ig-${n}.png`}
