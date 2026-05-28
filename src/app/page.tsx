@@ -544,29 +544,20 @@ function BestReviewsSection() {
             </div>
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {REVIEW_MOCKS.map((r, i) => (
-                    <li
-                        key={i}
-                        // Tailwind arbitrary value (rounded-[12px], aspect-[4/5]) 가 v4 CSS bundle 에서
-                        // detect 안 되는 경우 대비 — 모두 inline style 로 강제 + 고정 클래스만 사용.
-                        className="bg-white overflow-hidden"
-                        style={{ borderRadius: 12 }}
-                    >
+                    <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={r.photo}
-                                alt={r.product}
-                                className="block w-full object-cover"
-                                style={{
-                                    aspectRatio: "4 / 5",
-                                    width: "100%",
-                                    height: "auto",
-                                    borderTopLeftRadius: 12,
-                                    borderTopRightRadius: 12,
-                                }}
-                            />
-                            {/* 사진 → 텍스트 간격 줄임 + 요소 간 space 축소 + min-h 제거로 빈 공간 fix */}
-                            <div className="px-3 pt-2.5 pb-3 md:px-3.5 md:pt-3 md:pb-3.5 space-y-1.5">
+                            {/* 같은 페이지의 BestItemGrid 가 동일 구조로 라운딩 동작 — 동일 패턴 적용.
+                                사진만 감싸는 div 에 rounded + overflow-hidden. */}
+                            <div className="rounded-[var(--radius-lg)] overflow-hidden">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={r.photo}
+                                    alt={r.product}
+                                    className="block w-full"
+                                    style={{ aspectRatio: "4 / 5", objectFit: "cover" }}
+                                />
+                            </div>
+                            <div className="mt-2.5 md:mt-3 space-y-1.5">
                                 <div className="flex items-center gap-1 text-xs">
                                     <span className="text-yellow-400">★★★★★</span>
                                     <span className="text-[var(--color-fg)] font-medium">5.0</span>
