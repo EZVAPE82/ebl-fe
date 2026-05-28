@@ -546,10 +546,14 @@ function BestReviewsSection() {
                 {REVIEW_MOCKS.map((r, i) => (
                     <li key={i} className="rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-surface)]">
                         <Link href="/c/best" className="block">
-                            <div className="aspect-[4/5] overflow-hidden bg-[var(--color-bg-subtle)]">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={r.photo} alt={r.product} className="w-full h-full object-cover" />
-                            </div>
+                            {/* 사진을 li 직속에 두고 wrapper div 의 bg-subtle (회색 띠 원인) 제거.
+                                li 의 rounded-lg + overflow-hidden 이 사진 위 모서리까지 자연스럽게 자름. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={r.photo}
+                                alt={r.product}
+                                className="block w-full aspect-[4/5] object-cover"
+                            />
                             <div className="p-3 md:p-4 space-y-2">
                                 <div className="flex items-center gap-1 text-xs">
                                     <span className="text-yellow-400">★★★★★</span>
