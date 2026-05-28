@@ -546,9 +546,9 @@ function BestReviewsSection() {
                 {REVIEW_MOCKS.map((r, i) => (
                     <li key={i}>
                         <Link href="/c/best" className="block">
-                            {/* 같은 페이지의 BestItemGrid 가 동일 구조로 라운딩 동작 — 동일 패턴 적용.
-                                사진만 감싸는 div 에 rounded + overflow-hidden. */}
-                            <div className="rounded-[var(--radius-lg)] overflow-hidden">
+                            {/* Tailwind v4 default 의 --radius-lg(0.5rem) 가 사용자 정의 (12px) 와 충돌하고
+                                둘 다 작아서 시각적으로 거의 안 보였음 → inline style 16px 강제. */}
+                            <div style={{ borderRadius: 16, overflow: "hidden" }}>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={r.photo}
