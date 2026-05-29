@@ -86,35 +86,33 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         <dd className="text-[var(--color-fg)]">만 19세 이상 성인 인증 후 결제 가능</dd>
                     </dl>
 
-                    {/* 옵션 */}
+                    {/* 옵션 — select dropdowns (시안: 맛/수량) */}
                     {product.options.length > 0 && (
-                        <div>
-                            <div className="text-xs font-medium text-[var(--color-fg-muted)] mb-2">옵션 선택</div>
-                            <ul className="space-y-1.5 text-sm">
-                                {product.options.map(o => {
-                                    const out = o.stock <= 0;
-                                    return (
-                                        <li
-                                            key={o.id}
-                                            className={`flex items-center justify-between rounded-[var(--radius-sm)] border px-3 py-2.5 ${
-                                                out
-                                                    ? "border-[var(--color-border)] bg-[var(--color-bg-subtle)] opacity-60"
-                                                    : "border-[var(--color-border)] hover:border-[var(--color-border-strong)] cursor-pointer"
-                                            }`}
-                                        >
-                                            <span className="text-[var(--color-fg)]">
-                                                <span className="text-[var(--color-fg-muted)]">{o.optionGroup}</span>
-                                                <span className="mx-2">·</span>
-                                                <span>{o.optionValue}</span>
-                                            </span>
-                                            <span className="text-[var(--color-fg-muted)] text-xs">
-                                                {o.priceDelta !== 0 && `+${formatPrice(o.priceDelta)} `}
-                                                {out ? "품절" : `재고 ${o.stock}`}
-                                            </span>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
+                        <div className="space-y-2.5 pt-2">
+                            {/* 옵션 그룹별로 select */}
+                            {Array.from(new Set(product.options.map(o => o.optionGroup))).map(group => {
+                                const opts = product.options.filter(o => o.optionGroup === group);
+                                return (
+                                    <div key={group} className="grid grid-cols-[80px_1fr] gap-3 items-center">
+                                        <label className="text-xs font-medium text-[var(--color-fg-muted)]">{group}</label>
+                                        <select className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-3 py-2.5 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg-muted)] appearance-none cursor-pointer">
+                                            <option value="">{group} 선택</option>
+                                            {opts.map(o => (
+                                                <option key={o.id} value={o.id} disabled={o.stock <= 0}>
+                                                    {o.optionValue}{o.priceDelta !== 0 ? ` (+${formatPrice(o.priceDelta)})` : ""}{o.stock <= 0 ? " — 품절" : ""}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                );
+                            })}
+                            {/* 수량 selector */}
+                            <div className="grid grid-cols-[80px_1fr] gap-3 items-center">
+                                <label className="text-xs font-medium text-[var(--color-fg-muted)]">수량</label>
+                                <select className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-3 py-2.5 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg-muted)] appearance-none cursor-pointer">
+                                    {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
+                                </select>
+                            </div>
                         </div>
                     )}
 
@@ -126,12 +124,27 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         </div>
                     )}
 
-                    {/* PC 액션 */}
-                    <div className="hidden md:flex gap-2 pt-2">
-                        <Button variant="secondary" size="lg" fullWidth>장바구니</Button>
-                        <Button size="lg" fullWidth disabled={isSoldOut}>
-                            {isSoldOut ? "품절" : "바로구매"}
-                        </Button>
+                    {/* 총 가격 */}
+                    <div className="flex items-baseline justify-between pt-3 border-t border-[var(--color-border)]">
+                        <span className="text-sm text-[var(--color-fg-muted)]">총 결제 금액</span>
+                        <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(product.price)}</span>
+                    </div>
+
+                    {/* PC 액션 — 시안: 장바구니(흰 외곽선) + 바로 구매(검정) */}
+                    <div className="hidden md:flex gap-3 pt-2">
+                        <button
+                            type="button"
+                            className="flex-1 inline-flex items-center justify-center rounded-[8px] border-2 border-[var(--color-fg)] bg-white text-[var(--color-fg)] py-3.5 text-sm font-bold hover:bg-[var(--color-bg-subtle)] transition"
+                        >
+                            장바구니
+                        </button>
+                        <button
+                            type="button"
+                            disabled={isSoldOut}
+                            className="flex-1 inline-flex items-center justify-center rounded-[8px] bg-[var(--color-fg)] text-[var(--color-bg)] py-3.5 text-sm font-bold hover:opacity-90 transition disabled:opacity-50"
+                        >
+                            {isSoldOut ? "품절" : "바로 구매"}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -212,11 +225,11 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 <ProductQna productId={product.id} />
             </section>
 
-            {/* ===== 연관 상품 ===== */}
+            {/* ===== 이 아이템들 같이 사면 좋아요! ===== */}
             {related.content.length > 0 && (
                 <section className="mx-auto max-w-screen-2xl px-4 mt-10">
-                    <h2 className="text-lg md:text-xl font-semibold mb-3 text-[var(--color-fg)]">관련 상품</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                    <h2 className="text-base md:text-lg font-bold mb-5 text-[var(--color-fg)]">이 아이템들 같이 사면 좋아요!</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
                         {related.content.map(p => <ProductCard key={p.id} p={p} />)}
                     </div>
                 </section>

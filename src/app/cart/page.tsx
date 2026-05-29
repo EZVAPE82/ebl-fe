@@ -7,7 +7,8 @@ import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import type { ProductDetail } from "@/types/api";
-import { Button } from "@/components/ui";
+
+/* 시안 14:9910 매칭 — 좌: 구매상품 라인 / 우: 결제정보 (회색 박스 + 큰 라운딩) */
 
 type CartItem = {
     id: number;
@@ -23,9 +24,8 @@ type CartLine = CartItem & {
     unitPrice: number;
     thumbnailUrl: string | null;
     soldOut: boolean;
-    /** 프로모션 적용 시 받게 될 무료 증정 수량 (BOGO). 0 이면 미적용. */
     freeQuantity: number;
-    promotionLabel: string | null;   // "2+1", "10+1" 등
+    promotionLabel: string | null;
 };
 
 type PromoBadge = { id: number; buyQuantity: number; getQuantity: number; label: string };
@@ -55,7 +55,6 @@ export default function CartPage() {
                         const unitPrice = p.price + (opt?.priceDelta ?? 0);
                         const optionText = opt ? `${opt.optionGroup}: ${opt.optionValue}` : null;
                         const soldOut = opt ? opt.stock <= 0 : p.status === "SOLD_OUT";
-                        // 첫 프로모션만 적용 (백엔드와 동일 로직)
                         const promo = promos[0];
                         const freeQuantity = promo ? Math.floor(it.quantity / promo.buyQuantity) * promo.getQuantity : 0;
                         return {
@@ -111,11 +110,11 @@ export default function CartPage() {
     if (lines.length === 0) {
         return (
             <CartShell>
-                <div className="rounded-[var(--radius-lg)] px-4 py-16 text-center">
+                <div className="px-4 py-16 text-center">
                     <p className="text-sm text-[var(--color-fg-subtle)] mb-4">장바구니가 비어 있습니다.</p>
                     <Link
                         href="/"
-                        className="inline-flex items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-brand)] text-[var(--color-brand-fg)] px-5 py-3 text-sm font-medium hover:bg-[var(--color-brand-hover)]"
+                        className="inline-flex items-center justify-center rounded-[8px] bg-[#3b82f6] text-white px-6 py-3 text-sm font-medium hover:opacity-90 transition"
                     >
                         쇼핑하러 가기
                     </Link>
@@ -125,95 +124,181 @@ export default function CartPage() {
     }
 
     const total = lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
+    const shippingFee = 0; // 시안: "0,000원" placeholder
+    const discount = 0;
+    const paid = Math.max(0, total + shippingFee - discount);
     const hasSoldOut = lines.some(l => l.soldOut);
 
     return (
         <CartShell>
-            <ul className="divide-y divide-[var(--color-border)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
-                {lines.map(l => (
-                    <li key={l.id} className="flex gap-3 p-4 bg-[var(--color-surface)]">
-                        <div className="w-20 h-20 bg-[var(--color-bg-subtle)] rounded-[var(--radius-sm)] flex-shrink-0 overflow-hidden">
-                            {l.thumbnailUrl && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={l.thumbnailUrl} alt={l.name} className="w-full h-full object-cover" />
-                            )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <Link href={`/p/${l.productId}`} className="font-medium text-sm hover:underline line-clamp-2 text-[var(--color-fg)]">
-                                {l.name}
-                            </Link>
-                            {l.optionText && <div className="text-xs text-[var(--color-fg-muted)] mt-1">{l.optionText}</div>}
-                            {l.promotionLabel && (
-                                <div className="mt-1.5 text-[11px] text-[var(--color-danger)]">
-                                    🎁 {l.promotionLabel} 프로모션
-                                    {l.freeQuantity > 0
-                                        ? <span className="font-semibold"> · 결제 시 {l.freeQuantity}개 무료 증정</span>
-                                        : <span className="text-[var(--color-fg-muted)]"> · 적용 수량 미달</span>}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 md:gap-8">
+                {/* ===== 좌: 구매상품 ===== */}
+                <div>
+                    <h2 className="text-base md:text-lg font-bold text-[var(--color-fg)] pb-3 border-b-2 border-[var(--color-fg)]">구매상품</h2>
+                    <ul className="divide-y divide-[var(--color-border)]">
+                        {lines.map(l => (
+                            <li key={l.id} className="flex items-center gap-3 py-4">
+                                {/* thumbnail — 사각형 (라운딩 없음) */}
+                                <div className="w-16 h-16 bg-[var(--color-bg-subtle)] flex-shrink-0 overflow-hidden">
+                                    {l.thumbnailUrl && (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={l.thumbnailUrl} alt={l.name} className="w-full h-full object-cover" />
+                                    )}
                                 </div>
-                            )}
-                            <div className="mt-2 flex items-center gap-2">
-                                <button
-                                    onClick={() => changeQty(l.id, l.quantity - 1)}
-                                    disabled={working || l.quantity <= 1}
-                                    className="w-7 h-7 rounded-[var(--radius-sm)] border border-[var(--color-border)] text-sm text-[var(--color-fg)] disabled:opacity-40 hover:border-[var(--color-border-strong)]"
-                                >-</button>
-                                <span className="text-sm w-8 text-center text-[var(--color-fg)]">{l.quantity}</span>
-                                <button
-                                    onClick={() => changeQty(l.id, l.quantity + 1)}
-                                    disabled={working}
-                                    className="w-7 h-7 rounded-[var(--radius-sm)] border border-[var(--color-border)] text-sm text-[var(--color-fg)] disabled:opacity-40 hover:border-[var(--color-border-strong)]"
-                                >+</button>
+                                {/* 상품 정보 */}
+                                <div className="flex-1 min-w-0">
+                                    <Link href={`/p/${l.productId}`} className="text-sm font-medium text-[var(--color-fg)] hover:underline line-clamp-1">
+                                        {l.name}
+                                    </Link>
+                                    <p className="text-xs text-[var(--color-fg-muted)] tabular-nums mt-0.5">#{String(l.productId).padStart(10, "2021156")}</p>
+                                </div>
+                                {/* 옵션 select (placeholder — 라운딩 있음) */}
+                                {l.optionText && (
+                                    <select className="hidden md:block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-3 py-2 text-xs text-[var(--color-fg)] focus:outline-none">
+                                        <option>{l.optionText}</option>
+                                    </select>
+                                )}
+                                {/* 가격 */}
+                                <div className="text-sm font-medium text-[var(--color-fg)] tabular-nums hidden md:block">
+                                    {formatPrice(l.unitPrice * l.quantity)}
+                                </div>
+                                {/* 수량 (- 1 +) */}
+                                <div className="flex items-center border border-[var(--color-border)] rounded-[8px]">
+                                    <button
+                                        onClick={() => changeQty(l.id, l.quantity - 1)}
+                                        disabled={working || l.quantity <= 1}
+                                        className="w-7 h-7 flex items-center justify-center text-[var(--color-fg)] disabled:opacity-40 hover:bg-[var(--color-bg-subtle)] transition"
+                                    >–</button>
+                                    <span className="text-sm w-8 text-center text-[var(--color-fg)] tabular-nums">{l.quantity}</span>
+                                    <button
+                                        onClick={() => changeQty(l.id, l.quantity + 1)}
+                                        disabled={working}
+                                        className="w-7 h-7 flex items-center justify-center text-[var(--color-fg)] disabled:opacity-40 hover:bg-[var(--color-bg-subtle)] transition"
+                                    >+</button>
+                                </div>
+                                {/* X 삭제 */}
                                 <button
                                     onClick={() => removeItem(l.id)}
                                     disabled={working}
-                                    className="ml-auto text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-danger)]"
-                                >삭제</button>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-sm font-semibold text-[var(--color-fg)]">{formatPrice(l.unitPrice * l.quantity)}</div>
-                            {l.soldOut && <div className="mt-1 text-[11px] text-[var(--color-danger)]">품절</div>}
-                        </div>
-                    </li>
-                ))}
-            </ul>
-
-            <div className="mt-6 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-[var(--color-fg-muted)]">상품 합계</span><span className="text-[var(--color-fg)]">{formatPrice(total)}</span></div>
-                <div className="flex justify-between"><span className="text-[var(--color-fg-muted)]">배송비</span><span className="text-[var(--color-fg-subtle)]">결제 단계에서 확정</span></div>
-                <div className="border-t border-[var(--color-border)] pt-2 flex justify-between text-base font-bold text-[var(--color-fg)]">
-                    <span>예상 결제 금액</span><span>{formatPrice(total)}</span>
+                                    aria-label="삭제"
+                                    className="w-7 h-7 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition"
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
+
+                {/* ===== 우: 결제정보 (sticky) — 회색 배경 + 큰 라운딩 ===== */}
+                <aside className="lg:sticky lg:top-4 lg:self-start">
+                    <div className="rounded-[18px] bg-[var(--color-bg-subtle)] p-5 md:p-6">
+                        <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)] mb-4 pb-3 border-b border-[var(--color-border)]">결제정보</h3>
+
+                        <dl className="space-y-2.5 text-sm">
+                            <div className="flex justify-between">
+                                <dt className="text-[var(--color-fg-muted)]">주문금액</dt>
+                                <dd className="text-[var(--color-fg)] tabular-nums">{formatPrice(total)}</dd>
+                            </div>
+                            <div className="flex justify-between">
+                                <dt className="text-[var(--color-fg-muted)]">할인 혜택</dt>
+                                <dd className="text-[var(--color-fg)] tabular-nums">{discount > 0 ? `- ${formatPrice(discount)}` : "0원"}</dd>
+                            </div>
+                            <div className="flex justify-between">
+                                <dt className="text-[var(--color-fg-muted)]">배송비</dt>
+                                <dd className="text-[var(--color-fg)] tabular-nums">{shippingFee === 0 ? "0원" : formatPrice(shippingFee)}</dd>
+                            </div>
+                        </dl>
+
+                        <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex justify-between items-center">
+                            <span className="text-sm text-[var(--color-fg-muted)]">결제 예상 금액</span>
+                            <span className="text-lg font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(paid)}</span>
+                        </div>
+
+                        {/* 큰 파란색 결제하기 버튼 */}
+                        <button
+                            type="button"
+                            onClick={() => router.push("/checkout")}
+                            disabled={hasSoldOut || working}
+                            className="mt-4 w-full inline-flex items-center justify-center rounded-[8px] bg-[#3b82f6] text-white py-3.5 text-sm font-bold disabled:opacity-50 hover:opacity-90 transition tabular-nums"
+                        >
+                            {formatPrice(paid)} 결제하기
+                        </button>
+
+                        {/* 약관 동의 (placeholder accordion) */}
+                        <div className="mt-4 space-y-2 text-xs">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <span className="text-[var(--color-fg)]">전체약관 동의</span>
+                            </label>
+                            <details className="border-t border-[var(--color-border)] pt-2">
+                                <summary className="flex items-center justify-between cursor-pointer">
+                                    <span className="text-[var(--color-fg-muted)]">이용약관 동의 <span className="text-[var(--color-danger)]">[필수]</span></span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                </summary>
+                            </details>
+                            <details className="border-t border-[var(--color-border)] pt-2">
+                                <summary className="flex items-center justify-between cursor-pointer">
+                                    <span className="text-[var(--color-fg-muted)]">비회원 개인정보 수집 이용동의</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                </summary>
+                            </details>
+                        </div>
+                    </div>
+                </aside>
             </div>
 
-            <div className="mt-6 flex gap-2">
-                <Link
-                    href="/"
-                    className="flex-1 inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border-strong)] py-3.5 text-sm font-medium text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)]"
-                >
-                    계속 쇼핑
-                </Link>
-                <Button
-                    onClick={() => router.push("/checkout")}
-                    disabled={hasSoldOut || working || lines.length === 0}
-                    size="lg"
-                    fullWidth
-                    className="flex-1"
-                >
-                    결제하기
-                </Button>
-            </div>
-            {hasSoldOut && (
-                <p className="mt-2 text-xs text-[var(--color-danger)]">품절 상품이 있어 결제할 수 없습니다.</p>
-            )}
+            {/* ===== 이 아이템도 같이 사면 좋아요! ===== */}
+            <section className="mt-12 md:mt-16">
+                <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)]">이 아이템도 같이 사면 좋아요!</h3>
+                    <div className="flex gap-1.5">
+                        <button aria-label="이전" className="w-8 h-8 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        <button aria-label="다음" className="w-8 h-8 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+                    {[
+                        { id: 1, name: "Apple Ice", img: "/images/prod-apple-ice.png" },
+                        { id: 2, name: "Blue Razz Ice", img: "/images/prod-blue-razz.png" },
+                        { id: 3, name: "Cola Ice", img: "/images/prod-cola-ice.png" },
+                        { id: 4, name: "Grape Cherry", img: "/images/prod-grape-cherry.png" },
+                    ].map(p => (
+                        <li key={p.id}>
+                            <Link href={`/p/${p.id}`} className="block group">
+                                <div className="relative aspect-square rounded-[12px] overflow-hidden bg-[var(--color-bg-subtle)]">
+                                    <span className="absolute top-3 left-3 z-10 inline-flex items-center justify-center rounded-[6px] bg-[#6f70ff] text-white text-[10px] font-medium px-2 py-1">
+                                        Best 1
+                                    </span>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={p.img} alt={p.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
+                                </div>
+                                <p className="mt-2.5 text-sm font-medium text-[var(--color-fg)] line-clamp-1">{p.name}</p>
+                                <p className="text-xs text-[var(--color-fg-muted)] line-clamp-1">제품 상세타이틀 아이템 아이템</p>
+                                <p className="text-xs text-[var(--color-fg-subtle)] line-through tabular-nums mt-1">{formatPrice(50000)}</p>
+                                <p className="text-sm flex items-baseline gap-1 tabular-nums">
+                                    <span className="text-[var(--color-danger)] font-bold">40%</span>
+                                    <span className="text-[var(--color-fg)] font-bold">{formatPrice(30000)}</span>
+                                </p>
+                                <p className="text-xs text-[var(--color-fg-muted)] mt-1">
+                                    <span className="text-yellow-400">★</span> 4.9 <span className="text-[var(--color-fg-subtle)]">|</span> 22건
+                                </p>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </section>
         </CartShell>
     );
 }
 
 function CartShell({ children }: { children: React.ReactNode }) {
     return (
-        <div className="mx-auto max-w-3xl px-4 py-8">
-            <h1 className="text-xl md:text-2xl font-semibold mb-6 text-[var(--color-fg)]">장바구니</h1>
+        <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8">
             {children}
         </div>
     );
