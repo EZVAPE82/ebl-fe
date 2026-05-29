@@ -206,24 +206,24 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
             aria-label="후기 상세 보기"
             onClick={onClose}
         >
-            {/* 좌:사진 + 우:텍스트 — 시안 매칭: 두 박스가 분리된 라운딩 사각형, 사이에 작은 간격 */}
+            {/* 시안 매칭: 흰색 바깥 컨테이너 안에 사진 + 텍스트가 한 그룹 */}
             <div
-                className="relative w-full max-w-4xl flex flex-col md:flex-row gap-3 md:gap-4 md:h-[480px] max-h-[90vh]"
+                className="relative w-full max-w-4xl bg-white rounded-[18px] shadow-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 md:h-[520px] max-h-[90vh]"
                 onClick={e => e.stopPropagation()}
             >
-                {/* 좌측 큰 사진 — 4모서리 라운딩 (시안: 분리된 라운딩 정사각형) */}
-                <div className="md:h-full md:w-[480px] flex-shrink-0">
+                {/* 좌측 큰 사진 — 흰 박스 안에 들어간 라운딩 정사각형 */}
+                <div className="md:h-full md:w-[440px] flex-shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={main}
                         alt=""
-                        className="w-full md:w-[480px] aspect-square md:h-full object-cover rounded-[18px] block shadow-lg"
+                        className="w-full md:w-[440px] aspect-square md:h-full object-cover rounded-[14px] block"
                         draggable={false}
                     />
                 </div>
 
-                {/* 우측 텍스트 영역 (흰 배경) — 4모서리 라운딩 (시안: 분리된 라운딩 박스) */}
-                <div className="bg-white flex-1 md:h-full p-5 md:p-7 rounded-[18px] relative flex flex-col overflow-y-auto shadow-lg">
+                {/* 우측 텍스트 — 흰 컨테이너 위에 직접 (별도 박스 없음) */}
+                <div className="flex-1 md:h-full relative flex flex-col overflow-y-auto">
                     {/* 우상단 X 닫기 — 시안에 우상단 닫기 버튼 */}
                     <button
                         type="button"
