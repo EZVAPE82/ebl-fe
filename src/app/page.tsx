@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { TrustBadges } from "@/components/TrustBadges";
 import { ProductCard } from "@/components/ProductCard";
 import { EventPopup } from "@/components/EventPopup";
 import { formatDate, formatPrice } from "@/lib/format";
@@ -37,7 +38,10 @@ export default async function Home() {
                 헤더가 홈에서 fixed 투명 오버레이라 Hero 위 spacer 불필요 — Hero 가 헤더 위로 침범. */}
             <HeroCarousel banners={heroSlides} fallbackImage="/images/hero.png" />
 
-            {/* ===== 2. 카테고리 아이콘 ===== */}
+            {/* ===== 2. 트러스트 배지 5 카드 (시안 214:17932) — Hero 아래 풀폭 다크 그라데이션 ===== */}
+            <TrustBadges />
+
+            {/* ===== 3. 카테고리 아이콘 ===== */}
             <CategoryIcons categories={categories} />
 
             <div className="mx-auto max-w-screen-2xl px-4 space-y-16 pb-16">

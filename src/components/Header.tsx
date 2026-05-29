@@ -6,14 +6,23 @@ import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useRouter, usePathname } from "next/navigation";
 
-// 시안 214:17798 매칭 — 7 카테고리
-const NAV: { href: string; label: string }[] = [
+// 시안 214:17798 매칭 — 7 카테고리 + 고객센터 드롭다운
+type NavItem = { href: string; label: string; children?: { href: string; label: string }[] };
+const NAV: NavItem[] = [
     { href: "/c/best",       label: "전체상품" },
     { href: "/c/best",       label: "BEST" },
     { href: "/c/disposable", label: "일회용" },
     { href: "/c/liquid",     label: "액상" },
     { href: "/events",       label: "이벤트" },
-    { href: "/notices",      label: "공지사항" },
+    {
+        href: "/notices",
+        label: "고객센터",
+        children: [
+            { href: "/notices", label: "공지사항" },
+            { href: "/faq",     label: "문의하기" },
+            { href: "/faq",     label: "자주묻는질문" },
+        ],
+    },
     { href: "/reviews/best", label: "구매후기" },
 ];
 
@@ -81,12 +90,10 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                         />
                     </Link>
 
-                    {/* PC 카테고리 메뉴 — 가운데 정렬 (시안 매칭) */}
-                    <nav className={`hidden lg:flex flex-1 items-center justify-center gap-5 text-sm ${navTone}`}>
+                    {/* PC 카테고리 메뉴 — 좌측 정렬 (시안 214:17798 매칭, 로고 바로 옆) */}
+                    <nav className={`hidden lg:flex items-center gap-6 ml-6 text-sm ${navTone}`}>
                         {NAV.map(n => (
-                            <Link key={n.label} href={n.href} className="hover:opacity-100">
-                                {n.label}
-                            </Link>
+                            <NavItem key={n.label} item={n} transparent={transparent} navTone={navTone} />
                         ))}
                     </nav>
 
@@ -170,6 +177,49 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                 </div>
             )}
         </>
+    );
+}
+
+/* ===== 네비 항목 — children 있으면 호버 시 드롭다운 (시안 214:17798 매칭) ===== */
+function NavItem({ item, transparent, navTone }: { item: NavItem; transparent: boolean; navTone: string }) {
+    const [open, setOpen] = useState(false);
+    if (!item.children) {
+        return <Link href={item.href} className="hover:opacity-100">{item.label}</Link>;
+    }
+    return (
+        <div
+            className="relative"
+            onMouseEnter={() => setOpen(true)}
+            onMouseLeave={() => setOpen(false)}
+        >
+            <Link href={item.href} className="hover:opacity-100 flex items-center gap-1">
+                {item.label}
+            </Link>
+            {open && (
+                <div className={`absolute top-full left-0 pt-3 z-50`} role="menu">
+                    {/* 드롭다운 panel — 흰 배경 + 보더 + 살짝 그림자 */}
+                    <div className="min-w-[160px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md shadow-lg py-1">
+                        {item.children.map((c, i) => (
+                            <Link
+                                key={c.label}
+                                href={c.href}
+                                className={`flex items-center justify-between px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)] transition ${
+                                    i === 0 ? "text-[var(--color-fg)] font-medium" : "text-[var(--color-fg-muted)]"
+                                }`}
+                                role="menuitem"
+                            >
+                                <span>{c.label}</span>
+                                {i === 0 && (
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                )}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
