@@ -119,7 +119,7 @@ function FilterTab({ href, label, active }: { href: string; label: string; activ
     return (
         <Link
             href={href}
-            className={`inline-flex items-center justify-center px-5 py-2 text-sm font-medium transition ${
+            className={`inline-flex items-center justify-center rounded-[10px] px-5 py-2.5 text-sm font-medium transition ${
                 active
                     ? "bg-[var(--color-accent)] text-white"
                     : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border border-[var(--color-border)] hover:border-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
