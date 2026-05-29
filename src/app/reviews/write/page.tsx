@@ -2,9 +2,9 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, API_BASE } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { Button, Input } from "@/components/ui";
+import { Button } from "@/components/ui";
 
 export default function ReviewWritePage() {
     return (
@@ -23,7 +23,6 @@ function Inner() {
     const [rating, setRating] = useState(5);
     const [content, setContent] = useState("");
     const [photoUrls, setPhotoUrls] = useState<string[]>([]);
-    const [newPhotoUrl, setNewPhotoUrl] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -89,42 +88,7 @@ function Inner() {
                     />
                 </label>
 
-                <div>
-                    <div className="text-xs font-medium text-[var(--color-fg-muted)] mb-1">사진 URL (선택, 포토 리뷰는 적립금 2배)</div>
-                    <div className="flex gap-2">
-                        <div className="flex-1">
-                            <Input
-                                value={newPhotoUrl}
-                                onChange={e => setNewPhotoUrl(e.target.value)}
-                                placeholder="https://..."
-                            />
-                        </div>
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            onClick={() => {
-                                if (newPhotoUrl.trim()) {
-                                    setPhotoUrls(s => [...s, newPhotoUrl.trim()]);
-                                    setNewPhotoUrl("");
-                                }
-                            }}
-                        >추가</Button>
-                    </div>
-                    {photoUrls.length > 0 && (
-                        <ul className="mt-2 space-y-1 text-xs">
-                            {photoUrls.map((u, i) => (
-                                <li key={i} className="flex items-center gap-2 text-[var(--color-fg-muted)]">
-                                    <span className="truncate flex-1">{u}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPhotoUrls(s => s.filter((_, j) => j !== i))}
-                                        className="text-[var(--color-danger)]"
-                                    >삭제</button>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
+                <PhotoUploader photoUrls={photoUrls} onChange={setPhotoUrls} setError={setError} />
 
                 {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
 
@@ -136,6 +100,102 @@ function Inner() {
                 </p>
             </form>
         </Shell>
+    );
+}
+
+/**
+ * 사진 업로드 UI — 최대 5 장, multipart POST.
+ *  - 백엔드 /api/v1/me/images/batch 가 800x800 / 300x300 thumbnail 자동 생성
+ *  - 응답 thumbnailUrl 을 form 의 photoUrls 에 저장
+ *  - 화면 미리보기는 thumbnailUrl 사용
+ */
+function PhotoUploader({
+    photoUrls,
+    onChange,
+    setError,
+}: {
+    photoUrls: string[];
+    onChange: (urls: string[]) => void;
+    setError: (msg: string | null) => void;
+}) {
+    const [uploading, setUploading] = useState(false);
+    const MAX_PHOTOS = 5;
+
+    async function handleFiles(files: FileList | null) {
+        if (!files || files.length === 0) return;
+        const remaining = MAX_PHOTOS - photoUrls.length;
+        if (remaining <= 0) {
+            setError(`사진은 최대 ${MAX_PHOTOS} 장까지 등록 가능합니다.`);
+            return;
+        }
+        const list = Array.from(files).slice(0, remaining);
+        setError(null);
+        setUploading(true);
+        try {
+            const fd = new FormData();
+            list.forEach(f => fd.append("files", f));
+            const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+            const res = await fetch(`${API_BASE}/api/v1/me/images/batch`, {
+                method: "POST",
+                body: fd,
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+            if (!res.ok) throw new Error("업로드 실패: " + res.status);
+            const json = await res.json() as Array<{ url: string; thumbnailUrl: string }>;
+            onChange([...photoUrls, ...json.map(j => j.thumbnailUrl ?? j.url)]);
+        } catch (e) {
+            setError(e instanceof Error ? e.message : "사진 업로드에 실패했습니다.");
+        } finally {
+            setUploading(false);
+        }
+    }
+
+    return (
+        <div>
+            <div className="text-xs font-medium text-[var(--color-fg-muted)] mb-2">
+                사진 (선택, 포토 리뷰는 적립금 2배 · 최대 {MAX_PHOTOS} 장)
+            </div>
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+                {photoUrls.map((u, i) => (
+                    <div key={i} className="relative aspect-square rounded-md overflow-hidden border border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={u} alt={`사진 ${i+1}`} className="w-full h-full object-cover" />
+                        <button
+                            type="button"
+                            aria-label="삭제"
+                            onClick={() => onChange(photoUrls.filter((_, j) => j !== i))}
+                            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white text-xs flex items-center justify-center hover:bg-black/80"
+                        >×</button>
+                    </div>
+                ))}
+                {photoUrls.length < MAX_PHOTOS && (
+                    <label className="aspect-square rounded-md border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-fg-muted)] flex flex-col items-center justify-center cursor-pointer text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={e => handleFiles(e.target.files)}
+                            disabled={uploading}
+                            className="hidden"
+                        />
+                        {uploading ? (
+                            <span className="text-xs">업로드중...</span>
+                        ) : (
+                            <>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                <span className="text-[10px] mt-1">사진 추가</span>
+                            </>
+                        )}
+                    </label>
+                )}
+            </div>
+            <p className="mt-1 text-[10px] text-[var(--color-fg-subtle)]">
+                JPG/PNG/WebP, 장당 최대 10MB. 업로드 시 800×800 정사각형 자동 변환 (메인 리스트용).
+            </p>
+        </div>
     );
 }
 

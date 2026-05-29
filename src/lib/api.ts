@@ -16,6 +16,8 @@
 // .env.local 의 NEXT_PUBLIC_API_BASE_URL 가 우선. fallback 은 로컬 백엔드 기본 포트.
 // 다른 프로젝트와 충돌 회피해 8090 사용 (application-local.yml 의 server.port 와 일치).
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8090";
+// raw POST/multipart 같이 api() 헬퍼 거치지 않는 경우 (이미지 업로드 등) 위해 export.
+export const API_BASE = BASE_URL;
 
 const ACCESS_KEY = "accessToken";
 const REFRESH_KEY = "refreshToken";

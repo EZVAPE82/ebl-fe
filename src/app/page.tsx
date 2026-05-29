@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { TrustBadges } from "@/components/TrustBadges";
+import { BestReviewsCarousel } from "@/components/BestReviewsCarousel";
 import { ProductCard } from "@/components/ProductCard";
 import { EventPopup } from "@/components/EventPopup";
 import { formatDate, formatPrice } from "@/lib/format";
@@ -82,8 +83,8 @@ export default async function Home() {
                     <FaqBox />
                 </div>
 
-                {/* ===== 베스트 제품 후기 (4 카드 컴포넌트 + 한국어 목데이터) ===== */}
-                <BestReviewsSection />
+                {/* ===== 베스트 제품 후기 — Lightbox 연결 client component ===== */}
+                <BestReviewsCarousel reviews={REVIEW_MOCKS} />
             </div>
 
             {/* ===== CTA 풀폭 배너 ===== */}
