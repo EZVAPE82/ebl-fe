@@ -113,23 +113,11 @@ export function HeroCarousel({
             })}
 
             <div className="relative mx-auto max-w-screen-2xl h-full px-4 md:px-8 lg:px-12">
-                {/* 좌측 오버레이 — 시안 매칭: 페이지네이션을 위로, 텍스트를 그 아래로
-                    (이전: 텍스트 가운데 + 페이지네이션 하단 → 변경) */}
+                {/* 좌측 오버레이 — 시안 매칭:
+                    텍스트(라벨/제목/subtitle) vertical-center + 페이지네이션은 subtitle
+                    바로 아래에 작은 간격으로 붙임 (기존 hero 하단 멀리 배치 → 변경). */}
                 {showOverlay && (
-                    <div className="absolute top-10 md:top-14 lg:top-16 left-4 md:left-8 lg:left-12 max-w-md md:max-w-lg z-10 text-white">
-                        {/* 페이지네이션 + 화살표 (위로 올림) */}
-                        {total > 1 && (
-                            <div className="mb-6 md:mb-10">
-                                <SlideIndicator
-                                    index={index}
-                                    total={total}
-                                    onPrev={() => go(-1)}
-                                    onNext={() => go(1)}
-                                    onPick={(i) => setIndex(i)}
-                                />
-                            </div>
-                        )}
-                        {/* 텍스트 카피 (페이지네이션 아래로) */}
+                    <div className="absolute inset-y-0 left-4 md:left-8 lg:left-12 flex flex-col justify-center text-white max-w-md md:max-w-lg z-10">
                         <p className="text-xs md:text-sm tracking-[0.2em] uppercase opacity-90 mb-3 md:mb-4">
                             {defaultOverlay.label}
                         </p>
@@ -139,6 +127,18 @@ export function HeroCarousel({
                         <p className="mt-3 md:mt-5 text-xs md:text-sm opacity-80 leading-relaxed">
                             {defaultOverlay.subtitle}
                         </p>
+                        {/* 페이지네이션 + 화살표 — subtitle 바로 아래 (간격 작게) */}
+                        {total > 1 && (
+                            <div className="mt-5 md:mt-6">
+                                <SlideIndicator
+                                    index={index}
+                                    total={total}
+                                    onPrev={() => go(-1)}
+                                    onNext={() => go(1)}
+                                    onPick={(i) => setIndex(i)}
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
 

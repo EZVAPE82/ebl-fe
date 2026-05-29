@@ -22,13 +22,8 @@ export function TrustBadges() {
     return (
         <section
             aria-label="혜택 안내"
-            // Hero 안에 박힐 때: 반투명 어두운 보라 (Hero 이미지가 살짝 비침).
-            // 독립 사용 시: 짙은 그라데이션 fallback.
-            style={{
-                background: "linear-gradient(to top, rgba(26, 15, 61, 0.92) 0%, rgba(26, 15, 61, 0.7) 60%, rgba(26, 15, 61, 0.45) 100%)",
-                backdropFilter: "blur(4px)",
-                WebkitBackdropFilter: "blur(4px)",
-            }}
+            // 시안: 배경 완전 투명. Hero 이미지 그대로 비침. 아이콘/텍스트만 표시.
+            className="bg-transparent"
         >
             {/* 시안 padding 8 (py-8 = 32px) + padding 10 (px-10 = 40px) + 자동 spacing (justify-between) */}
             <div className="mx-auto max-w-screen-2xl px-6 md:px-10 py-5 md:py-8 flex flex-wrap items-center justify-between gap-x-4 gap-y-4">
