@@ -91,18 +91,16 @@ export default async function NoticesPage({ searchParams }: { searchParams: Prom
                             <li key={n.id}>
                                 <Link
                                     href={`/notices/${n.id}`}
-                                    className={`flex items-center gap-4 px-4 md:px-6 py-5 hover:bg-[var(--color-bg-subtle)] transition ${n.pinned ? "bg-[var(--color-bg-subtle)]" : ""}`}
+                                    className={`flex items-center gap-3 md:gap-4 px-3 md:px-4 py-5 hover:bg-[var(--color-bg-subtle)] transition ${n.pinned ? "bg-[var(--color-bg-subtle)]" : ""}`}
                                 >
-                                    {/* 좌측 영역: 핀 아이콘 또는 "새로운 소식" 뱃지 */}
-                                    <span className="w-28 md:w-32 flex-shrink-0 flex items-center">
-                                        {n.pinned ? (
-                                            <span aria-label="필독 공지" className="text-xl">📌</span>
-                                        ) : isNew ? (
-                                            <span className="inline-flex items-center justify-center rounded-[18px] bg-[var(--color-accent)] text-white text-xs font-medium px-3 py-1.5">
-                                                새로운 소식
-                                            </span>
-                                        ) : null}
-                                    </span>
+                                    {/* 좌측 영역: 핀 아이콘 또는 "새로운 소식" 뱃지 (시안 매칭, 라운딩 X) */}
+                                    {n.pinned ? (
+                                        <span aria-label="필독 공지" className="text-xl flex-shrink-0">📌</span>
+                                    ) : isNew ? (
+                                        <span className="inline-flex items-center justify-center bg-[var(--color-accent)] text-white text-xs font-medium px-3 py-1.5 flex-shrink-0">
+                                            새로운 소식
+                                        </span>
+                                    ) : null}
                                     {/* 제목 */}
                                     <span className="flex-1 min-w-0 text-sm md:text-base text-[var(--color-fg)] line-clamp-1">
                                         {n.title}
