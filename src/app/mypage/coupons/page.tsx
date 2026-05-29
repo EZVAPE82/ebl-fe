@@ -2,103 +2,244 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { MyPageSideNav } from "@/components/mypage/SideNav";
 
 /**
- * 쿠폰 페이지 — 시안 37:12625 매칭.
- * 시안: 좌측 SideNav + 우측 쿠폰 검색 + 쿠폰 리스트 (2 컬럼) + 페이지네이션.
- * MVP: 백엔드 /api/v1/members/me/coupons 호출 (이미 존재). placeholder 목데이터 + 시안 통이미지 fallback.
+ * 쿠폰 — Figma 시안 매칭.
+ *  - 상단: "쿠폰등록" — 회색 라운드 패널 안에 코드 입력 + 파란 등록 버튼 + 안내문
+ *  - 하단: "쿠폰리스트" — 회색 라운드 패널 안에 탭(보유쿠폰/사용쿠폰) + 2열 카드 그리드
+ *  - 카드: 흰색 라운드, 우측에 파란 톱니(티켓 컷) 장식
  */
-type Coupon = {
-    id: number;
+
+type CouponView = {
+    memberCouponId: number;
+    couponId: number;
     name: string;
-    discountType: "PERCENT" | "FIXED";
+    discountType: "AMOUNT" | "PERCENT";
     discountValue: number;
     minOrderAmount: number;
+    maxDiscount: number;
     expiresAt: string;
-    status: "USABLE" | "USED" | "EXPIRED";
+    usedAt: string | null;
 };
 
-const MOCK_COUPONS: Coupon[] = [
-    { id: 1, name: "신규 가입 축하 5,000원", discountType: "FIXED", discountValue: 5000, minOrderAmount: 30000, expiresAt: "2026-08-31T23:59:59", status: "USABLE" },
-    { id: 2, name: "5월 정기 10% 할인", discountType: "PERCENT", discountValue: 10, minOrderAmount: 50000, expiresAt: "2026-05-31T23:59:59", status: "USABLE" },
-    { id: 3, name: "일회용 라인업 3,000원", discountType: "FIXED", discountValue: 3000, minOrderAmount: 20000, expiresAt: "2026-06-30T23:59:59", status: "USABLE" },
-    { id: 4, name: "VIP 등급 전용 15%", discountType: "PERCENT", discountValue: 15, minOrderAmount: 100000, expiresAt: "2026-12-31T23:59:59", status: "USABLE" },
-];
-
 export default function CouponsPage() {
-    const { user, loading } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    const [items, setItems] = useState<Coupon[]>(MOCK_COUPONS);
-    void setItems;
+    const [coupons, setCoupons] = useState<CouponView[]>([]);
+    const [tab, setTab] = useState<"available" | "used">("available");
+    const [code, setCode] = useState("");
+    const [busy, setBusy] = useState(false);
 
-    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
-        if (!loading && !user) router.replace("/login?redirect=/mypage/coupons");
-    }, [user, loading, router]);
-    /* eslint-enable react-hooks/set-state-in-effect */
+        if (!authLoading && !user) {
+            router.replace("/login?redirect=/mypage/coupons");
+            return;
+        }
+        if (!user) return;
+        (async () => {
+            try {
+                const res = await api<{ content: CouponView[] }>(
+                    "/api/v1/members/me/coupons?size=50",
+                    { auth: true }
+                );
+                setCoupons(res.content ?? []);
+            } catch {
+                setCoupons([]);
+            }
+        })();
+    }, [user, authLoading, router]);
 
-    if (loading || !user) {
-        return <div className="mx-auto max-w-screen-2xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+    async function register(e: React.FormEvent) {
+        e.preventDefault();
+        if (!code.trim()) return;
+        setBusy(true);
+        try {
+            await api("/api/v1/members/me/coupons/register", {
+                method: "POST",
+                auth: true,
+                body: JSON.stringify({ code }),
+            });
+            setCode("");
+            const res = await api<{ content: CouponView[] }>(
+                "/api/v1/members/me/coupons?size=50",
+                { auth: true }
+            );
+            setCoupons(res.content ?? []);
+            alert("쿠폰이 등록되었습니다.");
+        } catch {
+            alert("쿠폰 등록에 실패했습니다. 코드를 확인해주세요.");
+        } finally {
+            setBusy(false);
+        }
     }
 
+    if (authLoading || !user) {
+        return (
+            <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-10 text-[var(--color-fg-subtle)]">
+                불러오는 중...
+            </div>
+        );
+    }
+
+    const visible = coupons.filter(c =>
+        tab === "available" ? !c.usedAt : !!c.usedAt
+    );
+
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 py-8 md:py-10 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 md:gap-12">
+        <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8">
             <MyPageSideNav />
 
-            <section>
-                <h2 className="text-xl md:text-2xl font-bold mb-6 text-[var(--color-fg)]">쿠폰</h2>
-
-                <div className="flex items-center gap-2 mb-6">
-                    <input
-                        type="text"
-                        placeholder="쿠폰코드를 입력해주세요"
-                        className="flex-1 px-4 py-2.5 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)]"
-                    />
-                    <button
-                        type="button"
-                        className="px-5 py-2.5 rounded-[var(--radius-sm)] bg-[var(--color-fg)] text-[var(--color-bg)] text-sm font-medium hover:opacity-90"
-                    >
+            <div className="space-y-10">
+                {/* 쿠폰등록 */}
+                <section>
+                    <h2 className="text-xl md:text-2xl font-bold text-[var(--color-fg)] mb-4">
                         쿠폰등록
-                    </button>
-                </div>
-
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                    {items.map(c => (
-                        <li key={c.id} className="relative rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-accent)] bg-[var(--color-surface)] p-5">
-                            <div className="flex items-start gap-4">
-                                <div className="flex-shrink-0 text-center pr-4 border-r border-dashed border-[var(--color-border-strong)]">
-                                    <p className="text-2xl md:text-3xl font-bold text-[var(--color-accent)] tabular-nums">
-                                        {c.discountType === "PERCENT" ? `${c.discountValue}%` : `${c.discountValue.toLocaleString()}원`}
-                                    </p>
-                                    <p className="text-[10px] text-[var(--color-fg-muted)] mt-1">할인</p>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-[var(--color-fg)] line-clamp-2">{c.name}</p>
-                                    <p className="text-xs text-[var(--color-fg-muted)] mt-1.5">최소 주문 {c.minOrderAmount.toLocaleString()}원</p>
-                                    <p className="text-[11px] text-[var(--color-fg-subtle)] mt-1">~ {new Date(c.expiresAt).toLocaleDateString("ko-KR")}</p>
-                                </div>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-
-                {items.length === 0 && (
-                    <div className="rounded-[var(--radius-lg)] px-4 py-16 text-center">
-                        <p className="text-sm text-[var(--color-fg-subtle)] mb-4">사용 가능한 쿠폰이 없습니다.</p>
-                        <Link href="/" className="inline-flex items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-brand)] text-[var(--color-brand-fg)] px-5 py-3 text-sm font-medium hover:bg-[var(--color-brand-hover)]">쇼핑하러 가기</Link>
+                    </h2>
+                    <div className="rounded-xl bg-[var(--color-bg-subtle)] px-6 py-7">
+                        <form onSubmit={register} className="flex items-center gap-2">
+                            <input
+                                type="text"
+                                value={code}
+                                onChange={e => setCode(e.target.value)}
+                                placeholder="쿠폰을 등록해주세요"
+                                className="flex-1 px-4 py-2.5 rounded-md bg-white border border-transparent text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[#3b82f6]"
+                            />
+                            <button
+                                type="submit"
+                                disabled={busy || !code.trim()}
+                                className="px-6 py-2.5 rounded-md bg-[#3b82f6] text-white text-sm font-medium hover:bg-[#2563eb] disabled:opacity-40 whitespace-nowrap"
+                            >
+                                쿠폰등록
+                            </button>
+                        </form>
+                        <p className="mt-3 text-center text-xs text-[var(--color-fg-muted)]">
+                            반드시 쇼핑몰에서 발행한 쿠폰번호 입력해주세요(10~35자 일렬번호 &quot;-&quot;제외)
+                        </p>
                     </div>
-                )}
+                </section>
 
-                {/* 페이지네이션 (MVP: 단일 페이지) */}
-                {items.length > 0 && (
-                    <div className="mt-6 flex items-center justify-center gap-1 text-xs text-[var(--color-fg-muted)]">
-                        <span className="px-2.5 py-1 rounded-[var(--radius-sm)] bg-[var(--color-accent)] text-white font-medium">1</span>
+                {/* 쿠폰리스트 */}
+                <section>
+                    <h2 className="text-xl md:text-2xl font-bold text-[var(--color-fg)] mb-4">
+                        쿠폰리스트
+                    </h2>
+
+                    {/* 탭 */}
+                    <div className="flex items-center gap-2 mb-4">
+                        <button
+                            type="button"
+                            onClick={() => setTab("available")}
+                            className={`px-4 py-1.5 rounded-md text-sm font-medium ${
+                                tab === "available"
+                                    ? "bg-[#3b82f6] text-white"
+                                    : "bg-white border border-[var(--color-border)] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
+                            }`}
+                        >
+                            보유쿠폰
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setTab("used")}
+                            className={`px-4 py-1.5 rounded-md text-sm font-medium ${
+                                tab === "used"
+                                    ? "bg-[#3b82f6] text-white"
+                                    : "bg-white border border-[var(--color-border)] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
+                            }`}
+                        >
+                            사용쿠폰
+                        </button>
                     </div>
+
+                    {/* 카드 그리드 */}
+                    <div className="rounded-xl bg-[var(--color-bg-subtle)] px-6 py-7">
+                        {visible.length === 0 ? (
+                            <p className="text-center text-sm text-[var(--color-fg-subtle)] py-12">
+                                {tab === "available" ? "보유한 쿠폰이 없습니다." : "사용한 쿠폰이 없습니다."}
+                            </p>
+                        ) : (
+                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {visible.map(c => (
+                                    <CouponCard key={c.memberCouponId} coupon={c} />
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </section>
+
+                {/* 페이지네이션 */}
+                {visible.length > 0 && (
+                    <nav className="flex items-center justify-center gap-1 text-sm text-[var(--color-fg-muted)]">
+                        <button
+                            className="w-8 h-8 rounded-md bg-[#3b82f6] text-white font-medium"
+                            aria-current="page"
+                        >
+                            1
+                        </button>
+                        {[2, 3, 4, 5].map(n => (
+                            <button
+                                key={n}
+                                className="w-8 h-8 rounded-md hover:bg-[var(--color-bg-subtle)]"
+                            >
+                                {n}
+                            </button>
+                        ))}
+                        <span className="px-1">...</span>
+                        <button className="w-8 h-8 rounded-md hover:bg-[var(--color-bg-subtle)]">
+                            30
+                        </button>
+                        <button className="w-8 h-8 rounded-md hover:bg-[var(--color-bg-subtle)]">
+                            &gt;
+                        </button>
+                    </nav>
                 )}
-            </section>
+            </div>
         </div>
+    );
+}
+
+function CouponCard({ coupon }: { coupon: CouponView }) {
+    const value =
+        coupon.discountType === "PERCENT"
+            ? `${coupon.discountValue}%`
+            : `${coupon.discountValue.toLocaleString()}원`;
+    return (
+        <li className="relative rounded-lg bg-white overflow-hidden">
+            {/* 우측 톱니 장식 (티켓 컷) */}
+            <div
+                className="absolute right-0 top-0 bottom-0 w-3 bg-[#3b82f6]"
+                style={{
+                    maskImage:
+                        "radial-gradient(circle at 0 6px, transparent 4px, black 4.5px)",
+                    maskSize: "100% 12px",
+                    maskRepeat: "repeat-y",
+                    WebkitMaskImage:
+                        "radial-gradient(circle at 0 6px, transparent 4px, black 4.5px)",
+                    WebkitMaskSize: "100% 12px",
+                    WebkitMaskRepeat: "repeat-y",
+                }}
+                aria-hidden="true"
+            />
+            <div className="pr-8 pl-6 py-6 text-center">
+                <p className="text-sm font-medium text-[var(--color-fg)] truncate">
+                    {coupon.name || "회원가입시 3천원 쿠폰"}
+                </p>
+                <p className="mt-1 text-[11px] text-[var(--color-fg-muted)]">
+                    사용기한: 발급일로부터 7일 이내
+                </p>
+                <p className="mt-5 text-3xl md:text-4xl font-bold text-[var(--color-fg)] tabular-nums">
+                    {value}
+                </p>
+                <p className="mt-5 text-[11px] text-[var(--color-fg-subtle)]">
+                    *총 주문금액
+                    {coupon.minOrderAmount > 0
+                        ? `${coupon.minOrderAmount.toLocaleString()}원`
+                        : "50,000원"}{" "}
+                    초과 구매 시 사용가능
+                </p>
+            </div>
+        </li>
     );
 }
