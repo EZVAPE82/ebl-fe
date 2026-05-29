@@ -763,14 +763,33 @@ function InstagramFeed() {
  * HTML form input 은 통이미지와 중복되므로 제거 (사용자가 input 위 그림자 지적 fix).
  * ============================================================ */
 function ContactCTA() {
-    // Figma 41:10474 원본 통이미지 (input/button 포함) 를 그대로 사용.
-    // 사용자 요청 — 추가 페인트/오버레이 없이 그냥 박는다. 클릭 시 /contact 이동.
+    // 배경: cta-purple-clean.png (input/button 영역 클린 — Figma 원본에서 input 자리 비운 버전)
+    // 그 위에 HTML form overlay (input + 문의하기 버튼) — 동작하는 입력칸
     return (
         <section className="mt-24 relative w-full">
-            <Link href="/contact" aria-label="1:1 문의하기" className="block">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/cta-purple.png" alt="엘프바에게 문의해주세요" className="w-full block" />
-            </Link>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/cta-purple-clean.png" alt="엘프바에게 문의해주세요" className="w-full block" />
+
+            {/* 우측 input + 문의하기 버튼 — 통이미지 위에 HTML overlay */}
+            <form
+                action="/contact"
+                method="get"
+                aria-label="1:1 문의하기"
+                className="absolute z-10 flex items-stretch gap-2 h-10 md:h-12"
+                style={{ left: "55%", right: "5%", top: "50%", transform: "translateY(-50%)" }}
+            >
+                <input
+                    type="text"
+                    placeholder="문의사항을 입력해주세요"
+                    className="flex-1 min-w-0 rounded-[18px] bg-white px-5 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
+                />
+                <button
+                    type="submit"
+                    className="rounded-[18px] bg-[var(--color-fg)] text-white text-sm font-semibold px-6 md:px-8 hover:opacity-90 transition whitespace-nowrap"
+                >
+                    문의하기
+                </button>
+            </form>
         </section>
     );
 }
