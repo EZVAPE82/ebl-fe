@@ -569,10 +569,11 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
         // 카드 4 장 높이 통일 — grid stretch + flex column 으로 상품줄을 카드 하단에 고정
         <li className="flex h-full">
             <Link href="/c/best" className="flex flex-col w-full h-full">
-                {/* 사진 박스 — aspect-ratio 6:5 (사진 원본 비율 매칭, padding/잘림 0%) */}
+                {/* 사진 박스 — 업계 표준 1:1 + object-fit cover (Shopify Dawn / Amazon / eBay 패턴).
+                    운영 시 사용자 업로드 사진(다양한 비율)도 800×800 thumbnail 자동 생성 후 동일 처리. */}
                 <div
                     style={{
-                        aspectRatio: "6 / 5",
+                        aspectRatio: "1 / 1",
                         width: "100%",
                         overflow: "hidden",
                         borderRadius: 12,
