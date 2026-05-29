@@ -467,10 +467,13 @@ function CalendarIconMini() {
  * BestReviewsSection — 시안 11:947 4 카드 (각 카드: 라이프스타일 사진 + 평점 + 후기 + 제품 미니)
  * 후기 텍스트는 한국어 목데이터, 사진은 review-photo-1~4.png 사용.
  * ============================================================ */
+// 후기 길이 다양화: 5줄 / 4줄 / 3줄 / 2줄 + 별점 5.0 / 4.5 / 5.0 / 4.0
+// 데이터 검증·layout 안정성 확인용 (mt-auto + grid stretch 로 상품줄 정렬 보장)
 const REVIEW_MOCKS = [
     {
         photo: "/images/review-photo-1-v2.png",
-        review: "야외 캠핑 갈 때 챙겨갔는데 가벼워서 부담 없고, 한 번 충전으로 정말 오래 가요. 친구들이 다 어디서 샀냐고 물어볼 정도였습니다.",
+        rating: 5.0,
+        review: "야외 캠핑 갈 때 챙겨갔는데 진짜 너무 좋아요. 가벼워서 부담 없고 한 번 충전으로 정말 오래 갑니다. 디자인도 깔끔하고 손에 쥐는 그립감도 편안해서 어디든 부담 없이 가지고 다닐 수 있어요. 친구들이 다 어디서 샀냐고 물어볼 정도였습니다. 다음에 또 살 거예요. 강추!",
         author: "김** 님",
         date: "2026.05.18",
         product: "ELFBAR BC5000 그린애플",
@@ -478,7 +481,8 @@ const REVIEW_MOCKS = [
     },
     {
         photo: "/images/review-photo-2-v2.png",
-        review: "디자인이 너무 깔끔해서 데일리로 쓰기 좋아요. 그립감도 편하고 손에 쥐기 딱 좋은 사이즈예요. 재구매 의사 있음.",
+        rating: 4.5,
+        review: "디자인이 너무 깔끔해서 데일리로 쓰기 좋아요. 그립감도 편하고 손에 쥐기 딱 좋은 사이즈입니다. 출장 다닐 때 가방에 쏙 들어가고 한 번 충전으로 정말 오래 가요. 재구매 의사 있음.",
         author: "이** 님",
         date: "2026.05.15",
         product: "ELFBAR BC10000 블루라즈",
@@ -486,6 +490,7 @@ const REVIEW_MOCKS = [
     },
     {
         photo: "/images/review-photo-3-v2.png",
+        rating: 5.0,
         review: "출장 다닐 때 가방에 쏙 들어가서 너무 편해요. 맛도 깔끔하고 향이 진하면서도 텁텁하지 않아서 마음에 듭니다.",
         author: "박** 님",
         date: "2026.05.10",
@@ -494,7 +499,8 @@ const REVIEW_MOCKS = [
     },
     {
         photo: "/images/review-photo-4-v2.png",
-        review: "선물용으로 샀는데 포장도 깔끔하고 받으신 분이 너무 좋아하셨어요. 다음에도 또 살 것 같아요. 강추!",
+        rating: 4.0,
+        review: "선물용으로 샀는데 받으신 분이 너무 좋아하셨어요. 강추!",
         author: "최** 님",
         date: "2026.05.08",
         product: "ELFLIQ 30ml 워터멜론",
@@ -589,8 +595,8 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
                 {/* 텍스트 영역 — flex column 으로 상품줄을 카드 하단에 mt-auto 로 푸시 */}
                 <div className="mt-4 flex flex-col flex-1 space-y-2">
                     <div className="flex items-center gap-1 text-xs">
-                        <span className="text-yellow-400">★★★★★</span>
-                        <span className="text-[var(--color-fg)] font-medium">5.0</span>
+                        <RatingStars rating={review.rating} />
+                        <span className="text-[var(--color-fg)] font-medium">{review.rating.toFixed(1)}</span>
                     </div>
                     {/* 후기 — 자연 길이 그대로 (자르거나 빈 자리 만들지 않음). 하단 정렬은 mt-auto + grid stretch 로 처리 */}
                     <p className="text-xs text-[var(--color-fg)] leading-relaxed">
@@ -614,6 +620,24 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
                 </div>
             </Link>
         </li>
+    );
+}
+
+/* 별점 표시 — rating (0~5) 에 따라 노란별 채움. 0.5 단위 반쪽별 지원.
+ * 예: 4.5 -> ★★★★⯨☆, 4.0 -> ★★★★☆, 5.0 -> ★★★★★ */
+function RatingStars({ rating }: { rating: number }) {
+    const full = Math.floor(rating);
+    const half = rating - full >= 0.25 && rating - full < 0.75;
+    const empty = 5 - full - (half ? 1 : 0);
+    return (
+        <span className="inline-flex items-center" aria-label={`별점 ${rating} / 5`}>
+            <span className="text-yellow-400 tracking-tight">{"★".repeat(full)}</span>
+            {half && <span className="text-yellow-400 tracking-tight relative">
+                <span className="absolute inset-0 overflow-hidden" style={{ width: "50%" }}>★</span>
+                <span className="text-[var(--color-border-strong,#d4d4d4)]">★</span>
+            </span>}
+            <span className="text-[var(--color-border-strong,#d4d4d4)] tracking-tight">{"★".repeat(empty)}</span>
+        </span>
     );
 }
 
