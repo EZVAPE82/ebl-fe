@@ -23,6 +23,7 @@ export function HeroCarousel({
     heightClass = "aspect-[12/5] min-h-[300px] md:min-h-[440px] max-h-[720px]",
     showOverlay = true,
     defaultOverlay = DESIGN_DEFAULT_OVERLAY,
+    children,
 }: {
     banners: Banner[];
     fallbackImage?: string;
@@ -36,6 +37,8 @@ export function HeroCarousel({
     showOverlay?: boolean;
     /** 텍스트 컬럼이 비어있을 때 쓸 기본 카피 */
     defaultOverlay?: { label: string; title: React.ReactNode; subtitle: string };
+    /** Hero 하단에 absolute 로 박힐 슬롯 (TrustBadges 등). 시안 214:17932 매칭. */
+    children?: React.ReactNode;
 }) {
     type Slide = { id: number; img: string; href: string; alt: string };
 
@@ -110,9 +113,23 @@ export function HeroCarousel({
             })}
 
             <div className="relative mx-auto max-w-screen-2xl h-full px-4 md:px-8 lg:px-12">
-                {/* 좌측 텍스트 오버레이 — 시안 매칭 (showOverlay=true 일 때만) */}
+                {/* 좌측 오버레이 — 시안 매칭: 페이지네이션을 위로, 텍스트를 그 아래로
+                    (이전: 텍스트 가운데 + 페이지네이션 하단 → 변경) */}
                 {showOverlay && (
-                    <div className="absolute inset-y-0 left-4 md:left-8 lg:left-12 flex flex-col justify-center text-white max-w-md md:max-w-lg z-10">
+                    <div className="absolute top-10 md:top-14 lg:top-16 left-4 md:left-8 lg:left-12 max-w-md md:max-w-lg z-10 text-white">
+                        {/* 페이지네이션 + 화살표 (위로 올림) */}
+                        {total > 1 && (
+                            <div className="mb-6 md:mb-10">
+                                <SlideIndicator
+                                    index={index}
+                                    total={total}
+                                    onPrev={() => go(-1)}
+                                    onNext={() => go(1)}
+                                    onPick={(i) => setIndex(i)}
+                                />
+                            </div>
+                        )}
+                        {/* 텍스트 카피 (페이지네이션 아래로) */}
                         <p className="text-xs md:text-sm tracking-[0.2em] uppercase opacity-90 mb-3 md:mb-4">
                             {defaultOverlay.label}
                         </p>
@@ -125,15 +142,9 @@ export function HeroCarousel({
                     </div>
                 )}
 
-                {/* 인디케이터·화살표 — showOverlay 와 독립, total>1 일 때만 노출 */}
-                {total > 1 && (
-                    <div
-                        className={
-                            showOverlay
-                                ? "absolute left-4 md:left-8 lg:left-12 bottom-6 md:bottom-10 z-10"
-                                : "absolute right-4 md:right-8 lg:right-12 bottom-3 md:bottom-5 z-10"
-                        }
-                    >
+                {/* 풀이미지 모드(showOverlay=false): 페이지네이션을 우하단 유지 */}
+                {!showOverlay && total > 1 && (
+                    <div className="absolute right-4 md:right-8 lg:right-12 bottom-3 md:bottom-5 z-10">
                         <SlideIndicator
                             index={index}
                             total={total}
@@ -162,6 +173,16 @@ export function HeroCarousel({
                     />
                 )}
             </div>
+
+            {/* 시안 214:17932: TrustBadges 등 Hero 하단에 absolute 로 박히는 슬롯.
+                Hero 이미지가 뒤에 비치고, 슬롯 자체는 반투명 다크 배경 (TrustBadges 내부 처리). */}
+            {children && (
+                <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none">
+                    <div className="pointer-events-auto">
+                        {children}
+                    </div>
+                </div>
+            )}
         </section>
     );
 }

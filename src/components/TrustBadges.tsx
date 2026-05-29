@@ -22,11 +22,18 @@ export function TrustBadges() {
     return (
         <section
             aria-label="혜택 안내"
-            className="bg-gradient-to-b from-[#1a0f3d] via-[#221248] to-[#1a0f3d]"
+            // Hero 안에 박힐 때: 반투명 어두운 보라 (Hero 이미지가 살짝 비침).
+            // 독립 사용 시: 짙은 그라데이션 fallback.
+            style={{
+                background: "linear-gradient(to top, rgba(26, 15, 61, 0.92) 0%, rgba(26, 15, 61, 0.7) 60%, rgba(26, 15, 61, 0.45) 100%)",
+                backdropFilter: "blur(4px)",
+                WebkitBackdropFilter: "blur(4px)",
+            }}
         >
-            <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-5 md:py-7 grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-4">
+            {/* 시안 padding 8 (py-8 = 32px) + padding 10 (px-10 = 40px) + 자동 spacing (justify-between) */}
+            <div className="mx-auto max-w-screen-2xl px-6 md:px-10 py-5 md:py-8 flex flex-wrap items-center justify-between gap-x-4 gap-y-4">
                 {items.map(it => (
-                    <div key={it.title} className="flex items-center gap-3 md:gap-4">
+                    <div key={it.title} className="flex items-center gap-3 md:gap-4 min-w-0">
                         {/* 아이콘 컨테이너 — 시안 매칭: 둥근 사각형 (rounded-xl) + 어두운 보라 + 살짝 그라데이션 */}
                         <div
                             className="w-12 h-12 md:w-[56px] md:h-[56px] flex-shrink-0 rounded-xl flex items-center justify-center text-white"
@@ -41,7 +48,7 @@ export function TrustBadges() {
                             <p className="text-sm md:text-base font-semibold text-white whitespace-nowrap">
                                 {it.title}
                             </p>
-                            <p className="text-[11px] md:text-xs text-white/60 mt-0.5">
+                            <p className="text-[11px] md:text-xs text-white/70 mt-0.5 whitespace-nowrap">
                                 {it.desc}
                             </p>
                         </div>

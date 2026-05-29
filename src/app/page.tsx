@@ -37,12 +37,12 @@ export default async function Home() {
         <div>
             {/* ===== 1. Hero 캐러셀 (MAIN_HERO 다중 슬라이드) =====
                 헤더가 홈에서 fixed 투명 오버레이라 Hero 위 spacer 불필요 — Hero 가 헤더 위로 침범. */}
-            <HeroCarousel banners={heroSlides} fallbackImage="/images/hero.png" />
+            {/* TrustBadges 는 Hero 안 하단에 absolute 로 박힘 (시안 214:17775 매칭) */}
+            <HeroCarousel banners={heroSlides} fallbackImage="/images/hero.png">
+                <TrustBadges />
+            </HeroCarousel>
 
-            {/* ===== 2. 트러스트 배지 5 카드 (시안 214:17932) — Hero 아래 풀폭 다크 그라데이션 ===== */}
-            <TrustBadges />
-
-            {/* ===== 3. 카테고리 아이콘 ===== */}
+            {/* ===== 카테고리 아이콘 ===== */}
             <CategoryIcons categories={categories} />
 
             <div className="mx-auto max-w-screen-2xl px-4 space-y-16 pb-16">
