@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useRouter, usePathname } from "next/navigation";
+import { api } from "@/lib/api";
 
 // 시안 214:17798 매칭 — 7 카테고리 + 고객센터 드롭다운
 type NavItem = { href: string; label: string; children?: { href: string; label: string }[] };
@@ -271,10 +272,21 @@ function UserIcon({ transparent, href, label }: { transparent?: boolean; href: s
     );
 }
 
-/* 시안 매칭: 카트 아이콘 + 우측 상단 빨간 동그라미 12 뱃지 (placeholder).
-   실제 카운트는 향후 cart API 연동 시 useCart() 같은 hook 으로 교체. */
+/* 시안 매칭: 카트 아이콘 + 우측 상단 빨간 동그라미 뱃지.
+   로그인 시 GET /api/v1/cart 호출해서 items.length 표시. 비로그인 / 0개 면 뱃지 숨김. */
 function CartIcon({ transparent }: { transparent?: boolean }) {
-    const count = 12; // TODO: cart API 연결 시 실제 개수로 교체
+    const { user } = useAuth();
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        if (!user) { setCount(0); return; }
+        let cancelled = false;
+        api<{ items?: { id: number }[] }>("/api/v1/cart", { auth: true })
+            .then(r => { if (!cancelled) setCount(r.items?.length ?? 0); })
+            .catch(() => { if (!cancelled) setCount(0); });
+        return () => { cancelled = true; };
+    }, [user]);
+
     return (
         <Link
             href="/cart"
