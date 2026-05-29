@@ -24,7 +24,7 @@ type Coupon = {
 const MOCK_COUPONS: Coupon[] = [
     { id: 1, name: "신규 가입 축하 5,000원", discountType: "FIXED", discountValue: 5000, minOrderAmount: 30000, expiresAt: "2026-08-31T23:59:59", status: "USABLE" },
     { id: 2, name: "5월 정기 10% 할인", discountType: "PERCENT", discountValue: 10, minOrderAmount: 50000, expiresAt: "2026-05-31T23:59:59", status: "USABLE" },
-    { id: 3, name: "ELFLIQ 액상 3,000원", discountType: "FIXED", discountValue: 3000, minOrderAmount: 20000, expiresAt: "2026-06-30T23:59:59", status: "USABLE" },
+    { id: 3, name: "일회용 라인업 3,000원", discountType: "FIXED", discountValue: 3000, minOrderAmount: 20000, expiresAt: "2026-06-30T23:59:59", status: "USABLE" },
     { id: 4, name: "VIP 등급 전용 15%", discountType: "PERCENT", discountValue: 15, minOrderAmount: 100000, expiresAt: "2026-12-31T23:59:59", status: "USABLE" },
 ];
 

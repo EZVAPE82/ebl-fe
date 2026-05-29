@@ -13,7 +13,6 @@ const NAV: NavItem[] = [
     { href: "/products",     label: "전체상품" },
     { href: "/c/best",       label: "BEST" },
     { href: "/c/disposable", label: "일회용" },
-    { href: "/c/liquid",     label: "액상" },
     { href: "/events",       label: "이벤트" },
     {
         href: "/notices",

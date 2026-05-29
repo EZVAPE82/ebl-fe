@@ -18,7 +18,7 @@ export type ReviewItem = {
 
 /* 시안 252:10915 매칭 — 카테고리 탭 + 4 cols 그리드 + 카드 클릭 시 ReviewLightbox */
 
-const CATEGORIES = ["전체", "일회용", "액상", "기기"];
+const CATEGORIES = ["전체", "일회용", "기기"];
 
 export function ReviewerGrid({ reviews }: { reviews: ReviewItem[] }) {
     const [category, setCategory] = useState<string>("전체");

@@ -17,10 +17,10 @@ const isProd = SITE_URL.includes("elfbarlounge.co.kr");
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
     title: { default: "엘프바 라운지 — 전자담배 자사몰", template: "%s | 엘프바 라운지" },
-    description: "정품 전자담배 기기·액상 전문몰. 만 19세 이상 이용 가능.",
+    description: "정품 전자담배 기기 전문몰. 만 19세 이상 이용 가능.",
     openGraph: {
         title: "엘프바 라운지",
-        description: "정품 전자담배 기기·액상 전문몰",
+        description: "정품 전자담배 기기 전문몰",
         url: SITE_URL,
         siteName: "엘프바 라운지",
         locale: "ko_KR",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     twitter: {
         card: "summary_large_image",
         title: "엘프바 라운지",
-        description: "정품 전자담배 기기·액상 전문몰",
+        description: "정품 전자담배 기기 전문몰",
         images: ["/og-default.png"],
     },
     robots: isProd ? { index: true, follow: true } : { index: false, follow: false },

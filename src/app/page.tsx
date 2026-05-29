@@ -106,9 +106,8 @@ const DEFAULT_CATEGORIES: Category[] = [
     { id: 1, parentId: null, name: "베스트",  slug: "best",       sortOrder: 1, visible: true },
     { id: 2, parentId: null, name: "신상품",  slug: "new",        sortOrder: 2, visible: true },
     { id: 3, parentId: null, name: "일회용",  slug: "disposable", sortOrder: 3, visible: true },
-    { id: 4, parentId: null, name: "액상",    slug: "liquid",     sortOrder: 4, visible: true },
-    { id: 5, parentId: null, name: "기기",    slug: "devices",    sortOrder: 5, visible: true },
-    { id: 6, parentId: null, name: "악세서리", slug: "accessory",  sortOrder: 6, visible: true },
+    { id: 5, parentId: null, name: "기기",    slug: "devices",    sortOrder: 4, visible: true },
+    { id: 6, parentId: null, name: "악세서리", slug: "accessory",  sortOrder: 5, visible: true },
 ];
 
 /**
@@ -137,13 +136,12 @@ function CategoryIcons({ categories: _categories }: { categories: Category[] }) 
         { label: "NEW",      href: "/c/new",        src: "/images/cat-new.png" },
         { label: "이벤트",   href: "/events",       src: "/images/cat-event.png" },
         { label: "일회용",   href: "/c/disposable", src: "/images/cat-disposable.png" },
-        { label: "액상",     href: "/c/liquid",     src: "/images/cat-liquid.png" },
         { label: "공지사항", href: "/notices",      src: "/images/cat-notice.png" },
         { label: "구매후기", href: "/reviews/best", src: "/images/cat-review.png" },
     ];
     return (
         <section className="mx-auto max-w-screen-2xl px-4 py-8 md:py-12">
-            <ul className="grid grid-cols-4 md:grid-cols-7 gap-3 md:gap-4">
+            <ul className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
                 {items.map(it => (
                     <li key={it.label}>
                         <Link
