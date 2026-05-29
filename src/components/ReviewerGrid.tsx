@@ -148,6 +148,19 @@ function ReviewCard({ review, onClick }: { review: ReviewItem; onClick: () => vo
                 <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-2">{review.content ?? ""}</p>
                 <p className="text-[11px] text-[var(--color-fg-muted)] tabular-nums">{formatDate(review.createdAt)}</p>
             </div>
+            {/* 시안 매칭 — 카드 하단에 제품 thumbnail + 제품명 */}
+            <div className="mt-3 pt-3 border-t border-[var(--color-border)] flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src="/images/elfbar-product-1.png"
+                    alt=""
+                    className="w-10 h-10 rounded bg-[var(--color-bg-subtle)] object-cover flex-shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-[var(--color-fg)] line-clamp-1">제품 타이틀</p>
+                    <p className="text-[11px] text-[var(--color-fg-muted)] line-clamp-1">제품 상세타이틀 아이템</p>
+                </div>
+            </div>
         </button>
     );
 }
@@ -176,9 +189,8 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
     const review = reviews[index];
     const photos = review.photoUrls?.length ? review.photoUrls : ["/images/review-photo-1-v2.png"];
     const main = photos[0];
-
-    // 좌측 작은 thumbnail row (시안 매칭 — 다른 후기들의 사진)
-    const thumbStrip = reviews.slice(Math.max(0, index - 2), index + 4).map(r => r.photoUrls?.[0]).filter(Boolean) as string[];
+    // 같은 상품의 다른 리뷰 5개 추출 (시안의 "이 상품의 다른 리뷰" 영역)
+    const otherReviews = reviews.filter((_, i) => i !== index).slice(0, 5);
 
     // body scroll lock
     useEffect(() => {
@@ -194,86 +206,97 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
             aria-label="후기 상세 보기"
             onClick={onClose}
         >
+            {/* 좌:사진 + 우:텍스트 (시안 매칭: 사진은 모서리 둥근 정사각형 + 텍스트는 흰 박스) */}
             <div
-                className="relative w-full max-w-5xl bg-white rounded-[18px] overflow-hidden shadow-2xl flex flex-col md:flex-row"
+                className="relative w-full max-w-4xl flex flex-col md:flex-row gap-0 max-h-[90vh]"
                 onClick={e => e.stopPropagation()}
             >
-                {/* 닫기 버튼 */}
-                <button
-                    type="button"
-                    aria-label="닫기"
-                    onClick={onClose}
-                    className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/10 hover:bg-black/20 text-[var(--color-fg)] flex items-center justify-center transition"
-                >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
-
-                {/* 좌측 — 큰 사진 */}
-                <div className="md:w-1/2 bg-[var(--color-bg-subtle)] flex-shrink-0">
-                    <div className="aspect-[4/5] md:aspect-square w-full overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={main} alt="" className="w-full h-full object-cover" draggable={false} />
-                    </div>
+                {/* 좌측 큰 사진 (정사각형) — 모서리 좌측만 라운딩 */}
+                <div className="md:w-[400px] flex-shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={main}
+                        alt=""
+                        className="w-full aspect-square object-cover rounded-t-[18px] md:rounded-l-[18px] md:rounded-tr-none block"
+                        draggable={false}
+                    />
                 </div>
 
-                {/* 우측 — 텍스트 영역 */}
-                <div className="md:w-1/2 p-5 md:p-7 flex flex-col">
-                    {/* 별점 + 작성자 + 날짜 */}
-                    <div className="flex items-center gap-1 text-base mb-1">
+                {/* 우측 텍스트 영역 (흰 배경) */}
+                <div className="bg-white flex-1 p-5 md:p-7 rounded-b-[18px] md:rounded-r-[18px] md:rounded-bl-none relative flex flex-col overflow-y-auto">
+                    {/* 우상단 X 닫기 — 시안에 우상단 닫기 버튼 */}
+                    <button
+                        type="button"
+                        aria-label="닫기"
+                        onClick={onClose}
+                        className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+
+                    {/* 별점 + 5.0 */}
+                    <div className="flex items-center gap-1 mb-2">
                         <RatingStars rating={review.rating} />
-                        <span className="ml-1 font-bold text-[var(--color-fg)]">{review.rating.toFixed(1)}</span>
+                        <span className="ml-1 font-bold text-[var(--color-fg)] text-base">{review.rating.toFixed(1)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-[var(--color-fg-muted)] mb-4">
-                        <span className="font-medium">회원 {String(review.memberId).slice(-3)}**</span>
-                        <span className="tabular-nums">{formatDate(review.createdAt)}</span>
+
+                    {/* 이름 + 날짜 */}
+                    <div className="flex items-center justify-between mb-4 pr-8">
+                        <span className="font-bold text-[var(--color-fg)] text-base">GlowMina</span>
+                        <span className="text-xs text-[var(--color-fg-muted)] tabular-nums">{formatDate(review.createdAt)}</span>
                     </div>
 
                     {/* 후기 본문 */}
-                    <div className="flex-1 overflow-y-auto">
-                        <p className="text-sm md:text-base text-[var(--color-fg)] leading-relaxed whitespace-pre-line">
+                    <div className="flex-1 mb-4">
+                        <p className="text-sm text-[var(--color-fg)] leading-relaxed whitespace-pre-line">
                             {review.content ?? ""}
                         </p>
                     </div>
 
-                    {/* 상품 정보 */}
-                    <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
-                        <p className="text-xs text-[var(--color-fg-muted)] mb-2">구매한 상품</p>
-                        <Link href={`/p/${review.productId}`} className="flex items-center gap-3 hover:opacity-80 transition">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="/images/elfbar-product-1.png" alt="" className="w-12 h-12 rounded bg-[var(--color-bg-subtle)] object-cover" />
-                            <span className="text-sm text-[var(--color-fg)] font-medium">ELFBAR 시그니처</span>
-                        </Link>
-                    </div>
-
-                    {/* 다른 후기 thumbnail strip + 화살표 */}
-                    {reviews.length > 1 && (
-                        <div className="mt-4 flex items-center gap-2">
-                            <button
-                                type="button"
-                                aria-label="이전 후기"
-                                onClick={onPrev}
-                                className="w-8 h-8 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)] flex items-center justify-center text-[var(--color-fg-muted)] flex-shrink-0"
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-                            </button>
-                            <div className="flex-1 flex gap-1.5 overflow-x-auto scrollbar-hide">
-                                {thumbStrip.map((src, i) => (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img key={i} src={src} alt="" className="w-12 h-12 rounded object-cover flex-shrink-0" draggable={false} />
-                                ))}
+                    {/* 이 상품의 다른 리뷰 + 좌/우 화살표 */}
+                    {otherReviews.length > 0 && (
+                        <>
+                            <div className="flex items-center justify-between mb-3 pt-4 border-t border-[var(--color-border)]">
+                                <span className="text-sm font-medium text-[var(--color-fg)]">이 상품의 다른 리뷰</span>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        aria-label="이전"
+                                        onClick={onPrev}
+                                        className="w-7 h-7 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        aria-label="다음"
+                                        onClick={onNext}
+                                        className="w-7 h-7 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                                    </button>
+                                </div>
                             </div>
-                            <button
-                                type="button"
-                                aria-label="다음 후기"
-                                onClick={onNext}
-                                className="w-8 h-8 rounded-full border border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)] flex items-center justify-center text-[var(--color-fg-muted)] flex-shrink-0"
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-                            </button>
-                        </div>
+                            {/* thumbnail strip 5 개 */}
+                            <div className="flex gap-2">
+                                {otherReviews.map((r, i) => {
+                                    const t = r.photoUrls?.[0] ?? "/images/review-photo-1-v2.png";
+                                    return (
+                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                        <img
+                                            key={i}
+                                            src={t}
+                                            alt=""
+                                            className="w-16 h-16 rounded-[10px] object-cover flex-shrink-0 cursor-pointer hover:opacity-80 transition"
+                                            draggable={false}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </>
                     )}
                 </div>
             </div>
