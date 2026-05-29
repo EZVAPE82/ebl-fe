@@ -10,7 +10,7 @@ import { api } from "@/lib/api";
 // 시안 214:17798 매칭 — 7 카테고리 + 고객센터 드롭다운
 type NavItem = { href: string; label: string; children?: { href: string; label: string }[] };
 const NAV: NavItem[] = [
-    { href: "/c/best",       label: "전체상품" },
+    { href: "/products",     label: "전체상품" },
     { href: "/c/best",       label: "BEST" },
     { href: "/c/disposable", label: "일회용" },
     { href: "/c/liquid",     label: "액상" },
