@@ -31,7 +31,7 @@ export function FloatingDock() {
                 {badgeOpen && (
                     <Link
                         href={profileHref}
-                        className="absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-[var(--color-fg)] text-[var(--color-bg)] text-[11px] font-medium px-3 py-1.5 shadow-md hover:opacity-90 transition flex items-center gap-1.5"
+                        className="absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-[18px] bg-[var(--color-fg)] text-[var(--color-bg)] text-[11px] font-medium px-3 py-1.5 shadow-md hover:opacity-90 transition flex items-center gap-1.5"
                         aria-label="개인정보 바로가기"
                     >
                         <span>개인정보 바로가기</span>
