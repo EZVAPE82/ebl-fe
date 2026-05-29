@@ -88,7 +88,7 @@ export async function SeriesPage(props: SeriesPageProps) {
                     <ul className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                         {products.map(p => (
                             <li key={p.id}>
-                                <ProductCard product={p} />
+                                <ProductCard p={p} />
                             </li>
                         ))}
                     </ul>

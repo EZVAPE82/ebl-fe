@@ -20,7 +20,7 @@ const NAV: NavItem[] = [
         label: "고객센터",
         children: [
             { href: "/notices", label: "공지사항" },
-            { href: "/faq",     label: "문의하기" },
+            { href: "/contact", label: "문의하기" },
             { href: "/faq",     label: "자주묻는질문" },
         ],
     },
