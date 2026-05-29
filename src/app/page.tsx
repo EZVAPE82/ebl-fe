@@ -565,10 +565,10 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
         // 카드 4 장 높이 통일 — grid stretch + flex column 으로 상품줄을 카드 하단에 고정
         <li className="flex h-full">
             <Link href="/c/best" className="flex flex-col w-full h-full">
-                {/* 사진 박스 — aspect-ratio 1:1 명시 + img/색 + object-fit cover (모든 환경 호환) */}
+                {/* 사진 박스 — aspect-ratio 6:5 (사진 원본 비율 매칭, padding/잘림 0%) */}
                 <div
                     style={{
-                        aspectRatio: "1 / 1",
+                        aspectRatio: "6 / 5",
                         width: "100%",
                         overflow: "hidden",
                         borderRadius: 12,
@@ -598,8 +598,9 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
                         <RatingStars rating={review.rating} />
                         <span className="text-[var(--color-fg)] font-medium">{review.rating.toFixed(1)}</span>
                     </div>
-                    {/* 후기 — 자연 길이 그대로 (자르거나 빈 자리 만들지 않음). 하단 정렬은 mt-auto + grid stretch 로 처리 */}
-                    <p className="text-xs text-[var(--color-fg)] leading-relaxed">
+                    {/* 후기 — 최대 5 줄 표시, 그 이상은 "..." 으로 잘림 (line-clamp-5).
+                        하단 정렬은 mt-auto + grid stretch 로 처리. */}
+                    <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-5">
                         {review.review}
                     </p>
                     <p className="text-[11px] text-[var(--color-fg-muted)] flex items-center gap-1.5">
