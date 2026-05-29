@@ -297,13 +297,12 @@ function Ranking({ items }: { items: ProductSummary[] }) {
         top.slice(6, 9),
     ];
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {groups.map((group, gi) => (
-                <div
-                    key={gi}
-                    className="flex flex-col rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-surface)]"
-                >
-                    <Link href="/c/best" aria-label={LABELS[gi]} className="relative block group">
+                // 시안 매칭: 사진 + 리스트를 한 박스로 묶지 않고 분리.
+                // 사진은 단독 라운딩, 리스트는 풀폭. 둘 다 좌측 0 으로 선 맞춤.
+                <div key={gi} className="flex flex-col gap-3">
+                    <Link href="/c/best" aria-label={LABELS[gi]} className="relative block group rounded-[var(--radius-lg)] overflow-hidden">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={PHOTOS[gi]} alt={LABELS[gi]} className="w-full block aspect-[464/348] object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
@@ -312,11 +311,12 @@ function Ranking({ items }: { items: ProductSummary[] }) {
                             <p className="text-sm md:text-base font-bold mt-0.5">{LABELS[gi]}</p>
                         </div>
                     </Link>
+                    {/* 리스트 — 좌측 padding 0 으로 사진과 선 맞춤 */}
                     <ul className="divide-y divide-[var(--color-border)]">
                         {group.map((p) => (
                             <li key={p.id}>
-                                <Link href={`/p/${p.id}`} className="flex items-center gap-3 px-3 py-3 hover:bg-[var(--color-bg-subtle)]">
-                                    {/* 썸네일 - 사진 다 보이게 object-contain + 박스 크게 */}
+                                <Link href={`/p/${p.id}`} className="flex items-center gap-3 py-3 pr-3 hover:bg-[var(--color-bg-subtle)]">
+                                    {/* 썸네일 — 사진 박스 좌측 선과 정확히 정렬 (padding 0) */}
                                     <div className="w-14 h-14 rounded bg-[var(--color-bg-subtle)] flex-shrink-0 overflow-hidden flex items-center justify-center p-1">
                                         {p.thumbnailUrl && (
                                             // eslint-disable-next-line @next/next/no-img-element
