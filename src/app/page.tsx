@@ -791,15 +791,14 @@ function ContactCTA() {
                 draggable={false}
             />
 
-            {/* 우측 input + 문의하기 버튼 — 통이미지 위에 HTML overlay 박아서
-                CSS rounded-[18px] 적용 (사용자 요청: 라운딩 적용된 사각형 전부 18 통일).
-                위치 비율은 cta-card-full.png (3840x560) 의 input/button 자리에 맞춤. */}
+            {/* 우측 input + 문의하기 버튼 — 통이미지 위에 HTML overlay.
+                고정 높이 (h-10 md:h-12) + vertical center 로 통이미지 안 input 자리에 맞춤. */}
             <form
                 action="/faq"
                 method="get"
                 aria-label="1:1 문의하기"
-                className="absolute z-10 flex items-stretch gap-2"
-                style={{ left: "55%", right: "5%", top: "25%", bottom: "25%" }}
+                className="absolute z-10 flex items-stretch gap-2 h-10 md:h-12"
+                style={{ left: "55%", right: "5%", top: "50%", transform: "translateY(-50%)" }}
             >
                 <input
                     type="text"
