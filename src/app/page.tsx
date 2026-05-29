@@ -60,13 +60,13 @@ export default async function Home() {
                     <Ranking items={popular.content.slice(0, 9)} />
                 </Section>
 
-                {/* ===== 7. 시리즈 풀폭 배너 (시안 14:10629, 14:10630 통이미지) ===== */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Link href="/c/disposable" className="block overflow-hidden rounded-[var(--radius-lg)] hover:opacity-95 transition">
+                {/* ===== 7. 시리즈 배너 (시안 — 테두리 X, 간격 X, 꽉 채움) ===== */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                    <Link href="/c/disposable" className="block overflow-hidden hover:opacity-95 transition">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/images/series-ice.png" alt="ICE COOL AS YOU WANT" className="w-full block" />
                     </Link>
-                    <Link href="/c/disposable" className="block overflow-hidden rounded-[var(--radius-lg)] hover:opacity-95 transition">
+                    <Link href="/c/disposable" className="block overflow-hidden hover:opacity-95 transition">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/images/series-shimmer.png" alt="SHIMMERING IN YOUR HAND" className="w-full block" />
                     </Link>
@@ -592,11 +592,8 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
                         <span className="text-yellow-400">★★★★★</span>
                         <span className="text-[var(--color-fg)] font-medium">5.0</span>
                     </div>
-                    {/* 후기 — 항상 3 줄 분량 자리 확보 (text-xs 0.75rem * leading-relaxed 1.625 * 3 ≈ 3.66em) */}
-                    <p
-                        className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-3"
-                        style={{ minHeight: "3.66em" }}
-                    >
+                    {/* 후기 — 자연 길이 그대로 (자르거나 빈 자리 만들지 않음). 하단 정렬은 mt-auto + grid stretch 로 처리 */}
+                    <p className="text-xs text-[var(--color-fg)] leading-relaxed">
                         {review.review}
                     </p>
                     <p className="text-[11px] text-[var(--color-fg-muted)] flex items-center gap-1.5">
