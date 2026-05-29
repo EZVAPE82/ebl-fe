@@ -200,3 +200,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* 모바일 가로 스크롤 영역 스크롤바 숨김 (TrustBadges 등) */
+.scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }

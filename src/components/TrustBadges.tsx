@@ -25,13 +25,13 @@ export function TrustBadges() {
             // 시안: 배경 완전 투명. Hero 이미지 그대로 비침. 아이콘/텍스트만 표시.
             className="bg-transparent"
         >
-            {/* 시안 padding 8 (py-8 = 32px) + padding 10 (px-10 = 40px) + 자동 spacing (justify-between) */}
-            <div className="mx-auto max-w-screen-2xl px-6 md:px-10 py-5 md:py-8 flex flex-wrap items-center justify-between gap-x-4 gap-y-4">
+            {/* 데스크톱: flex justify-between. 모바일: 가로 스크롤 (시안 매칭) */}
+            <div className="mx-auto max-w-screen-2xl px-4 md:px-10 py-4 md:py-8 flex md:flex-wrap items-center md:justify-between gap-x-5 md:gap-x-4 gap-y-4 overflow-x-auto md:overflow-visible scrollbar-hide snap-x">
                 {items.map(it => (
-                    <div key={it.title} className="flex items-center gap-3 md:gap-4 min-w-0">
+                    <div key={it.title} className="flex items-center gap-2.5 md:gap-4 flex-shrink-0 md:min-w-0 snap-start">
                         {/* 아이콘 컨테이너 — 시안 매칭: 둥근 사각형 (rounded-xl) + 어두운 보라 + 살짝 그라데이션 */}
                         <div
-                            className="w-12 h-12 md:w-[56px] md:h-[56px] flex-shrink-0 rounded-xl flex items-center justify-center text-white"
+                            className="w-10 h-10 md:w-[56px] md:h-[56px] flex-shrink-0 rounded-xl flex items-center justify-center text-white"
                             style={{
                                 background: "linear-gradient(135deg, rgba(74, 51, 135, 0.55) 0%, rgba(45, 30, 90, 0.45) 100%)",
                                 boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.08)",
@@ -40,10 +40,10 @@ export function TrustBadges() {
                             <it.Icon />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm md:text-base font-semibold text-white whitespace-nowrap">
+                            <p className="text-xs md:text-base font-semibold text-white whitespace-nowrap">
                                 {it.title}
                             </p>
-                            <p className="text-[11px] md:text-xs text-white/70 mt-0.5 whitespace-nowrap">
+                            <p className="text-[10px] md:text-xs text-white/70 mt-0.5 whitespace-nowrap">
                                 {it.desc}
                             </p>
                         </div>

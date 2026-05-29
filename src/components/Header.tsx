@@ -102,7 +102,11 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                         검색은 input 박스 대신 아이콘 → /search 로 이동 (시안 11:797 매칭).
                         다크 토글은 사이드 메뉴 안으로 이동 (시안 헤더엔 없음). */}
                     <div className={`ml-auto flex items-center gap-3.5 md:gap-4 ${actionTone}`}>
-                        <SearchIcon transparent={transparent} />
+                        {/* 검색 아이콘: 모바일은 헤더 공간 절약 위해 숨김 (햄버거 메뉴에서 접근).
+                            데스크톱(sm+)에서만 노출. */}
+                        <span className="hidden sm:inline-flex">
+                            <SearchIcon transparent={transparent} />
+                        </span>
                         {loading ? (
                             <span className="opacity-60">···</span>
                         ) : user ? (
