@@ -211,6 +211,19 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
                 className="relative w-full max-w-4xl bg-white rounded-[18px] shadow-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 md:h-[520px] max-h-[90vh]"
                 onClick={e => e.stopPropagation()}
             >
+                {/* 우상단 X 닫기 — 흰 컨테이너 바깥 모서리 (overflow 안 잘리도록 컨테이너 직계 child) */}
+                <button
+                    type="button"
+                    aria-label="닫기"
+                    onClick={(e) => { e.stopPropagation(); onClose(); }}
+                    className="absolute top-3 right-3 md:top-4 md:right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+
                 {/* 좌측 큰 사진 — 흰 박스 안에 들어간 라운딩 정사각형 */}
                 <div className="md:h-full md:w-[440px] flex-shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -223,20 +236,7 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
                 </div>
 
                 {/* 우측 텍스트 — 흰 컨테이너 위에 직접 (별도 박스 없음) */}
-                <div className="flex-1 md:h-full relative flex flex-col overflow-y-auto">
-                    {/* 우상단 X 닫기 — 시안에 우상단 닫기 버튼 */}
-                    <button
-                        type="button"
-                        aria-label="닫기"
-                        onClick={onClose}
-                        className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition"
-                    >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    </button>
-
+                <div className="flex-1 md:h-full relative flex flex-col overflow-y-auto pr-10">
                     {/* 별점 + 5.0 */}
                     <div className="flex items-center gap-1 mb-2">
                         <RatingStars rating={review.rating} />
@@ -244,7 +244,7 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
                     </div>
 
                     {/* 이름 + 날짜 */}
-                    <div className="flex items-center justify-between mb-4 pr-8">
+                    <div className="flex items-center justify-between mb-4">
                         <span className="font-bold text-[var(--color-fg)] text-base">GlowMina</span>
                         <span className="text-xs text-[var(--color-fg-muted)] tabular-nums">{formatDate(review.createdAt)}</span>
                     </div>
