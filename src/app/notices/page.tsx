@@ -55,14 +55,24 @@ export default async function NoticesPage({ searchParams }: { searchParams: Prom
                     Total: <span className="text-[var(--color-accent)] font-bold">{total}</span>
                 </p>
                 <form action="/notices" method="get" className="flex items-center gap-2">
-                    <select
-                        name="field"
-                        className="bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-2 text-sm text-[var(--color-fg)] min-w-[100px]"
-                        defaultValue="title"
-                    >
-                        <option value="title">제목</option>
-                        <option value="content">내용</option>
-                    </select>
+                    {/* 커스텀 select — 기본 화살표 숨김(appearance-none) + 우측에 SVG chevron. */}
+                    <div className="relative">
+                        <select
+                            name="field"
+                            className="appearance-none bg-[var(--color-surface)] border border-[var(--color-border)] pl-3 pr-8 py-2 text-sm text-[var(--color-fg)] cursor-pointer focus:outline-none focus:border-[var(--color-fg)]"
+                            defaultValue="title"
+                        >
+                            <option value="title">제목</option>
+                            <option value="content">내용</option>
+                        </select>
+                        <svg
+                            width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-fg-muted)] pointer-events-none"
+                        >
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </div>
                     <div className="relative">
                         <input
                             type="search"

@@ -198,7 +198,15 @@ function NavItem({ item, transparent, navTone }: { item: NavItem; transparent: b
             onMouseLeave={() => setOpen(false)}
         >
             <Link href={item.href} className="hover:opacity-100 flex items-center gap-1">
-                {item.label}
+                <span>{item.label}</span>
+                {/* 드롭다운 표시 chevron — 호버 시 회전 */}
+                <svg
+                    width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+                    className={`transition-transform ${open ? "rotate-180" : ""}`}
+                >
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
             </Link>
             {open && (
                 <div className={`absolute top-full left-0 pt-3 z-50`} role="menu">

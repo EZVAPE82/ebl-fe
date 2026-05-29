@@ -77,18 +77,23 @@ export default function ContactPage() {
             <form onSubmit={onSubmit} className="max-w-3xl space-y-6">
                 {/* 문의 유형 */}
                 <Field label="문의 유형" required>
-                    <select
-                        value={form.category}
-                        onChange={e => update("category", e.target.value)}
-                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg)]"
-                    >
-                        <option value="주문/결제">주문/결제</option>
-                        <option value="배송">배송</option>
-                        <option value="교환/반품">교환/반품</option>
-                        <option value="회원/적립금">회원/적립금</option>
-                        <option value="상품 문의">상품 문의</option>
-                        <option value="기타">기타</option>
-                    </select>
+                    <div className="relative">
+                        <select
+                            value={form.category}
+                            onChange={e => update("category", e.target.value)}
+                            className="w-full appearance-none bg-[var(--color-surface)] border border-[var(--color-border)] pl-4 pr-10 py-3 text-sm text-[var(--color-fg)] cursor-pointer focus:outline-none focus:border-[var(--color-fg)]"
+                        >
+                            <option value="주문/결제">주문/결제</option>
+                            <option value="배송">배송</option>
+                            <option value="교환/반품">교환/반품</option>
+                            <option value="회원/적립금">회원/적립금</option>
+                            <option value="상품 문의">상품 문의</option>
+                            <option value="기타">기타</option>
+                        </select>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-fg-muted)] pointer-events-none">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </div>
                 </Field>
 
                 {/* 이름 + 이메일 */}
