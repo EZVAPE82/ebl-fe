@@ -57,7 +57,7 @@ export default async function NoticesPage({ searchParams }: { searchParams: Prom
                 <form action="/notices" method="get" className="flex items-center gap-2">
                     <select
                         name="field"
-                        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[18px] px-4 py-2 text-sm text-[var(--color-fg)] min-w-[100px]"
+                        className="bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-2 text-sm text-[var(--color-fg)] min-w-[100px]"
                         defaultValue="title"
                     >
                         <option value="title">제목</option>
@@ -69,7 +69,7 @@ export default async function NoticesPage({ searchParams }: { searchParams: Prom
                             name="q"
                             placeholder="검색어를 입력해주세요"
                             defaultValue={sp.q ?? ""}
-                            className="w-48 md:w-64 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[18px] px-4 py-2 pr-10 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
+                            className="w-48 md:w-64 bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-2 pr-10 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
                         />
                         <button type="submit" aria-label="검색" className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -85,8 +85,12 @@ export default async function NoticesPage({ searchParams }: { searchParams: Prom
                 <p className="text-sm text-[var(--color-fg-subtle)] text-center py-16">등록된 공지가 없습니다.</p>
             ) : (
                 <ul className="divide-y divide-[var(--color-border)]">
-                    {items.map(n => {
-                        const isNew = new Date(n.createdAt).getTime() > sevenDaysAgo;
+                    {items.map((n, i) => {
+                        // mock fallback 모드일 때: 시안 매칭 — index 1, 2 (핀 다음 두 row) 강제 NEW.
+                        // 실데이터: createdAt 기준 7일 이내면 NEW.
+                        const isNew = isFallback
+                            ? (i === 1 || i === 2)
+                            : new Date(n.createdAt).getTime() > sevenDaysAgo;
                         return (
                             <li key={n.id}>
                                 <Link

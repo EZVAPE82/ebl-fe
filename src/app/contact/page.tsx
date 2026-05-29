@@ -47,13 +47,13 @@ export default function ContactPage() {
                 <div className="mt-10 flex justify-center gap-3">
                     <Link
                         href="/"
-                        className="inline-flex items-center justify-center rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] px-8 py-3 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
+                        className="inline-flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)] px-8 py-3 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
                     >
                         홈으로
                     </Link>
                     <Link
                         href="/notices"
-                        className="inline-flex items-center justify-center rounded-[18px] bg-[var(--color-fg)] text-white px-8 py-3 text-sm font-medium hover:opacity-90 transition"
+                        className="inline-flex items-center justify-center bg-[var(--color-fg)] text-white px-8 py-3 text-sm font-medium hover:opacity-90 transition"
                     >
                         공지사항
                     </Link>
@@ -80,7 +80,7 @@ export default function ContactPage() {
                     <select
                         value={form.category}
                         onChange={e => update("category", e.target.value)}
-                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[18px] px-4 py-3 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg)]"
+                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg)]"
                     >
                         <option value="주문/결제">주문/결제</option>
                         <option value="배송">배송</option>
@@ -100,7 +100,7 @@ export default function ContactPage() {
                             onChange={e => update("name", e.target.value)}
                             placeholder="홍길동"
                             required
-                            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[18px] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
+                            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
                         />
                     </Field>
                     <Field label="이메일" required>
@@ -110,7 +110,7 @@ export default function ContactPage() {
                             onChange={e => update("email", e.target.value)}
                             placeholder="example@elfbar.com"
                             required
-                            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[18px] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
+                            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
                         />
                     </Field>
                 </div>
@@ -122,7 +122,7 @@ export default function ContactPage() {
                         value={form.phone}
                         onChange={e => update("phone", e.target.value)}
                         placeholder="010-0000-0000"
-                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[18px] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
+                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
                     />
                 </Field>
 
@@ -134,7 +134,7 @@ export default function ContactPage() {
                         onChange={e => update("title", e.target.value)}
                         placeholder="문의 제목을 입력해주세요"
                         required
-                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[18px] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
+                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)]"
                     />
                 </Field>
 
@@ -146,7 +146,7 @@ export default function ContactPage() {
                         placeholder="문의 내용을 자세히 입력해주세요"
                         required
                         rows={8}
-                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[18px] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)] resize-y"
+                        className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg)] resize-y"
                     />
                 </Field>
 
@@ -171,13 +171,13 @@ export default function ContactPage() {
                 <div className="pt-4 flex justify-center gap-3">
                     <Link
                         href="/"
-                        className="inline-flex items-center justify-center rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] px-10 py-3 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
+                        className="inline-flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)] px-10 py-3 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
                     >
                         취소
                     </Link>
                     <button
                         type="submit"
-                        className="inline-flex items-center justify-center rounded-[18px] bg-[var(--color-fg)] text-white px-10 py-3 text-sm font-semibold hover:opacity-90 transition"
+                        className="inline-flex items-center justify-center bg-[var(--color-fg)] text-white px-10 py-3 text-sm font-semibold hover:opacity-90 transition"
                     >
                         문의 접수
                     </button>

@@ -172,7 +172,7 @@ function SortTab({ href, label, active }: { href: string; label: string; active:
     return (
         <Link
             href={href}
-            className={`inline-flex items-center justify-center rounded-[18px] px-5 py-2 text-sm transition ${
+            className={`inline-flex items-center justify-center px-5 py-2 text-sm transition ${
                 active
                     ? "bg-[var(--color-accent)] text-white font-medium"
                     : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border border-[var(--color-border)] hover:border-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
