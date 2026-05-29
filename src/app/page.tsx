@@ -1,6 +1,5 @@
 import { api } from "@/lib/api";
 import { HeroCarousel } from "@/components/HeroCarousel";
-import { DukeCarousel } from "@/components/DukeCarousel";
 import { ProductCard } from "@/components/ProductCard";
 import { EventPopup } from "@/components/EventPopup";
 import { formatDate, formatPrice } from "@/lib/format";
@@ -50,9 +49,6 @@ export default async function Home() {
                     </div>
                     <BestItemGrid />
                 </section>
-
-                {/* ===== 4. DUKE 시그니처 캐러셀 (좌 텍스트 통이미지 + 우 3카드 회전) ===== */}
-                <DukeCarousel />
 
                 {/* ===== 5. 우리의 이벤트 (2 banner card 그리드) ===== */}
                 <Section title="우리의 이벤트" href="/events">
