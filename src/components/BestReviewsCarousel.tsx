@@ -85,11 +85,11 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
                     type="button"
                     aria-label={`${review.product} 사진 크게 보기`}
                     onClick={onPhotoClick}
-                    className="w-full block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent,#7c5cff)] rounded-[12px]"
+                    className="w-full block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent,#7c5cff)] rounded-[18px]"
                     style={{
                         aspectRatio: "1 / 1",
                         overflow: "hidden",
-                        borderRadius: 12,
+                        borderRadius: 18,
                         backgroundColor: isColor ? review.photo : undefined,
                         flexShrink: 0,
                         cursor: "zoom-in",

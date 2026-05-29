@@ -51,11 +51,13 @@
   --color-border-strong: #dddddd;       /* line-color/line-color-100 */
   --color-ring:          #000000;       /* focus ring — brand color */
 
-  /* ---- Radius (Figma radius 1–4 + full) ---- */
-  --radius-sm:           4px;
-  --radius-md:           8px;
-  --radius-lg:           12px;
-  --radius-xl:           16px;
+  /* ---- Radius (사용자 요청: 라운딩 적용된 사각형 전부 18 통일) ----
+   * radius-full 은 동그라미 (의도적 100% 원형) 유지.
+   * sm/md/lg/xl 은 모두 18 로 통일 → 모든 rounded-* utility 가 일괄 18 적용. */
+  --radius-sm:           18px;
+  --radius-md:           18px;
+  --radius-lg:           18px;
+  --radius-xl:           18px;
   --radius-full:         9999px;
 
   /* ---- Shadow ---- */
@@ -178,6 +180,18 @@ body {
   --color-info:            var(--color-info);
   --font-sans:             var(--font-sans);
   --font-mono:             var(--font-mono);
+
+  /* Radius 토큰 — 사용자 요청: rounded-sm/md/lg/xl 전부 18 통일.
+   * rounded (default = sm) / rounded-2xl 도 18 로 강제.
+   * rounded-full 은 9999 (동그라미). rounded-none 은 0 그대로. */
+  --radius:                18px;
+  --radius-sm:             18px;
+  --radius-md:             18px;
+  --radius-lg:             18px;
+  --radius-xl:             18px;
+  --radius-2xl:            18px;
+  --radius-3xl:            18px;
+  --radius-full:           9999px;
 }
 
 body {

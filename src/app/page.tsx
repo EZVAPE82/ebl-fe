@@ -577,7 +577,7 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
                         aspectRatio: "1 / 1",
                         width: "100%",
                         overflow: "hidden",
-                        borderRadius: 12,
+                        borderRadius: 18,
                         backgroundColor: isColor ? review.photo : undefined,
                         flexShrink: 0,
                     }}
