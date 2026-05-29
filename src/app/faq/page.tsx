@@ -138,8 +138,8 @@ export default async function FaqPage({ searchParams }: { searchParams: Promise<
                                             </svg>
                                         </span>
                                     </summary>
-                                    {/* 답변 — 펼쳐졌을 때만 표시. 회색 배경 + A. 라벨 */}
-                                    <div className="mx-4 md:mx-6 mb-4 md:mb-5 px-4 md:px-6 py-5 md:py-6 bg-[var(--color-bg-subtle)] rounded-[18px] flex items-start gap-3 md:gap-4">
+                                    {/* 답변 — 펼쳐졌을 때만 표시. 회색 배경 + A. 라벨 (시안: 사각형, 라운딩 X) */}
+                                    <div className="mx-4 md:mx-6 mb-4 md:mb-5 px-4 md:px-6 py-5 md:py-6 bg-[var(--color-bg-subtle)] flex items-start gap-3 md:gap-4">
                                         <span className="text-[var(--color-fg-muted)] font-bold text-sm md:text-base flex-shrink-0">A.</span>
                                         <p className="flex-1 text-sm md:text-base text-[var(--color-fg)] whitespace-pre-line leading-relaxed">
                                             {f.answer}

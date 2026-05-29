@@ -83,7 +83,7 @@ export default async function NoticeDetail({ params }: { params: Promise<{ id: s
             <div className="flex justify-center">
                 <Link
                     href="/notices"
-                    className="inline-flex items-center justify-center rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] px-10 py-3 text-sm md:text-base text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
+                    className="inline-flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)] px-10 py-3 text-sm md:text-base text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
                 >
                     목록으로
                 </Link>
