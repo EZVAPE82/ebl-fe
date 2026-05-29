@@ -49,8 +49,8 @@ export default async function NoticesPage({ searchParams }: { searchParams: Prom
                 NOTICE
             </h1>
 
-            {/* Total + 우측 검색 */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3 pb-3 border-b-2 border-[var(--color-fg)]">
+            {/* Total + 우측 검색 — 핀 공지 row 와 붙이려면 mb/pb 제거. border-b-2 만 남김. */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b-2 border-[var(--color-fg)]">
                 <p className="text-sm text-[var(--color-fg-muted)]">
                     Total: <span className="text-[var(--color-accent)] font-bold">{total}</span>
                 </p>
@@ -111,7 +111,7 @@ export default async function NoticesPage({ searchParams }: { searchParams: Prom
                                     {n.pinned ? (
                                         <span aria-label="필독 공지" className="text-xl flex-shrink-0">📌</span>
                                     ) : isNew ? (
-                                        <span className="inline-flex items-center justify-center bg-[var(--color-accent)] text-white text-xs font-medium px-3 py-1.5 flex-shrink-0">
+                                        <span className="inline-flex items-center justify-center bg-[var(--color-accent)] text-white text-xs font-medium px-3 py-2.5 md:py-3 flex-shrink-0">
                                             새로운 소식
                                         </span>
                                     ) : null}

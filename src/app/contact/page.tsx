@@ -63,18 +63,18 @@ export default function ContactPage() {
     }
 
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-8 md:py-12">
-            {/* 큰 타이틀 */}
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-3 md:mb-4 text-[var(--color-fg)] tracking-tight">
+        <div className="mx-auto max-w-3xl px-4 md:px-8 py-8 md:py-12">
+            {/* 큰 타이틀 — 가운데 정렬 */}
+            <h1 className="text-3xl md:text-5xl font-extrabold mb-3 md:mb-4 text-[var(--color-fg)] tracking-tight text-center">
                 INQUIRY
             </h1>
-            <p className="text-sm md:text-base text-[var(--color-fg-muted)] mb-6 md:mb-10">
+            <p className="text-sm md:text-base text-[var(--color-fg-muted)] mb-6 md:mb-10 text-center">
                 궁금하신 부분을 남겨주시면 영업일 기준 1~2일 이내 답변드리겠습니다.
             </p>
 
             <hr className="border-t-2 border-[var(--color-fg)] mb-8" />
 
-            <form onSubmit={onSubmit} className="max-w-3xl space-y-6">
+            <form onSubmit={onSubmit} className="space-y-6">
                 {/* 문의 유형 */}
                 <Field label="문의 유형" required>
                     <div className="relative">
