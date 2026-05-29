@@ -763,55 +763,14 @@ function InstagramFeed() {
  * HTML form input 은 통이미지와 중복되므로 제거 (사용자가 input 위 그림자 지적 fix).
  * ============================================================ */
 function ContactCTA() {
+    // Figma 41:10474 원본 통이미지 (input/button 포함) 를 그대로 사용.
+    // 사용자 요청 — 추가 페인트/오버레이 없이 그냥 박는다. 클릭 시 /contact 이동.
     return (
         <section className="mt-24 relative w-full">
-            {/* 카드 통이미지 */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/cta-card-full.png" alt="엘프바에게 문의해주세요" className="w-full block" />
-
-            {/* 좌측 일러스트 — 노란 바구니 + 선물박스 (카드 위로 솟음) */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-                src="/images/cta-illust-left.png"
-                alt=""
-                aria-hidden="true"
-                className="absolute pointer-events-none select-none"
-                style={{ left: "30.78%", top: "-26.07%", width: "5.42%", height: "47.14%" }}
-                draggable={false}
-            />
-
-            {/* 우측 일러스트 — 보라 구슬 구름 */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-                src="/images/cta-illust-right.png"
-                alt=""
-                aria-hidden="true"
-                className="absolute pointer-events-none select-none"
-                style={{ left: "86.04%", top: "-17.86%", width: "7.08%", height: "37.86%" }}
-                draggable={false}
-            />
-
-            {/* 우측 input + 문의하기 버튼 — 통이미지 위에 HTML overlay.
-                고정 높이 (h-10 md:h-12) + vertical center 로 통이미지 안 input 자리에 맞춤. */}
-            <form
-                action="/faq"
-                method="get"
-                aria-label="1:1 문의하기"
-                className="absolute z-10 flex items-stretch gap-2 h-10 md:h-12"
-                style={{ left: "55%", right: "5%", top: "50%", transform: "translateY(-50%)" }}
-            >
-                <input
-                    type="text"
-                    placeholder="문의사항을 입력해주세요"
-                    className="flex-1 min-w-0 rounded-[18px] bg-white px-5 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
-                />
-                <button
-                    type="submit"
-                    className="rounded-[18px] bg-[var(--color-fg)] text-white text-sm font-semibold px-6 md:px-8 hover:opacity-90 transition whitespace-nowrap"
-                >
-                    문의하기
-                </button>
-            </form>
+            <Link href="/contact" aria-label="1:1 문의하기" className="block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/cta-purple.png" alt="엘프바에게 문의해주세요" className="w-full block" />
+            </Link>
         </section>
     );
 }

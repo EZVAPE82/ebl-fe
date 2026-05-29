@@ -206,24 +206,24 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
             aria-label="후기 상세 보기"
             onClick={onClose}
         >
-            {/* 좌:사진 + 우:텍스트 (시안 매칭: 사진은 모서리 둥근 정사각형 + 텍스트는 흰 박스) */}
+            {/* 좌:사진 + 우:텍스트 — 시안 매칭: 두 패널 높이가 같아 하나의 둥근 사각형 처럼 보이게 */}
             <div
-                className="relative w-full max-w-4xl flex flex-col md:flex-row gap-0 max-h-[90vh]"
+                className="relative w-full max-w-4xl flex flex-col md:flex-row gap-0 md:h-[480px] max-h-[90vh]"
                 onClick={e => e.stopPropagation()}
             >
-                {/* 좌측 큰 사진 (정사각형) — 모서리 좌측만 라운딩 */}
-                <div className="md:w-[400px] flex-shrink-0">
+                {/* 좌측 큰 사진 — 높이를 컨테이너 기준 (md:h-full) 으로 잡고 1:1 정사각형 */}
+                <div className="md:h-full md:w-[480px] flex-shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={main}
                         alt=""
-                        className="w-full aspect-square object-cover rounded-t-[18px] md:rounded-l-[18px] md:rounded-tr-none block"
+                        className="w-full md:w-[480px] aspect-square md:h-full object-cover rounded-t-[18px] md:rounded-l-[18px] md:rounded-tr-none block"
                         draggable={false}
                     />
                 </div>
 
-                {/* 우측 텍스트 영역 (흰 배경) */}
-                <div className="bg-white flex-1 p-5 md:p-7 rounded-b-[18px] md:rounded-r-[18px] md:rounded-bl-none relative flex flex-col overflow-y-auto">
+                {/* 우측 텍스트 영역 (흰 배경) — md:h-full 로 사진과 동일 높이 */}
+                <div className="bg-white flex-1 md:h-full p-5 md:p-7 rounded-b-[18px] md:rounded-r-[18px] md:rounded-bl-none relative flex flex-col overflow-y-auto">
                     {/* 우상단 X 닫기 — 시안에 우상단 닫기 버튼 */}
                     <button
                         type="button"
