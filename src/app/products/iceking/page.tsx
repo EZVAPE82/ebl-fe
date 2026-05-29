@@ -1,26 +1,16 @@
-import Link from "next/link";
+import { SeriesPage } from "@/components/SeriesPage";
 
-export const metadata = { title: "ICE KING" };
+export const metadata = { title: "ELFBAR ICE KING" };
 
-/**
- * 아이스킹 제품 페이지 — 시안 14:4126 통이미지.
- */
 export default function IceKingPage() {
     return (
-        <div className="bg-[var(--color-bg)]">
-            <Link href="/c/disposable" className="block mx-auto max-w-screen-2xl px-4 py-3 text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">
-                ← 일회용 카테고리
-            </Link>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/page-iceking.png" alt="ICE KING" className="w-full block" />
-            <div className="mx-auto max-w-screen-2xl px-4 py-8 flex justify-center">
-                <Link
-                    href="/c/disposable"
-                    className="inline-flex items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-brand)] text-[var(--color-brand-fg)] px-6 py-3 text-sm font-medium hover:bg-[var(--color-brand-hover)]"
-                >
-                    구매하러 가기
-                </Link>
-            </div>
-        </div>
+        <SeriesPage
+            series="ICE KING"
+            subtitle="가장 시원한, 가장 강력한"
+            description="ICE KING 은 ELFBAR 의 최상위 쿨링 시리즈로, 한 번의 흡입으로 극강의 청량감을 제공합니다. 진한 향과 풍부한 연기로 매니아들에게 사랑받는 라인업."
+            nameKeyword="KING"
+            accentColor="#5b6abf"
+            accentColor2="#2a3680"
+        />
     );
 }

@@ -1,28 +1,16 @@
-import Link from "next/link";
+import { SeriesPage } from "@/components/SeriesPage";
 
 export const metadata = { title: "ELFBAR DUKE 시그니처" };
 
-/**
- * DUKE 시리즈 상세 페이지 — 시안 96:11673 통이미지.
- * 통이미지 자체에 모든 정보(제품/스펙/사용법 등) 베이크.
- * 인터랙티브 영역만 별도 overlay 필요 시 추가.
- */
 export default function DukeProductPage() {
     return (
-        <div className="bg-[var(--color-bg)]">
-            <Link href="/c/disposable" className="block mx-auto max-w-screen-2xl px-4 py-3 text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">
-                ← 일회용 카테고리
-            </Link>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/page-duke.png" alt="ELFBAR DUKE 시그니처" className="w-full block" />
-            <div className="mx-auto max-w-screen-2xl px-4 py-8 flex justify-center">
-                <Link
-                    href="/c/disposable"
-                    className="inline-flex items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-brand)] text-[var(--color-brand-fg)] px-6 py-3 text-sm font-medium hover:bg-[var(--color-brand-hover)]"
-                >
-                    구매하러 가기
-                </Link>
-            </div>
-        </div>
+        <SeriesPage
+            series="ELFBAR DUKE"
+            subtitle="단순한 풍미 그 이상의 시그니처 시리즈"
+            description="DUKE 시리즈는 ELFBAR 의 시그니처 라인업으로, 정제된 풍미와 균형 잡힌 그립감을 자랑합니다. 멘솔·그레이프·라임 등 다양한 플레이버를 한 번의 충전으로 오래 즐길 수 있습니다."
+            nameKeyword="DUKE"
+            accentColor="#3a4a8a"
+            accentColor2="#1a1f4e"
+        />
     );
 }

@@ -55,7 +55,7 @@ export function ProductReviews({ productId }: { productId: number }) {
             {loading ? (
                 <p className="text-sm text-[var(--color-fg-subtle)]">불러오는 중...</p>
             ) : reviews.length === 0 ? (
-                <p className="text-sm text-[var(--color-fg-subtle)] text-center py-8 border border-dashed border-[var(--color-border-strong)] rounded-[var(--radius-lg)]">
+                <p className="text-sm text-[var(--color-fg-subtle)] text-center py-8 rounded-[var(--radius-lg)]">
                     아직 리뷰가 없습니다.
                 </p>
             ) : (

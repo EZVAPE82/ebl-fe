@@ -108,7 +108,7 @@ export default function WishlistPage() {
                 {loading ? (
                     <p className="text-[var(--color-fg-subtle)] text-sm">불러오는 중...</p>
                 ) : items.length === 0 ? (
-                    <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-16 text-center">
+                    <div className="rounded-[var(--radius-lg)] px-4 py-16 text-center">
                         <p className="text-sm text-[var(--color-fg-subtle)] mb-4">찜한 상품이 없습니다.</p>
                         <Link
                             href="/"

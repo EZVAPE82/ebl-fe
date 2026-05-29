@@ -111,7 +111,7 @@ export default function CartPage() {
     if (lines.length === 0) {
         return (
             <CartShell>
-                <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-16 text-center">
+                <div className="rounded-[var(--radius-lg)] px-4 py-16 text-center">
                     <p className="text-sm text-[var(--color-fg-subtle)] mb-4">장바구니가 비어 있습니다.</p>
                     <Link
                         href="/"

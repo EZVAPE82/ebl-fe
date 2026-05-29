@@ -86,7 +86,7 @@ export default function CouponsPage() {
                 </ul>
 
                 {items.length === 0 && (
-                    <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-16 text-center">
+                    <div className="rounded-[var(--radius-lg)] px-4 py-16 text-center">
                         <p className="text-sm text-[var(--color-fg-subtle)] mb-4">사용 가능한 쿠폰이 없습니다.</p>
                         <Link href="/" className="inline-flex items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-brand)] text-[var(--color-brand-fg)] px-5 py-3 text-sm font-medium hover:bg-[var(--color-brand-hover)]">쇼핑하러 가기</Link>
                     </div>

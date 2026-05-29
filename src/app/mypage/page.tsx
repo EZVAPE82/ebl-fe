@@ -164,7 +164,7 @@ export default function MyPage() {
                         <Link href="#" className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">전체보기 →</Link>
                     </div>
                     {orders.length === 0 ? (
-                        <p className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] py-12 text-center text-sm text-[var(--color-fg-subtle)]">
+                        <p className="rounded-[var(--radius-lg)] py-12 text-center text-sm text-[var(--color-fg-subtle)]">
                             주문 내역이 없습니다.
                         </p>
                     ) : (

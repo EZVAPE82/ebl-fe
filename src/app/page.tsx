@@ -184,7 +184,7 @@ function Section({ title, href, children }: { title: string; href?: string; chil
 function ProductGrid({ items }: { items: ProductSummary[] }) {
     if (items.length === 0) {
         return (
-            <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-12 text-center text-sm text-[var(--color-fg-subtle)]">
+            <div className="rounded-[var(--radius-lg)] px-4 py-12 text-center text-sm text-[var(--color-fg-subtle)]">
                 아직 상품이 없습니다.
             </div>
         );

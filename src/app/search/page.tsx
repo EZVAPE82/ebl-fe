@@ -51,11 +51,11 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
             {/* 결과 */}
             {!q ? (
-                <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-16 text-center text-sm text-[var(--color-fg-subtle)]">
+                <div className="rounded-[var(--radius-lg)] px-4 py-16 text-center text-sm text-[var(--color-fg-subtle)]">
                     검색어를 입력하시면 상품을 찾아드립니다.
                 </div>
             ) : list.content.length === 0 ? (
-                <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-16 text-center">
+                <div className="rounded-[var(--radius-lg)] px-4 py-16 text-center">
                     <p className="text-sm text-[var(--color-fg)] mb-2">
                         &lsquo;<span className="font-semibold">{q}</span>&rsquo; 검색 결과가 없습니다.
                     </p>

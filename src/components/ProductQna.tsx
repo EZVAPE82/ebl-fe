@@ -121,11 +121,11 @@ export function ProductQna({ productId }: { productId: number }) {
 
             {/* 리스트 */}
             {loading ? (
-                <p className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-10 text-center text-sm text-[var(--color-fg-subtle)]">
+                <p className="rounded-[var(--radius-lg)] px-4 py-10 text-center text-sm text-[var(--color-fg-subtle)]">
                     불러오는 중...
                 </p>
             ) : list.length === 0 ? (
-                <p className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border-strong)] px-4 py-10 text-center text-sm text-[var(--color-fg-subtle)]">
+                <p className="rounded-[var(--radius-lg)] px-4 py-10 text-center text-sm text-[var(--color-fg-subtle)]">
                     아직 문의가 없습니다. 상품에 대해 궁금한 점을 남겨주세요.
                 </p>
             ) : (
