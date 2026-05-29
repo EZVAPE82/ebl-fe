@@ -27,7 +27,14 @@ export function TrustBadges() {
             <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-5 md:py-7 grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-4">
                 {items.map(it => (
                     <div key={it.title} className="flex items-center gap-3 md:gap-4">
-                        <div className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 rounded-full bg-white/10 flex items-center justify-center text-white">
+                        {/* 아이콘 컨테이너 — 시안 매칭: 둥근 사각형 (rounded-xl) + 어두운 보라 + 살짝 그라데이션 */}
+                        <div
+                            className="w-12 h-12 md:w-[56px] md:h-[56px] flex-shrink-0 rounded-xl flex items-center justify-center text-white"
+                            style={{
+                                background: "linear-gradient(135deg, rgba(74, 51, 135, 0.55) 0%, rgba(45, 30, 90, 0.45) 100%)",
+                                boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+                            }}
+                        >
                             <it.Icon />
                         </div>
                         <div className="min-w-0">
