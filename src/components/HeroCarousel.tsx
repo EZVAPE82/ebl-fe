@@ -19,7 +19,7 @@ import type { Banner } from "@/types/api";
  */
 export function HeroCarousel({
     banners,
-    fallbackImage = "/images/hero.png",
+    fallbackImage = "/images/hero-bg.png",
     heightClass = "aspect-[12/5] min-h-[300px] md:min-h-[440px] max-h-[720px]",
     showOverlay = true,
     defaultOverlay = DESIGN_DEFAULT_OVERLAY,
@@ -252,7 +252,7 @@ const DESIGN_DEFAULT_OVERLAY = {
             가장 먼저 만나보세요
         </>
     ),
-    subtitle: "더 강력해진 맛과 비프, 새로운 경험의 시작",
+    subtitle: "더 강력해진 맛과 비교, 새로운 경험의 시작",
 };
 
 function ArrowLeft() {

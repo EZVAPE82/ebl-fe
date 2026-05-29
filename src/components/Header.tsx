@@ -6,14 +6,15 @@ import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useRouter, usePathname } from "next/navigation";
 
+// 시안 214:17798 매칭 — 7 카테고리
 const NAV: { href: string; label: string }[] = [
     { href: "/c/best",       label: "전체상품" },
-    { href: "/c/disposable", label: "일회용기기" },
+    { href: "/c/best",       label: "BEST" },
+    { href: "/c/disposable", label: "일회용" },
     { href: "/c/liquid",     label: "액상" },
-    { href: "/c/devices",    label: "기기" },
-    { href: "/c/accessory",  label: "맛·카트리지" },
-    { href: "/c/accessory",  label: "악세사리" },
-    { href: "/events",       label: "기획전" },
+    { href: "/events",       label: "이벤트" },
+    { href: "/notices",      label: "공지사항" },
+    { href: "/reviews/best", label: "구매후기" },
 ];
 
 export function Header({ transparent = false }: { transparent?: boolean }) {
@@ -54,7 +55,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
     return (
         <>
             <header className={headerCls}>
-                <div className="mx-auto max-w-screen-2xl flex items-center gap-3 md:gap-4 px-4 h-14">
+                <div className="mx-auto max-w-screen-2xl flex items-center gap-3 md:gap-4 px-4 h-16">
                     {/* 햄버거 */}
                     <button
                         type="button"
@@ -69,9 +70,15 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                         </span>
                     </button>
 
-                    {/* 로고 */}
-                    <Link href="/" className={`font-bold text-base md:text-lg tracking-[0.15em] ${logoTone}`}>
-                        ELFBAR
+                    {/* 로고 — 시안 214:17793 매칭 (가로 그라데이션 이미지) */}
+                    <Link href="/" aria-label="ELFBAR 홈" className="flex items-center">
+                        {/* 흰모드: 컬러 그라데이션 로고. 투명모드: 흰색 필터로 통일 */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src="/images/logo-elfbar-color.png"
+                            alt="ELFBAR"
+                            className={`h-7 md:h-8 w-auto ${transparent ? "brightness-0 invert" : ""}`}
+                        />
                     </Link>
 
                     {/* PC 카테고리 메뉴 — 가운데 정렬 (시안 매칭) */}
@@ -116,7 +123,8 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                     {/* drawer */}
                     <aside className="absolute inset-y-0 left-0 w-72 bg-[var(--color-surface)] shadow-xl flex flex-col">
                         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
-                            <span className="font-bold tracking-[0.15em] text-[var(--color-fg)]">ELFBAR</span>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src="/images/logo-elfbar-color.png" alt="ELFBAR" className="h-7 w-auto" />
                             <button
                                 onClick={() => setMenuOpen(false)}
                                 aria-label="메뉴 닫기"

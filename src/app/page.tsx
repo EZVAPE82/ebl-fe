@@ -111,9 +111,9 @@ const DEFAULT_CATEGORIES: Category[] = [
  * 각 자산은 1920x800 (2.4:1) hero 비율, Figma 노드 41:8762/41:8761/41:8763.
  */
 const DESIGN_FALLBACK_MAIN_HERO: Banner[] = [
-    { id: -1, placement: "MAIN_HERO", imageUrl: "/images/hero.png",   linkUrl: "/c/best",       altText: "엘프바 BC10000 — NEW ARRIVAL", sortOrder: 1 },
-    { id: -2, placement: "MAIN_HERO", imageUrl: "/images/hero-2.png", linkUrl: "/c/disposable", altText: "엘프바 시그니처 라인업",          sortOrder: 2 },
-    { id: -3, placement: "MAIN_HERO", imageUrl: "/images/hero-3.png", linkUrl: "/c/disposable", altText: "엘프바 프리미엄 컬렉션",          sortOrder: 3 },
+    { id: -1, placement: "MAIN_HERO", imageUrl: "/images/hero-bg.png", linkUrl: "/c/best",       altText: "엘프바 BC10000 — NEW ARRIVAL", sortOrder: 1 },
+    { id: -2, placement: "MAIN_HERO", imageUrl: "/images/hero-2.png",  linkUrl: "/c/disposable", altText: "엘프바 시그니처 라인업",          sortOrder: 2 },
+    { id: -3, placement: "MAIN_HERO", imageUrl: "/images/hero-3.png",  linkUrl: "/c/disposable", altText: "엘프바 프리미엄 컬렉션",          sortOrder: 3 },
 ];
 
 /**
