@@ -10,6 +10,7 @@ const NAV: { href: string; label: string }[] = [
     { href: "/admin/products", label: "상품" },
     { href: "/admin/orders", label: "주문" },
     { href: "/admin/promotions", label: "프로모션" },
+    { href: "/admin/referral", label: "추천인 보상" },
     { href: "/admin/foreign-verifications", label: "외국인 승인" },
     { href: "/admin/content", label: "콘텐츠" },
     { href: "/admin/settings", label: "정책 설정" },

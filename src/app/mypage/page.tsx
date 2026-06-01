@@ -77,6 +77,7 @@ export default function MyPage() {
     const [balance, setBalance] = useState(0);
     const [coupons, setCoupons] = useState<CouponItem[]>([]);
     const [joinedAt, setJoinedAt] = useState<string>("");
+    const [referral, setReferral] = useState<{ code: string; count: number }>({ code: "", count: 0 });
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -86,18 +87,21 @@ export default function MyPage() {
         if (!user) return;
         (async () => {
             try {
-                const [me, o, b, c] = await Promise.all([
+                const [me, o, b, c, r] = await Promise.all([
                     api<{ createdAt?: string }>("/api/v1/members/me", { auth: true }).catch(
                         () => ({}) as { createdAt?: string }
                     ),
                     api<{ content: Order[] }>("/api/v1/orders?size=10", { auth: true }),
                     api<{ balance: number }>("/api/v1/members/me/points/balance", { auth: true }),
                     api<{ content: CouponItem[] }>("/api/v1/members/me/coupons?size=50", { auth: true }),
+                    api<{ referralCode: string; referredCount: number }>("/api/v1/members/me/referrals", { auth: true })
+                        .catch(() => ({ referralCode: "", referredCount: 0 })),
                 ]);
                 if (me.createdAt) setJoinedAt(me.createdAt);
                 setOrders(o.content);
                 setBalance(b.balance);
                 setCoupons(c.content);
+                setReferral({ code: r.referralCode, count: r.referredCount });
             } catch {
                 /* ignore */
             }
@@ -179,6 +183,29 @@ export default function MyPage() {
                         정보수정
                     </Link>
                 </div>
+
+                {/* 내 추천 코드 카드 — 어드민이 적립금 설정. 회원이 코드 공유로 친구 가입 시 양쪽 보상 */}
+                {referral.code && (
+                    <div className="rounded-[12px] bg-gradient-to-r from-[#EFF6FF] to-[#DBEAFE] p-5 flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                            <p className="text-xs text-[var(--color-fg-muted)] mb-1">내 추천 코드</p>
+                            <p className="text-2xl font-bold tabular-nums tracking-wider text-[#3b82f6]">{referral.code}</p>
+                            <p className="text-[11px] text-[var(--color-fg-muted)] mt-1">
+                                친구 가입 시 양쪽 적립금 지급 · 누적 추천 <span className="text-[var(--color-fg)] font-semibold">{referral.count}명</span>
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                navigator.clipboard?.writeText(referral.code);
+                                alert("추천 코드가 복사되었습니다.");
+                            }}
+                            className="shrink-0 rounded-md bg-[#3b82f6] text-white px-4 py-2 text-sm font-medium hover:bg-[#2563eb] transition"
+                        >
+                            코드 복사
+                        </button>
+                    </div>
+                )}
 
                 {/* 3분할 통계 카드 — 옅은 회색 박스, rounded-md, 보더 없음 */}
                 <div className="grid grid-cols-3 gap-2 md:gap-3">

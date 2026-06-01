@@ -21,17 +21,21 @@ export type ProductInitial = {
     description: string;
     compatibilityInfo: string;
     price: number;
+    /** 온라인몰 판매가 (선택). NULL/0 이면 기본 price 사용. */
+    onlinePrice?: number | null;
     status: "DRAFT" | "ACTIVE" | "SOLD_OUT" | "DISCONTINUED";
     thumbnailUrl: string;
     stockThreshold: number;
     options: OptionInput[];
     images: ImageInput[];
+    /** 메인 페이지 추천 슬롯 (1~4). 1~4만 가능, 빈값=추천 안 함. */
+    featuredOrder?: number | null;
 };
 
 const EMPTY: ProductInitial = {
     name: "", slug: "", description: "", compatibilityInfo: "",
-    price: 0, status: "DRAFT", thumbnailUrl: "", stockThreshold: 0,
-    options: [], images: [],
+    price: 0, onlinePrice: null, status: "DRAFT", thumbnailUrl: "", stockThreshold: 0,
+    options: [], images: [], featuredOrder: null,
 };
 
 export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitial; mode: "create" | "edit" }) {
@@ -51,23 +55,33 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                 name: f.name, slug: f.slug,
                 description: f.description, compatibilityInfo: f.compatibilityInfo,
                 price: f.price,
+                onlinePrice: f.onlinePrice && f.onlinePrice > 0 ? f.onlinePrice : null,
                 status: f.status,
                 thumbnailUrl: f.thumbnailUrl,
                 stockThreshold: f.stockThreshold,
                 options: f.options,
                 images: f.images,
             };
+            let productId: number;
             if (mode === "create") {
                 const res = await adminApi<{ id: number }>("/api/v1/admin/products", {
                     method: "POST", body: JSON.stringify(payload),
                 });
-                router.replace(`/admin/products/${res.id}`);
+                productId = res.id;
             } else {
                 await adminApi(`/api/v1/admin/products/${initial.id}`, {
                     method: "PUT", body: JSON.stringify(payload),
                 });
-                alert("저장되었습니다.");
+                productId = initial.id!;
             }
+            // 추천 슬롯 (featuredOrder) — 별도 PATCH 엔드포인트
+            const order = f.featuredOrder;
+            if (order !== initial.featuredOrder) {
+                const qs = order && order >= 1 && order <= 4 ? `?order=${order}` : "";
+                await adminApi(`/api/v1/admin/products/${productId}/featured${qs}`, { method: "PATCH" });
+            }
+            if (mode === "create") router.replace(`/admin/products/${productId}`);
+            else alert("저장되었습니다.");
         } catch (e) {
             setError(e instanceof ApiError ? e.message : "저장에 실패했습니다.");
         } finally { setSubmitting(false); }
@@ -115,8 +129,22 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                     <F label="슬러그"><input required value={f.slug} onChange={e => up("slug", e.target.value)} className={ic} /></F>
                     <F label="카테고리 ID"><input type="number" value={f.categoryId ?? ""} onChange={e => up("categoryId", e.target.value ? Number(e.target.value) : null)} className={ic} /></F>
                     <F label="브랜드 ID"><input type="number" value={f.brandId ?? ""} onChange={e => up("brandId", e.target.value ? Number(e.target.value) : null)} className={ic} /></F>
-                    <F label="가격"><input type="number" required value={f.price} onChange={e => up("price", Number(e.target.value))} className={ic} /></F>
+                    <F label="기본 판매가 *"><input type="number" required value={f.price} onChange={e => up("price", Number(e.target.value))} className={ic} placeholder="오프라인 매장 등" /></F>
+                    <F label="온라인몰 판매가"><input type="number" value={f.onlinePrice ?? ""} onChange={e => up("onlinePrice", e.target.value ? Number(e.target.value) : null)} className={ic} placeholder="비우면 기본가 사용" /></F>
                     <F label="재고 임계치"><input type="number" value={f.stockThreshold} onChange={e => up("stockThreshold", Number(e.target.value))} className={ic} /></F>
+                    <F label="추천 슬롯">
+                        <select
+                            value={f.featuredOrder ?? ""}
+                            onChange={e => up("featuredOrder", e.target.value ? Number(e.target.value) : null)}
+                            className={ic}
+                        >
+                            <option value="">추천 안 함</option>
+                            <option value="1">1번 슬롯</option>
+                            <option value="2">2번 슬롯</option>
+                            <option value="3">3번 슬롯</option>
+                            <option value="4">4번 슬롯</option>
+                        </select>
+                    </F>
                     <F label="상태">
                         <select value={f.status} onChange={e => up("status", e.target.value as ProductInitial["status"])} className={ic}>
                             <option value="DRAFT">DRAFT</option>

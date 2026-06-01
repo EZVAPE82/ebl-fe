@@ -69,6 +69,7 @@ function SignupFlow() {
         address2: "",
         gender: "MALE" as "MALE" | "FEMALE" | "",
         joinPath: "",
+        referralCode: "",
         marketingEmail: false,
         marketingSms: false,
     });
@@ -139,6 +140,8 @@ function SignupFlow() {
         radioMale:          "Male",
         radioFemale:        "Female",
         phJoinPath:         "Please enter how you found us",
+        lblReferral:        "Referral Code",
+        phReferral:         "Enter referrer's code (optional)",
         btnComplete:        "Complete",
         errEmail:           "Please enter your email.",
         errPasswordMismatch:"Passwords do not match.",
@@ -198,6 +201,8 @@ function SignupFlow() {
         radioMale:          "남자",
         radioFemale:        "여자",
         phJoinPath:         "가입경로를 입력해주세요",
+        lblReferral:        "추천인 코드",
+        phReferral:         "추천인 코드를 입력해주세요 (선택)",
         btnComplete:        "가입완료",
         errEmail:           "이메일을 입력해주세요.",
         errPasswordMismatch:"비밀번호가 일치하지 않습니다.",
@@ -270,6 +275,7 @@ function SignupFlow() {
                     gender: form.gender || null,
                     memberType: memberKind,
                     joinChannel: typeof window !== "undefined" && window.innerWidth < 768 ? "MOBILE" : "PC",
+                    referralCode: form.referralCode || null,
                     marketingEmailAgreed: form.marketingEmail || agree.marketing,
                     marketingSmsAgreed: form.marketingSms || agree.marketing,
                     tosAgreed: agree.tos,
@@ -635,6 +641,14 @@ function SignupFlow() {
                         <input type="text" placeholder={i18n.phJoinPath}
                             className={`${inputCls} w-full`}
                             value={form.joinPath} onChange={e => update("joinPath", e.target.value)} />
+                    </FieldRow>
+
+                    <FieldRow label={i18n.lblReferral}>
+                        <input type="text" placeholder={i18n.phReferral}
+                            className={`${inputCls} w-full uppercase`}
+                            maxLength={12}
+                            value={form.referralCode}
+                            onChange={e => update("referralCode", e.target.value.toUpperCase().trim())} />
                     </FieldRow>
 
                     {error && <p className="pt-2 text-sm text-[var(--color-danger)]">{error}</p>}
