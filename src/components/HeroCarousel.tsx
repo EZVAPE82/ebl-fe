@@ -20,17 +20,20 @@ import type { Banner } from "@/types/api";
 export function HeroCarousel({
     banners,
     fallbackImage = "/images/hero-bg.png",
-    heightClass = "aspect-[12/5] min-h-[300px] md:min-h-[440px] max-h-[720px]",
+    fallbackMobileImage,
+    heightClass = "aspect-[9/13] md:aspect-[12/5] md:min-h-[440px] md:max-h-[720px]",
     showOverlay = true,
     defaultOverlay = DESIGN_DEFAULT_OVERLAY,
     children,
 }: {
     banners: Banner[];
     fallbackImage?: string;
+    /** 모바일 fallback (시안 276:9808 매칭 — 세로 비율 hero-mobile-1.png). 미지정 시 fallbackImage 사용. */
+    fallbackMobileImage?: string;
     /**
-     * Tailwind 높이 클래스. 기본은 hero.png 자연 비율(2.4:1 = 12/5)에 맞춰
-     * viewport width 에 따라 자동으로 늘어남. cover crop 최소화.
-     * 모바일 최소 300, 데스크톱 최소 440, 최대 720 으로 클램프.
+     * Tailwind 높이 클래스. 시안 매칭:
+     *  - 모바일(<md): 9:13 세로 비율 (모바일 시안 360x520 ≈ 9:13)
+     *  - 데스크톱(>=md): 12:5 가로 와이드 + min-h 440 / max-h 720
      */
     heightClass?: string;
     /** false면 텍스트/인디케이터 오버레이를 숨기고 풀폭 이미지만 노출 (중간 DUKE 등 풀이미지 슬라이드용) */
@@ -40,19 +43,21 @@ export function HeroCarousel({
     /** Hero 하단에 absolute 로 박힐 슬롯 (TrustBadges 등). 시안 214:17932 매칭. */
     children?: React.ReactNode;
 }) {
-    type Slide = { id: number; img: string; href: string; alt: string };
+    type Slide = { id: number; img: string; mobileImg: string; href: string; alt: string };
 
     const slides = useMemo<Slide[]>(() => {
         if (banners.length > 0) {
             return banners.map((b, i) => ({
                 id: b.id ?? i,
                 img: safeImageUrl(b.imageUrl),
+                // 모바일 이미지 미지정 시 PC 이미지 폴백 (호환성 유지)
+                mobileImg: b.mobileImageUrl ? safeImageUrl(b.mobileImageUrl) : safeImageUrl(b.imageUrl),
                 href: safeLinkUrl(b.linkUrl),
                 alt: b.altText ?? "",
             }));
         }
-        return [{ id: 0, img: fallbackImage, href: "#", alt: "" }];
-    }, [banners, fallbackImage]);
+        return [{ id: 0, img: fallbackImage, mobileImg: fallbackMobileImage ?? fallbackImage, href: "#", alt: "" }];
+    }, [banners, fallbackImage, fallbackMobileImage]);
 
     const [index, setIndex] = useState(0);
     const [paused, setPaused] = useState(false);
@@ -91,22 +96,36 @@ export function HeroCarousel({
                         className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${isActive ? "opacity-100" : "opacity-0"}`}
                         aria-hidden={!isActive}
                     >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={s.img}
-                            alt={s.alt}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            draggable={false}
-                        />
-                        {/* 좌측 어두운 그라데이션 — 텍스트 가독성 확보 (시안의 deep purple 톤) */}
-                        {showOverlay && (
-                            <div
-                                className="absolute inset-0 pointer-events-none"
-                                style={{
-                                    background:
-                                        "linear-gradient(90deg, rgba(20,8,60,0.65) 0%, rgba(20,8,60,0.35) 35%, rgba(20,8,60,0) 65%)",
-                                }}
+                        {/* 시안 매칭: 모바일은 세로 hero(276:9808 360x520), 데스크탑은 와이드 hero.
+                            <picture> + media query 로 viewport 별 다른 source 자동 swap. */}
+                        <picture>
+                            <source media="(max-width: 767px)" srcSet={s.mobileImg} />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={s.img}
+                                alt={s.alt}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                draggable={false}
                             />
+                        </picture>
+                        {/* 좌측 어두운 그라데이션 — 텍스트 가독성 확보. 모바일은 하단에서 위로 어두운 그라데이션 추가 (텍스트 가독성). */}
+                        {showOverlay && (
+                            <>
+                                <div
+                                    className="absolute inset-0 pointer-events-none hidden md:block"
+                                    style={{
+                                        background:
+                                            "linear-gradient(90deg, rgba(20,8,60,0.65) 0%, rgba(20,8,60,0.35) 35%, rgba(20,8,60,0) 65%)",
+                                    }}
+                                />
+                                <div
+                                    className="absolute inset-0 pointer-events-none md:hidden"
+                                    style={{
+                                        background:
+                                            "linear-gradient(180deg, rgba(10,5,40,0.55) 0%, rgba(10,5,40,0.25) 30%, rgba(10,5,40,0.55) 100%)",
+                                    }}
+                                />
+                            </>
                         )}
                     </div>
                 );
@@ -273,7 +292,7 @@ const DESIGN_DEFAULT_OVERLAY = {
             가장 먼저 만나보세요
         </>
     ),
-    subtitle: "더 강력해진 맛과 비교, 새로운 경험의 시작",
+    subtitle: "더 강력해진 맛과 비프, 새로운 경험의 시작",
 };
 
 function ArrowLeft() {

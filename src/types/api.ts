@@ -75,6 +75,8 @@ export type Banner = {
     id: number;
     placement: "MAIN_HERO" | "MID_HERO" | "TOP_STRIP" | "SECTION";
     imageUrl: string;
+    /** 모바일(<=767px) 전용 이미지. 시안에서 모바일 hero 비율(세로)이 PC(와이드)와 다를 때 사용. 미지정 시 imageUrl 폴백. */
+    mobileImageUrl?: string;
     linkUrl: string | null;
     altText: string | null;
     sortOrder: number;

@@ -36,10 +36,26 @@ export default async function Home() {
         <div>
             {/* ===== 1. Hero 캐러셀 (MAIN_HERO 다중 슬라이드) =====
                 헤더가 홈에서 fixed 투명 오버레이라 Hero 위 spacer 불필요 — Hero 가 헤더 위로 침범. */}
-            {/* TrustBadges 는 Hero 안 하단에 absolute 로 박힘 (시안 214:17775 매칭) */}
-            <HeroCarousel banners={heroSlides} fallbackImage="/images/hero.png">
-                <TrustBadges />
+            {/* 데스크탑(md+): TrustBadges 는 Hero 안 하단에 absolute 로 박힘 (시안 214:17775).
+                모바일(<md): Hero 가 세로 비율이라 absolute 로 박을 공간 부족 — Hero 외부 별도 섹션으로 출력 (시안 276:9846). */}
+            <HeroCarousel
+                banners={heroSlides}
+                fallbackImage="/images/hero.png"
+                fallbackMobileImage="/images/hero-mobile-1.png"
+            >
+                <div className="hidden md:block">
+                    <TrustBadges />
+                </div>
             </HeroCarousel>
+            {/* 모바일 전용 TrustBadges — Hero 바로 아래 다크 보라 영역 */}
+            <div
+                className="md:hidden"
+                style={{
+                    background: "linear-gradient(180deg, #1a0f3d 0%, #261658 100%)",
+                }}
+            >
+                <TrustBadges />
+            </div>
 
             {/* ===== 카테고리 아이콘 ===== */}
             <CategoryIcons categories={categories} />
@@ -114,9 +130,9 @@ const DEFAULT_CATEGORIES: Category[] = [
  * 각 자산은 1920x800 (2.4:1) hero 비율, Figma 노드 41:8762/41:8761/41:8763.
  */
 const DESIGN_FALLBACK_MAIN_HERO: Banner[] = [
-    { id: -1, placement: "MAIN_HERO", imageUrl: "/images/hero-bg.png", linkUrl: "/c/best",       altText: "엘프바 BC10000 — NEW ARRIVAL", sortOrder: 1 },
-    { id: -2, placement: "MAIN_HERO", imageUrl: "/images/hero-2.png",  linkUrl: "/c/disposable", altText: "엘프바 시그니처 라인업",          sortOrder: 2 },
-    { id: -3, placement: "MAIN_HERO", imageUrl: "/images/hero-3.png",  linkUrl: "/c/disposable", altText: "엘프바 프리미엄 컬렉션",          sortOrder: 3 },
+    { id: -1, placement: "MAIN_HERO", imageUrl: "/images/hero-bg.png", mobileImageUrl: "/images/hero-mobile-1.png", linkUrl: "/c/best",       altText: "엘프바 BC10000 — NEW ARRIVAL", sortOrder: 1 },
+    { id: -2, placement: "MAIN_HERO", imageUrl: "/images/hero-2.png",  mobileImageUrl: "/images/hero-mobile-1.png", linkUrl: "/c/disposable", altText: "엘프바 시그니처 라인업",          sortOrder: 2 },
+    { id: -3, placement: "MAIN_HERO", imageUrl: "/images/hero-3.png",  mobileImageUrl: "/images/hero-mobile-1.png", linkUrl: "/c/disposable", altText: "엘프바 프리미엄 컬렉션",          sortOrder: 3 },
 ];
 
 /**
