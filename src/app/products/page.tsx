@@ -25,8 +25,10 @@ const SORTS: { key: SortKey; label: string }[] = [
     { key: "reviews",    label: "후기많은순" },
 ];
 
-// 시안 9 시리즈 — slug prefix 와 한글 표시명 매핑
+// "all" 은 series 필터 없이 전체 상품 조회.
+// 9 시리즈는 slug prefix 와 한글 표시명 매핑.
 const SERIES: { key: string; label: string }[] = [
+    { key: "all",          label: "전체보기" },
     { key: "iceking-pro",  label: "아이스킹 프로" },
     { key: "duke",         label: "듀크" },
     { key: "iceking",      label: "아이스킹" },
@@ -52,7 +54,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
     qs.set("page", String(page));
     qs.set("size", String(PAGE_SIZE));
     qs.set("sort", sort);
-    qs.set("series", active);
+    // "all" 은 series 필터 미적용
+    if (active !== "all") qs.set("series", active);
 
     const list = await safeFetch<Page<ProductSummary>>(
         `/api/v1/public/products?${qs.toString()}`,
