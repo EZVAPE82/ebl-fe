@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
-import type { Category, Page, ProductSummary, SortKey } from "@/types/api";
+import type { Page, ProductSummary, SortKey } from "@/types/api";
 
 export const metadata = { title: "전체상품" };
 
 /**
- * 전체상품 페이지 — 실제 백엔드 API + 동작 페이지네이션.
- * mock 데이터 폐기. categoryId / sort / page 모두 URL query 로 제어.
+ * 전체상품 페이지 — 시리즈 9 탭 + 페이지네이션.
+ * series query param 으로 백엔드 filter (slug LIKE '<series>-flavor-%').
  */
 
 type Search = Promise<{
-    categoryId?: string;
+    series?: string;
     sort?: SortKey;
     page?: string;
 }>;
@@ -25,79 +25,81 @@ const SORTS: { key: SortKey; label: string }[] = [
     { key: "reviews",    label: "후기많은순" },
 ];
 
+// 시안 9 시리즈 — slug prefix 와 한글 표시명 매핑
+const SERIES: { key: string; label: string }[] = [
+    { key: "iceking-pro",  label: "아이스킹 프로" },
+    { key: "duke",         label: "듀크" },
+    { key: "iceking",      label: "아이스킹" },
+    { key: "yangjuyeon",   label: "양주연" },
+    { key: "joinwon-kit",  label: "조인원 킷" },
+    { key: "joinwon-pot",  label: "조인원 팟" },
+    { key: "crosamba",     label: "크로싱바" },
+    { key: "puffbar",      label: "퍼프바" },
+    { key: "frozen",       label: "프로즌" },
+];
+const DEFAULT_SERIES = "iceking-pro";
+
 const PAGE_SIZE = 20;
 
 export default async function ProductsPage({ searchParams }: { searchParams: Search }) {
     const sp = await searchParams;
     const sort = (sp.sort ?? "popular") as SortKey;
     const page = Math.max(0, parseInt(sp.page ?? "0", 10) || 0);
-    const categoryId = sp.categoryId;
-
-    const categories = await safeFetch<Category[]>("/api/v1/public/categories", []);
+    const active = SERIES.find(s => s.key === sp.series)?.key ?? DEFAULT_SERIES;
+    const activeMeta = SERIES.find(s => s.key === active)!;
 
     const qs = new URLSearchParams();
     qs.set("page", String(page));
     qs.set("size", String(PAGE_SIZE));
     qs.set("sort", sort);
-    if (categoryId) qs.set("categoryId", categoryId);
+    qs.set("series", active);
 
     const list = await safeFetch<Page<ProductSummary>>(
         `/api/v1/public/products?${qs.toString()}`,
         { content: [], totalElements: 0, totalPages: 0, number: 0, size: PAGE_SIZE, first: true, last: true, empty: true }
     );
 
-    const activeCat = categoryId ? categories.find(c => String(c.id) === categoryId) : undefined;
     const pageNumbers = compactPagination(page, list.totalPages);
 
     function urlForPage(p: number) {
         const u = new URLSearchParams();
-        u.set("page", String(p));
+        u.set("series", active);
         u.set("sort", sort);
-        if (categoryId) u.set("categoryId", categoryId);
+        u.set("page", String(p));
         return `/products?${u.toString()}`;
     }
     function urlForSort(s: SortKey) {
         const u = new URLSearchParams();
+        u.set("series", active);
         u.set("sort", s);
-        if (categoryId) u.set("categoryId", categoryId);
         return `/products?${u.toString()}`;
     }
-    function urlForCategory(cId?: string) {
+    function urlForSeries(key: string) {
         const u = new URLSearchParams();
+        u.set("series", key);
         u.set("sort", sort);
-        if (cId) u.set("categoryId", cId);
         return `/products?${u.toString()}`;
     }
 
     return (
         <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-8 md:py-12">
             <h1 className="text-3xl md:text-5xl font-extrabold mb-6 md:mb-10 text-[var(--color-fg)] tracking-tight">
-                {activeCat?.name ?? "전체상품"}
+                {activeMeta.label}
             </h1>
 
-            {/* 카테고리 탭 */}
+            {/* 시리즈 탭 (9개) */}
             <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
-                <Link
-                    href={urlForCategory(undefined)}
-                    className={`inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium transition ${
-                        !categoryId
-                            ? "bg-[var(--color-accent)] text-white"
-                            : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border border-[var(--color-border)] hover:border-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
-                    }`}
-                >
-                    전체
-                </Link>
-                {categories.map(c => (
+                {SERIES.map(s => (
                     <Link
-                        key={c.id}
-                        href={urlForCategory(String(c.id))}
+                        key={s.key}
+                        href={urlForSeries(s.key)}
                         className={`inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium transition ${
-                            categoryId === String(c.id)
+                            active === s.key
                                 ? "bg-[var(--color-accent)] text-white"
                                 : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border border-[var(--color-border)] hover:border-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
                         }`}
                     >
-                        {c.name}
+                        {s.label}
                     </Link>
                 ))}
             </div>
@@ -109,14 +111,14 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
                 </p>
                 <div className="flex items-center gap-1 text-xs">
                     {SORTS.map((s, i) => {
-                        const active = sort === s.key;
+                        const isActive = sort === s.key;
                         return (
                             <span key={s.key} className="flex items-center gap-1">
                                 {i > 0 && <span className="text-[var(--color-border-strong)]">·</span>}
                                 <Link
                                     href={urlForSort(s.key)}
                                     className={`px-1.5 transition ${
-                                        active
+                                        isActive
                                             ? "text-[var(--color-fg)] font-semibold"
                                             : "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
                                     }`}
@@ -142,7 +144,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
                 </ul>
             )}
 
-            {/* 페이지네이션 — 동작하는 Link */}
+            {/* 페이지네이션 */}
             {list.totalPages > 1 && (
                 <nav className="mt-10 md:mt-14 flex justify-center items-center gap-1.5 text-sm" aria-label="페이지네이션">
                     {page > 0 && (
@@ -190,7 +192,6 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
     );
 }
 
-/** 시안 매칭: 1 2 3 4 5 … (totalPages) — 현재 페이지 주변 + 처음/끝 */
 function compactPagination(current: number, total: number): (number | "ellipsis")[] {
     if (total <= 1) return [];
     if (total <= 7) return Array.from({ length: total }, (_, i) => i);
