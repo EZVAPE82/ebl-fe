@@ -25,11 +25,12 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
     return (
         <div>
             <div className="aspect-square bg-[var(--color-bg-subtle)] rounded-[var(--radius-lg)] overflow-hidden relative group">
+                {/* device 이미지가 세로로 길쭉(0.4~0.8) — contain 으로 잘림 방지. 약간의 padding 으로 가장자리 여백 확보. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={images[idx]}
                     alt={`${alt} ${idx + 1}/${total}`}
-                    className="w-full h-full object-cover transition-opacity duration-200"
+                    className="w-full h-full object-contain p-4 md:p-8 transition-opacity duration-200"
                     key={idx /* 강제 re-mount 로 자연스러운 fade 효과 (브라우저 단계) */}
                 />
                 {total > 1 && (
@@ -81,7 +82,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                             aria-label={`썸네일 ${i + 1}`}
                         >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={src} alt="" className="w-full h-full object-cover" />
+                            <img src={src} alt="" className="w-full h-full object-contain p-1" />
                         </button>
                     ))}
                 </div>
