@@ -36,7 +36,9 @@ export default function MyPageSettings() {
     const [zip, setZip] = useState("");
     const [addr1, setAddr1] = useState("");
     const [addr2, setAddr2] = useState("");
-    const [marketingChannel, setMarketingChannel] = useState<"email" | "sms" | "">("email");
+    // 시안: 이메일수신 / SMS 수신 — 둘 다 체크 가능 (multi-select)
+    const [marketingEmail, setMarketingEmail] = useState(true);
+    const [marketingSms, setMarketingSms] = useState(true);
     const [gender, setGender] = useState<"M" | "F" | "">("M");
     const [joinPath, setJoinPath] = useState("");
 
@@ -65,8 +67,8 @@ export default function MyPageSettings() {
                 method: "PUT",
                 auth: true,
                 body: JSON.stringify({
-                    marketingEmailAgreed: marketingChannel === "email",
-                    marketingSmsAgreed: marketingChannel === "sms",
+                    marketingEmailAgreed: marketingEmail,
+                    marketingSmsAgreed: marketingSms,
                 }),
             });
             alert("저장되었습니다.");
@@ -301,15 +303,16 @@ export default function MyPageSettings() {
                     </FormRow>
 
                     <FormRow label="마케팅 및 광고 활용 동의" required>
+                        {/* 시안: 이메일수신 / SMS 수신 — 둘 다 체크 가능 (multi-select toggle) */}
                         <div className="flex items-center gap-6 pt-2">
                             <RadioOption
-                                checked={marketingChannel === "email"}
-                                onChange={() => setMarketingChannel("email")}
+                                checked={marketingEmail}
+                                onChange={() => setMarketingEmail(v => !v)}
                                 label="이메일 수신"
                             />
                             <RadioOption
-                                checked={marketingChannel === "sms"}
-                                onChange={() => setMarketingChannel("sms")}
+                                checked={marketingSms}
+                                onChange={() => setMarketingSms(v => !v)}
                                 label="SMS 수신"
                             />
                         </div>

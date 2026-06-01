@@ -283,44 +283,34 @@ export default function AddressesPage() {
                         </div>
                     </Row>
 
-                    {/* 기본 배송지 저장 */}
+                    {/* 기본 배송지 저장 — 시안: 커스텀 블루 채움 + 흰 도트 radio */}
                     <Row label="기본 배송지 저장" required>
                         <div className="flex items-center gap-6">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="isDefault"
-                                    checked={form.isDefault}
-                                    onChange={() => setForm(s => ({ ...s, isDefault: true }))}
-                                    className="w-4 h-4 accent-[#3b82f6]"
-                                />
-                                <span className="text-sm text-[var(--color-fg)]">저장함</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="isDefault"
-                                    checked={!form.isDefault}
-                                    onChange={() => setForm(s => ({ ...s, isDefault: false }))}
-                                    className="w-4 h-4 accent-[#3b82f6]"
-                                />
-                                <span className="text-sm text-[var(--color-fg)]">저장안함</span>
-                            </label>
+                            <DefaultRadio
+                                checked={form.isDefault}
+                                onChange={() => setForm(s => ({ ...s, isDefault: true }))}
+                                label="저장함"
+                            />
+                            <DefaultRadio
+                                checked={!form.isDefault}
+                                onChange={() => setForm(s => ({ ...s, isDefault: false }))}
+                                label="저장안함"
+                            />
                         </div>
                     </Row>
 
-                    {/* 액션 버튼 */}
+                    {/* 액션 버튼 — 시안: 각진 모서리 (rounded-none) */}
                     <div className="flex justify-center gap-3 pt-6 border-t border-[var(--color-border)]">
                         <button
                             type="button"
                             onClick={cancel}
-                            className="px-10 py-3 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-fg)] text-sm font-medium hover:bg-[var(--color-bg-muted)] min-w-[120px]"
+                            className="px-10 py-3 rounded-none bg-[var(--color-bg-subtle)] text-[var(--color-fg)] text-sm font-medium hover:bg-[var(--color-bg-muted)] min-w-[120px]"
                         >
                             취소
                         </button>
                         <button
                             type="submit"
-                            className="px-10 py-3 rounded-md bg-[var(--color-fg)] text-[var(--color-bg)] text-sm font-medium hover:opacity-90 min-w-[120px]"
+                            className="px-10 py-3 rounded-none bg-[var(--color-fg)] text-[var(--color-bg)] text-sm font-medium hover:opacity-90 min-w-[120px]"
                         >
                             확인
                         </button>
@@ -377,5 +367,33 @@ function Row({
             </label>
             <div>{children}</div>
         </div>
+    );
+}
+
+/* 시안 매칭 커스텀 라디오 — 체크: 블루(#3b82f6) 채움 + 흰 도트 / 미체크: 회색 outline */
+function DefaultRadio({
+    checked,
+    onChange,
+    label,
+}: {
+    checked: boolean;
+    onChange: () => void;
+    label: string;
+}) {
+    return (
+        <label className="inline-flex items-center gap-2 cursor-pointer">
+            <span
+                onClick={onChange}
+                className={`relative w-4 h-4 rounded-full border ${
+                    checked
+                        ? "border-[#3b82f6] bg-[#3b82f6]"
+                        : "border-[var(--color-border-strong)] bg-white"
+                } flex items-center justify-center`}
+            >
+                {checked && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+            </span>
+            <input type="radio" checked={checked} onChange={onChange} className="hidden" />
+            <span className="text-sm text-[var(--color-fg)]">{label}</span>
+        </label>
     );
 }

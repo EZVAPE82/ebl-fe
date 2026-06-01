@@ -65,7 +65,23 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                                 ))}
                             </div>
                         )}
-                        <h1 className="text-xl md:text-2xl font-semibold leading-tight text-[var(--color-fg)]">{product.name}</h1>
+                        <div className="flex items-start justify-between gap-3">
+                            <h1 className="text-xl md:text-2xl font-semibold leading-tight text-[var(--color-fg)]">{product.name}</h1>
+                            {/* 시안: 공유 아이콘 (우측 상단) */}
+                            <button
+                                type="button"
+                                aria-label="공유"
+                                className="shrink-0 mt-1 text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="18" cy="5" r="3" />
+                                    <circle cx="6" cy="12" r="3" />
+                                    <circle cx="18" cy="19" r="3" />
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                </svg>
+                            </button>
+                        </div>
                         <div className="mt-3 flex items-end gap-2">
                             <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">{formatPrice(product.price)}</span>
                         </div>
@@ -130,24 +146,37 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(product.price)}</span>
                     </div>
 
-                    {/* PC 액션 — 시안: 장바구니(흰 외곽선) + 바로 구매(검정) */}
+                    {/* PC 액션 — 시안: 찜하기(하트 흰) + 장바구니(검정 메인) */}
                     <div className="hidden md:flex gap-3 pt-2">
                         <button
                             type="button"
-                            className="flex-1 inline-flex items-center justify-center rounded-[8px] border-2 border-[var(--color-fg)] bg-white text-[var(--color-fg)] py-3.5 text-sm font-bold hover:bg-[var(--color-bg-subtle)] transition"
+                            aria-label="찜하기"
+                            className="shrink-0 inline-flex items-center justify-center w-14 h-12 rounded-[8px] border border-[var(--color-border-strong)] bg-white text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
                         >
-                            장바구니
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
                         </button>
                         <button
                             type="button"
                             disabled={isSoldOut}
                             className="flex-1 inline-flex items-center justify-center rounded-[8px] bg-[var(--color-fg)] text-[var(--color-bg)] py-3.5 text-sm font-bold hover:opacity-90 transition disabled:opacity-50"
                         >
-                            {isSoldOut ? "품절" : "바로 구매"}
+                            {isSoldOut ? "품절" : "장바구니"}
                         </button>
                     </div>
                 </div>
             </div>
+
+            {/* ===== 이 아이템도 같이 사면 좋아요! — 시안: 상품 정보 바로 아래 ===== */}
+            {related.content.length > 0 && (
+                <section className="mx-auto max-w-screen-2xl px-4 mt-8">
+                    <h2 className="text-base md:text-lg font-bold mb-5 text-[var(--color-fg)]">이 아이템도 같이 사면 좋아요!</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+                        {related.content.slice(0, 4).map(p => <ProductCard key={p.id} p={p} />)}
+                    </div>
+                </section>
+            )}
 
             {/* ===== 탭 ===== */}
             <DetailTabs />
@@ -224,16 +253,6 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">Q&amp;A</h2>
                 <ProductQna productId={product.id} />
             </section>
-
-            {/* ===== 이 아이템들 같이 사면 좋아요! ===== */}
-            {related.content.length > 0 && (
-                <section className="mx-auto max-w-screen-2xl px-4 mt-10">
-                    <h2 className="text-base md:text-lg font-bold mb-5 text-[var(--color-fg)]">이 아이템들 같이 사면 좋아요!</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-                        {related.content.map(p => <ProductCard key={p.id} p={p} />)}
-                    </div>
-                </section>
-            )}
 
             {/* ===== 모바일 하단 고정 CTA ===== */}
             <div className="md:hidden fixed bottom-0 inset-x-0 z-20 border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur">

@@ -47,7 +47,7 @@ function LoginForm() {
         }
     }
 
-    const inputClass = "w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[6px] px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg-muted)] transition";
+    const inputClass = "w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-none px-4 py-3 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg-muted)] transition";
 
     return (
         <div className="mx-auto max-w-md px-4 py-10 md:py-16">
@@ -124,19 +124,18 @@ function LoginForm() {
                             <input type="checkbox" checked={rememberEmail} onChange={e => setRememberEmail(e.target.checked)} className="w-4 h-4 rounded-full border-[var(--color-border)] accent-[var(--color-fg)]" />
                             <span className="text-[var(--color-fg-muted)]">아이디 저장</span>
                         </label>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                             <Link href="/find-email" className="text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">아이디찾기</Link>
-                            <span className="text-[var(--color-fg-subtle)]">|</span>
                             <Link href="/password-reset" className="text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">비밀번호 찾기</Link>
                         </div>
                     </div>
                 )}
 
-                {/* 검정 로그인 버튼 (rounded-[6px]) */}
+                {/* 검정 로그인 버튼 — 시안: 모서리 각짐 (rounded-none) */}
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full inline-flex items-center justify-center rounded-[6px] bg-[var(--color-fg)] text-[var(--color-bg)] py-3.5 text-sm font-bold hover:opacity-90 transition disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center rounded-none bg-[var(--color-fg)] text-[var(--color-bg)] py-3.5 text-sm font-bold hover:opacity-90 transition disabled:opacity-50"
                 >
                     {submitting ? "처리 중..." : tab === "member" ? "로그인" : "비회원으로 주문하기"}
                 </button>

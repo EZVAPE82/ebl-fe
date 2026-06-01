@@ -152,10 +152,14 @@ export default function CartPage() {
                                     </Link>
                                     <p className="text-xs text-[var(--color-fg-muted)] tabular-nums mt-0.5">#{String(l.productId).padStart(10, "2021156")}</p>
                                 </div>
-                                {/* 옵션 select (placeholder — 라운딩 있음) */}
+                                {/* 옵션변경 select — 시안: "옵션변경" 라벨 displayed (선택된 옵션은 dropdown에 표시) */}
                                 {l.optionText && (
-                                    <select className="hidden md:block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-3 py-2 text-xs text-[var(--color-fg)] focus:outline-none">
-                                        <option>{l.optionText}</option>
+                                    <select
+                                        defaultValue=""
+                                        className="hidden md:block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-3 py-2 text-xs text-[var(--color-fg)] focus:outline-none cursor-pointer"
+                                    >
+                                        <option value="" hidden>옵션변경</option>
+                                        <option value="current">{l.optionText}</option>
                                     </select>
                                 )}
                                 {/* 가격 */}

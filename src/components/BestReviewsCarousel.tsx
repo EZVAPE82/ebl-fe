@@ -78,7 +78,7 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
     const isColor = review.photo.startsWith("#");
     return (
         <li className="flex h-full">
-            <Link href="/c/best" className="flex flex-col w-full h-full">
+            <Link href="/reviews/best" className="flex flex-col w-full h-full">
                 {/* 사진 박스 — 1:1 + object-fit cover (Shopify Dawn / Amazon 표준).
                     클릭 시 Lightbox 로 원본 풀 사이즈 보기 (텍스트 영역 클릭은 /c/best 로 이동). */}
                 <button

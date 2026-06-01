@@ -21,6 +21,17 @@ const SORTS: { key: SortKey; label: string }[] = [
     { key: "reviews", label: "후기많은순" },
 ];
 
+// slug → 한글 라벨 폴백 (백엔드 카테고리 API 미응답 시 헤더에 영문 slug 노출 방지)
+const SLUG_KO: Record<string, string> = {
+    best: "베스트",
+    new: "신상품",
+    disposable: "일회용",
+    liquid: "액상",
+    devices: "기기",
+    cartridge: "맛·카트리지",
+    accessory: "악세사리",
+};
+
 export default async function CategoryPage({
     params, searchParams,
 }: { params: Params; searchParams: Search }) {
@@ -50,10 +61,10 @@ export default async function CategoryPage({
 
     return (
         <div className="mx-auto max-w-screen-2xl px-4 py-8">
-            {/* 헤더: 타이틀 큰 글씨 (시안 "아이템리스트" 톤) */}
+            {/* 헤더: 타이틀 큰 글씨 (시안 "아이템리스트" 톤) — 한글 slug 폴백 */}
             <header className="mb-6">
                 <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">
-                    {cat?.name ?? slug.toUpperCase()}
+                    {cat?.name ?? SLUG_KO[slug] ?? slug}
                 </h1>
             </header>
 

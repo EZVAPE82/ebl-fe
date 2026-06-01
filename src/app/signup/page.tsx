@@ -20,6 +20,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { api, ApiError } from "@/lib/api";
 import { validatePassword } from "@/lib/validation";
 
@@ -36,10 +37,14 @@ export default function SignupPage() {
 function SignupFlow() {
     const router = useRouter();
     const sp = useSearchParams();
-    const initial: Step = sp.get("type") === "foreign" ? "cert" : "choice";
+    const isForeignInitial = sp.get("type") === "foreign";
+    const initial: Step = isForeignInitial ? "cert" : "choice";
 
     const [step, setStep] = useState<Step>(initial);
-    const [memberKind, setMemberKind] = useState<"KOREAN" | "FOREIGN_RESIDENT">("KOREAN");
+    // URL ?type=foreign 으로 진입 시 memberKind 도 외국인으로 설정 (시안 274:8727)
+    const [memberKind, setMemberKind] = useState<"KOREAN" | "FOREIGN_RESIDENT">(
+        isForeignInitial ? "FOREIGN_RESIDENT" : "KOREAN"
+    );
 
     const [form, setForm] = useState({
         email: "",
@@ -84,6 +89,128 @@ function SignupFlow() {
 
     const allRequired = agree.tos && agree.privacy && agree.youth;
 
+    // 시안 274:8752/8771/8813 — 외국인일 때 영문 텍스트 사전
+    const isForeign = memberKind === "FOREIGN_RESIDENT";
+    const i18n = isForeign ? {
+        title:       "Sign Up",
+        agreeAll:    "Agree to All",
+        privacy:     "Privacy Policy",
+        youth:       "Youth Protection Policy",
+        marketing:   "Consent to Receive Marketing Information",
+        required:    "[Required]",
+        cancel:      "Cancel",
+        next:        "Next",
+        errAgree:    "Please agree to all required terms.",
+        smsConsent:  "Agree to Receive SMS Notifications",
+        emailConsent:"Agree to Receive Email Notifications",
+        // info step
+        sectionTitle:       "Account Information",
+        markRequired:       "*Required",
+        markOptional:       "*Optional",
+        lblId:              "ID",
+        lblPassword:        "Password",
+        lblPasswordConfirm: "Confirm Password",
+        lblName:            "Name",
+        lblLandline:        "Landline",
+        lblMobile:          "Mobile Number",
+        lblCert:            "Identity Verification",
+        lblBirth:           "Date of Birth",
+        lblEmail:           "Email",
+        lblAddress:         "Address",
+        lblMarketing:       "Marketing Consent",
+        lblGender:          "Gender",
+        lblJoinPath:        "How did you hear about us",
+        phId:               "Please enter your ID",
+        phPwd:              "Please enter your password",
+        pwdHint:            "*10-16 chars, mix of letters, numbers & special characters",
+        phPwdConfirm:       "Please re-enter your password",
+        phName:             "Please enter your name",
+        phCert:             "Please enter your verification code",
+        btnVerify:          "Verify",
+        optYear:            "Year",
+        optMonth:           "Month",
+        optDay:             "Day",
+        phEmail:            "Please enter your email",
+        domainManually:     "Manually",
+        phAddress:          "Enter your address",
+        btnFindZip:         "Find Code",
+        radioEmailNoti:     "Email Notifications",
+        radioSmsNoti:       "SMS Notifications",
+        radioMale:          "Male",
+        radioFemale:        "Female",
+        phJoinPath:         "Please enter how you found us",
+        btnComplete:        "Complete",
+        errEmail:           "Please enter your email.",
+        errPasswordMismatch:"Passwords do not match.",
+        errPhone:           "Please enter your mobile number.",
+        errBirth:           "Please enter your date of birth.",
+        errSignup:          "Sign-up failed.",
+        // done step
+        doneTitle:    "Registration Complete!",
+        doneDesc:     "Log in now to explore our services.",
+        btnEditProf:  "Edit Profile",
+        btnShop:      "Go Shopping",
+    } : {
+        title:       "회원가입",
+        agreeAll:    "전체동의",
+        privacy:     "개인정보 수집 및 이용 동의",
+        youth:       "청소년보호정책",
+        marketing:   "마케팅 정보 수신 동의",
+        required:    "[필수]",
+        cancel:      "취소",
+        next:        "다음",
+        errAgree:    "필수 약관에 모두 동의해주세요.",
+        smsConsent:  "SMS 수신 동의",
+        emailConsent:"이메일 수신 동의",
+        // info step
+        sectionTitle:       "회원정보",
+        markRequired:       "* 필수입력사항",
+        markOptional:       "* 선택사항",
+        lblId:              "아이디",
+        lblPassword:        "비밀번호",
+        lblPasswordConfirm: "비밀번호 확인",
+        lblName:            "이름",
+        lblLandline:        "일반전화",
+        lblMobile:          "휴대전화",
+        lblCert:            "성인인증",
+        lblBirth:           "생년월일",
+        lblEmail:           "이메일",
+        lblAddress:         "주소",
+        lblMarketing:       "마케팅 및 광고 활용 동의",
+        lblGender:          "성별",
+        lblJoinPath:        "가입경로",
+        phId:               "아이디를 입력해주세요",
+        phPwd:              "비밀번호를 입력해주세요",
+        pwdHint:            "(영문 대소문자/숫자/특수문자 중 2가지 이상 조합, 10자 ~ 16자)",
+        phPwdConfirm:       "비밀번호를 입력해주세요",
+        phName:             "이름을 입력해주세요",
+        phCert:             "인증번호를 입력해주세요",
+        btnVerify:          "인증번호 입력",
+        optYear:            "년",
+        optMonth:           "월",
+        optDay:             "일",
+        phEmail:            "이메일을 입력해주세요",
+        domainManually:     "직접입력",
+        phAddress:          "주소를 입력해주세요",
+        btnFindZip:         "우편번호 찾기",
+        radioEmailNoti:     "이메일수신",
+        radioSmsNoti:       "SMS 수신",
+        radioMale:          "남자",
+        radioFemale:        "여자",
+        phJoinPath:         "가입경로를 입력해주세요",
+        btnComplete:        "가입완료",
+        errEmail:           "이메일을 입력해주세요.",
+        errPasswordMismatch:"비밀번호가 일치하지 않습니다.",
+        errPhone:           "휴대폰 번호를 입력해주세요.",
+        errBirth:           "생년월일을 입력해주세요.",
+        errSignup:          "회원가입에 실패했습니다.",
+        // done step
+        doneTitle:    "회원가입이 완료되었습니다!",
+        doneDesc:     "로그인하고 다양한 서비스를 이용해 보세요.",
+        btnEditProf:  "회원정보 수정",
+        btnShop:      "쇼핑하러가기",
+    };
+
     /* ─── choice → cert ────────────────────────────────────────── */
     function chooseKorean() { setMemberKind("KOREAN"); setStep("cert"); }
     function chooseForeign() { setMemberKind("FOREIGN_RESIDENT"); setStep("cert"); }
@@ -98,7 +225,7 @@ function SignupFlow() {
     function goInfo() {
         setError(null);
         if (!allRequired) {
-            setError("필수 약관에 모두 동의해주세요.");
+            setError(i18n.errAgree);
             return;
         }
         setStep("info");
@@ -113,20 +240,20 @@ function SignupFlow() {
         const email = form.emailLocal && (form.emailDomainCustom || form.emailDomain)
             ? `${form.emailLocal}@${form.emailDomainCustom || form.emailDomain}`
             : "";
-        if (!email) { setError("이메일을 입력해주세요."); return; }
+        if (!email) { setError(i18n.errEmail); return; }
 
         const pwError = validatePassword(form.password);
         if (pwError) { setError(pwError); return; }
         if (form.password !== form.passwordConfirm) {
-            setError("비밀번호가 일치하지 않습니다.");
+            setError(i18n.errPasswordMismatch);
             return;
         }
 
         const phone = `${form.phonePrefix}-${form.phone2}-${form.phone3}`;
-        if (!form.phone2 || !form.phone3) { setError("휴대폰 번호를 입력해주세요."); return; }
+        if (!form.phone2 || !form.phone3) { setError(i18n.errPhone); return; }
 
         if (!form.birthYear || !form.birthMonth || !form.birthDay) {
-            setError("생년월일을 입력해주세요."); return;
+            setError(i18n.errBirth); return;
         }
         const birthDate = `${form.birthYear}-${form.birthMonth.padStart(2,"0")}-${form.birthDay.padStart(2,"0")}`;
 
@@ -153,7 +280,7 @@ function SignupFlow() {
             setStep("done");
             window.scrollTo({ top: 0 });
         } catch (e) {
-            setError(e instanceof ApiError ? e.message : "회원가입에 실패했습니다.");
+            setError(e instanceof ApiError ? e.message : i18n.errSignup);
         } finally {
             setSubmitting(false);
         }
@@ -166,69 +293,86 @@ function SignupFlow() {
         <div className="mx-auto max-w-[760px] px-4 py-8 md:py-12">
             {step === "choice" && <ChoiceScreen onKorean={chooseKorean} onForeign={chooseForeign} />}
 
-            {step === "cert" && <CertScreen onPick={passCert} onClose={() => setStep("choice")} />}
+            {step === "cert" && <CertScreen foreign={memberKind === "FOREIGN_RESIDENT"} onPick={passCert} onClose={() => setStep("choice")} />}
 
             {(step === "agree" || step === "info" || step === "done") && (
                 <>
                     <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] text-center mb-8">
-                        회원가입
+                        {i18n.title}
                     </h1>
-                    <Stepper current={step === "done" ? "done" : step === "info" ? "info" : "agree"} />
+                    <Stepper current={step === "done" ? "done" : step === "info" ? "info" : "agree"} foreign={isForeign} />
                 </>
             )}
 
             {step === "agree" && (
                 <section className="mt-10 space-y-3">
-                    {/* 전체동의 */}
+                    {/* 전체동의 / Agree to All */}
                     <AgreeCard
-                        title="전체동의"
+                        title={i18n.agreeAll}
                         checked={agree.tos && agree.privacy && agree.youth && agree.marketing}
                         onCheck={v => toggleAll(v)}
                         open={openCard === "all"}
                         onToggleOpen={() => setOpenCard(openCard === "all" ? "none" : "all")}
                     />
 
-                    {/* 개인정보 수집 및 이용 동의 [필수] */}
+                    {/* 개인정보 수집 및 이용 동의 / Privacy Policy [Required] */}
                     <AgreeCard
-                        title={<>개인정보 수집 및 이용 동의 <span className="text-[#3b82f6] font-semibold">[필수]</span></>}
+                        title={<>{i18n.privacy} <span className="text-[#3b82f6] font-semibold">{i18n.required}</span></>}
                         checked={agree.tos}
                         onCheck={v => setAgree(s => ({ ...s, tos: v }))}
                         open={openCard === "tos"}
                         onToggleOpen={() => setOpenCard(openCard === "tos" ? "none" : "tos")}
                         body={
                             <div className="text-sm text-[var(--color-fg-muted)] space-y-2">
-                                <p className="font-medium text-[var(--color-fg)]">제 1조 (목적)</p>
+                                <p className="font-medium text-[var(--color-fg)]">{isForeign ? "Article 1 (Purpose)" : "제 1조 (목적)"}</p>
                                 <p className="text-[13px] leading-relaxed">
-                                    본 약관은 회사가 제공하는 쇼핑몰 서비스의 이용과 관련하여 회원과 회사 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+                                    {isForeign
+                                        ? "The purpose of these Terms and Conditions is to regulate the rights, obligations, responsibilities, and other necessary matters between the Member and the Company regarding the use of the shopping mall services provided by the Company."
+                                        : "본 약관은 회사가 제공하는 쇼핑몰 서비스의 이용과 관련하여 회원과 회사 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다."}
                                 </p>
-                                <p className="text-xs text-[var(--color-fg-subtle)]">* 필수 항목에 동의하셔야 회원가입 및 서비스 이용이 가능합니다.</p>
+                                <p className="text-xs text-[var(--color-fg-subtle)]">
+                                    {isForeign
+                                        ? "* You must agree to the required terms to sign up and use our services."
+                                        : "* 필수 항목에 동의하셔야 회원가입 및 서비스 이용이 가능합니다."}
+                                </p>
                             </div>
                         }
                     />
 
-                    {/* 청소년보호정책 [필수] */}
+                    {/* 청소년보호정책 / Youth Protection Policy [Required] */}
                     <AgreeCard
-                        title={<>청소년보호정책 <span className="text-[#3b82f6] font-semibold">[필수]</span></>}
+                        title={<>{i18n.youth} <span className="text-[#3b82f6] font-semibold">{i18n.required}</span></>}
                         checked={agree.youth}
                         onCheck={v => setAgree(s => ({ ...s, youth: v }))}
                         open={openCard === "youth"}
                         onToggleOpen={() => setOpenCard(openCard === "youth" ? "none" : "youth")}
                         body={
                             <div className="text-sm text-[var(--color-fg-muted)] space-y-1">
-                                <p className="font-medium text-[var(--color-fg)] mb-1">제 2조 (목적)</p>
+                                <p className="font-medium text-[var(--color-fg)] mb-1">{isForeign ? "Article 2" : "제 2조 (목적)"}</p>
                                 <ol className="list-decimal pl-5 text-[13px] leading-relaxed space-y-1">
-                                    <li>필수 동의 항목을 체크하지 않을 경우 회원가입이 제한될 수 있습니다.</li>
-                                    <li>선택 동의 항목은 서비스 이용에 영향을 미치지 않습니다.</li>
-                                    <li>자세한 내용은 각 약관 전문을 통해 확인하실 수 있습니다.</li>
-                                    <li>이벤트, 할인 혜택, 신상품 안내 등의 마케팅 정보를 제공합니다.</li>
+                                    {isForeign ? (
+                                        <>
+                                            <li>If you do not agree to the required items, your registration may be restricted.</li>
+                                            <li>Optional items do not affect your use of the service.</li>
+                                            <li>Detailed information can be found in the full text of each agreement.</li>
+                                            <li>We provide marketing updates, including events, discount benefits, and new product arrivals.</li>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <li>필수 동의 항목을 체크하지 않을 경우 회원가입이 제한될 수 있습니다.</li>
+                                            <li>선택 동의 항목은 서비스 이용에 영향을 미치지 않습니다.</li>
+                                            <li>자세한 내용은 각 약관 전문을 통해 확인하실 수 있습니다.</li>
+                                            <li>이벤트, 할인 혜택, 신상품 안내 등의 마케팅 정보를 제공합니다.</li>
+                                        </>
+                                    )}
                                 </ol>
                             </div>
                         }
                     />
 
-                    {/* 마케팅 정보 수신 동의 [필수] (라디오) */}
+                    {/* 마케팅 정보 수신 동의 / Consent to Receive Marketing Information [Required] */}
                     <AgreeCard
-                        title={<>마케팅 정보 수신 동의 <span className="text-[#3b82f6] font-semibold">[필수]</span></>}
+                        title={<>{i18n.marketing} <span className="text-[#3b82f6] font-semibold">{i18n.required}</span></>}
                         checked={agree.marketing}
                         onCheck={v => {
                             setAgree(s => ({ ...s, marketing: v }));
@@ -240,19 +384,27 @@ function SignupFlow() {
                             <div className="space-y-2">
                                 <div className="flex items-center gap-6 text-sm">
                                     <Radio
-                                        label="SMS 수신 동의"
+                                        label={i18n.smsConsent}
                                         checked={form.marketingSms}
                                         onChange={v => { update("marketingSms", v); if (v) setAgree(s => ({ ...s, marketing: true })); }}
                                     />
                                     <Radio
-                                        label="이메일 수신 동의"
+                                        label={i18n.emailConsent}
                                         checked={form.marketingEmail}
                                         onChange={v => { update("marketingEmail", v); if (v) setAgree(s => ({ ...s, marketing: true })); }}
                                     />
                                 </div>
                                 <p className="text-xs text-[var(--color-fg-subtle)] leading-relaxed">
-                                    할인쿠폰 및 혜택, 이벤트, 신상품 등 쇼핑몰에서 제공하는 다양한 쇼핑정보를 SMS·이메일로 받아보실 수 있습니다.<br />
-                                    단, 주문/거래 정보 및 주요 정책의 관련된 내용은 수신동의 여부와 관계없이 발송됩니다.
+                                    {isForeign ? (
+                                        <>
+                                            You can receive useful shopping updates, including discount coupons, exclusive benefits, events, and new arrivals via SMS or email.
+                                        </>
+                                    ) : (
+                                        <>
+                                            할인쿠폰 및 혜택, 이벤트, 신상품 등 쇼핑몰에서 제공하는 다양한 쇼핑정보를 SMS·이메일로 받아보실 수 있습니다.<br />
+                                            단, 주문/거래 정보 및 주요 정책의 관련된 내용은 수신동의 여부와 관계없이 발송됩니다.
+                                        </>
+                                    )}
                                 </p>
                             </div>
                         }
@@ -267,7 +419,7 @@ function SignupFlow() {
                             onClick={() => router.push("/")}
                             className="w-[120px] py-3 text-sm bg-[var(--color-bg-subtle)] text-[var(--color-fg)] hover:bg-[var(--color-bg-muted)] transition"
                         >
-                            취소
+                            {i18n.cancel}
                         </button>
                         <button
                             type="button"
@@ -275,7 +427,7 @@ function SignupFlow() {
                             disabled={!allRequired}
                             className="w-[120px] py-3 text-sm bg-[var(--color-fg)] text-[var(--color-bg)] hover:opacity-90 transition disabled:opacity-40"
                         >
-                            다음
+                            {i18n.next}
                         </button>
                     </div>
                 </section>
@@ -283,19 +435,17 @@ function SignupFlow() {
 
             {step === "info" && (
                 <form onSubmit={onSubmit} className="mt-10">
-                    {/* 회원정보 헤더 */}
+                    {/* 회원정보 헤더 / Account Information */}
                     <div className="flex items-center justify-between border-b border-[var(--color-fg)] pb-3 mb-1">
-                        <h2 className="text-lg font-bold text-[var(--color-fg)]">회원정보</h2>
-                        <span className="text-xs text-[var(--color-fg-muted)]">
-                            <span className="text-[#3b82f6]">*</span> 필수입력사항
-                        </span>
+                        <h2 className="text-lg font-bold text-[var(--color-fg)]">{i18n.sectionTitle}</h2>
+                        <span className="text-xs text-[#3b82f6]">{i18n.markRequired}</span>
                     </div>
 
-                    <FieldRow label="아이디" required>
+                    <FieldRow label={i18n.lblId} required>
                         <div className="flex items-center gap-2">
                             <input
                                 type="text"
-                                placeholder="아이디를 입력해주세요"
+                                placeholder={i18n.phId}
                                 className={inputCls}
                                 value={form.emailLocal}
                                 onChange={e => update("emailLocal", e.target.value)}
@@ -303,40 +453,40 @@ function SignupFlow() {
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="비밀번호" required>
+                    <FieldRow label={i18n.lblPassword} required>
                         <input
                             type="password"
-                            placeholder="비밀번호를 입력해주세요"
+                            placeholder={i18n.phPwd}
                             className={inputCls}
                             value={form.password}
                             onChange={e => update("password", e.target.value)}
                         />
                         <p className="mt-1.5 text-[11px] text-[var(--color-danger)]">
-                            (영문 대소문자/숫자/특수문자 중 2가지 이상 조합, 10자 ~ 16자)
+                            {i18n.pwdHint}
                         </p>
                     </FieldRow>
 
-                    <FieldRow label="비밀번호 확인" required>
+                    <FieldRow label={i18n.lblPasswordConfirm} required>
                         <input
                             type="password"
-                            placeholder="비밀번호를 입력해주세요"
+                            placeholder={i18n.phPwdConfirm}
                             className={inputCls}
                             value={form.passwordConfirm}
                             onChange={e => update("passwordConfirm", e.target.value)}
                         />
                     </FieldRow>
 
-                    <FieldRow label="이름" required>
+                    <FieldRow label={i18n.lblName} required>
                         <input
                             type="text"
-                            placeholder="이름을 입력해주세요"
+                            placeholder={i18n.phName}
                             className={inputCls}
                             value={form.name}
                             onChange={e => update("name", e.target.value)}
                         />
                     </FieldRow>
 
-                    <FieldRow label="일반전화">
+                    <FieldRow label={i18n.lblLandline} required>
                         <div className="flex items-center gap-2">
                             <select
                                 value={form.landlinePrefix}
@@ -359,7 +509,7 @@ function SignupFlow() {
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="휴대전화" required>
+                    <FieldRow label={i18n.lblMobile} required>
                         <div className="flex items-center gap-2">
                             <select
                                 value={form.phonePrefix}
@@ -378,34 +528,34 @@ function SignupFlow() {
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="인증번호" required>
+                    <FieldRow label={i18n.lblCert} required>
                         <div className="flex items-center gap-2">
-                            <input type="text" placeholder="인증번호를 입력해주세요"
+                            <input type="text" placeholder={i18n.phCert}
                                 className={`${inputCls} flex-1`}
                                 value={form.certCode} onChange={e => update("certCode", e.target.value)} />
                             <button type="button"
                                 className="shrink-0 px-4 py-2.5 text-sm font-medium bg-[#3b82f6] text-white rounded-[4px] hover:opacity-90 transition">
-                                인증번호 입력
+                                {i18n.btnVerify}
                             </button>
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="생년월일">
+                    <FieldRow label={i18n.lblBirth} required>
                         <div className="grid grid-cols-3 gap-2">
                             <select value={form.birthYear} onChange={e => update("birthYear", e.target.value)} className={selectCls}>
-                                <option value="">년</option>
+                                <option value="">{i18n.optYear}</option>
                                 {Array.from({ length: 80 }, (_, i) => 2010 - i).map(y => (
                                     <option key={y} value={String(y)}>{y}</option>
                                 ))}
                             </select>
                             <select value={form.birthMonth} onChange={e => update("birthMonth", e.target.value)} className={selectCls}>
-                                <option value="">월</option>
+                                <option value="">{i18n.optMonth}</option>
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                                     <option key={m} value={String(m)}>{m}</option>
                                 ))}
                             </select>
                             <select value={form.birthDay} onChange={e => update("birthDay", e.target.value)} className={selectCls}>
-                                <option value="">일</option>
+                                <option value="">{i18n.optDay}</option>
                                 {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
                                     <option key={d} value={String(d)}>{d}</option>
                                 ))}
@@ -413,9 +563,9 @@ function SignupFlow() {
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="이메일" required>
+                    <FieldRow label={i18n.lblEmail} required>
                         <div className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-2">
-                            <input type="text" placeholder="이메일을 입력해주세요"
+                            <input type="text" placeholder={i18n.phEmail}
                                 className={inputCls}
                                 value={form.emailLocal} onChange={e => update("emailLocal", e.target.value)} />
                             <span className="text-[var(--color-fg-subtle)]">@</span>
@@ -429,7 +579,7 @@ function SignupFlow() {
                                     if (e.target.value !== "") update("emailDomainCustom", e.target.value);
                                 }}
                                 className={selectCls}>
-                                <option value="">직접입력</option>
+                                <option value="">{i18n.domainManually}</option>
                                 <option value="naver.com">naver.com</option>
                                 <option value="gmail.com">gmail.com</option>
                                 <option value="daum.net">daum.net</option>
@@ -439,15 +589,15 @@ function SignupFlow() {
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="주소">
+                    <FieldRow label={i18n.lblAddress} required>
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <input type="text" placeholder="주소를 입력해주세요"
+                                <input type="text" placeholder={i18n.phAddress}
                                     className={`${inputCls} flex-1`}
                                     value={form.addressZip} onChange={e => update("addressZip", e.target.value)} />
                                 <button type="button"
                                     className="shrink-0 px-4 py-2.5 text-sm font-medium bg-[#3b82f6] text-white rounded-[4px] hover:opacity-90 transition">
-                                    우편번호 찾기
+                                    {i18n.btnFindZip}
                                 </button>
                             </div>
                             <input type="text" className={`${inputCls} w-full`}
@@ -457,48 +607,46 @@ function SignupFlow() {
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="마케팅 및 광고 활용 동의" required>
+                    <FieldRow label={i18n.lblMarketing} required>
                         <div className="flex items-center gap-6">
-                            <Radio label="이메일수신" checked={form.marketingEmail}
+                            <Radio label={i18n.radioEmailNoti} checked={form.marketingEmail}
                                 onChange={v => update("marketingEmail", v)} />
-                            <Radio label="SMS 수신" checked={form.marketingSms}
+                            <Radio label={i18n.radioSmsNoti} checked={form.marketingSms}
                                 onChange={v => update("marketingSms", v)} />
                         </div>
                     </FieldRow>
 
-                    {/* 회원정보 (선택) */}
+                    {/* 회원정보 (선택) / Account Information (Optional) */}
                     <div className="flex items-center justify-between border-b border-[var(--color-fg)] pb-3 mt-12 mb-1">
-                        <h2 className="text-lg font-bold text-[var(--color-fg)]">회원정보</h2>
-                        <span className="text-xs text-[var(--color-fg-muted)]">
-                            <span className="text-[#3b82f6]">*</span> 선택사항
-                        </span>
+                        <h2 className="text-lg font-bold text-[var(--color-fg)]">{i18n.sectionTitle}</h2>
+                        <span className="text-xs text-[#3b82f6]">{i18n.markOptional}</span>
                     </div>
 
-                    <FieldRow label="성별" required>
+                    <FieldRow label={i18n.lblGender} required>
                         <div className="flex items-center gap-6">
-                            <Radio label="남자" checked={form.gender === "MALE"}
+                            <Radio label={i18n.radioMale} checked={form.gender === "MALE"}
                                 onChange={() => update("gender", "MALE")} />
-                            <Radio label="여자" checked={form.gender === "FEMALE"}
+                            <Radio label={i18n.radioFemale} checked={form.gender === "FEMALE"}
                                 onChange={() => update("gender", "FEMALE")} />
                         </div>
                     </FieldRow>
 
-                    <FieldRow label="가입경로" required>
-                        <input type="text" placeholder="가입경로를 입력해주세요"
+                    <FieldRow label={i18n.lblJoinPath} required>
+                        <input type="text" placeholder={i18n.phJoinPath}
                             className={`${inputCls} w-full`}
                             value={form.joinPath} onChange={e => update("joinPath", e.target.value)} />
                     </FieldRow>
 
                     {error && <p className="pt-2 text-sm text-[var(--color-danger)]">{error}</p>}
 
-                    {/* 가입완료 버튼 — SQUARE 검정 */}
+                    {/* Complete 버튼 — SQUARE 검정, 시안: 와이드 풀폭 */}
                     <div className="flex justify-center pt-10">
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="min-w-[160px] py-3.5 px-8 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] hover:opacity-90 transition disabled:opacity-40"
+                            className="w-full max-w-[480px] py-3.5 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] hover:opacity-90 transition disabled:opacity-40"
                         >
-                            {submitting ? "처리 중..." : "가입완료"}
+                            {submitting ? (isForeign ? "Processing..." : "처리 중...") : i18n.btnComplete}
                         </button>
                     </div>
                 </form>
@@ -506,31 +654,37 @@ function SignupFlow() {
 
             {step === "done" && (
                 <section className="mt-12 text-center">
-                    {/* 확성기 일러스트 자리 */}
-                    <div className="mx-auto w-[260px] h-[200px] mb-6 flex items-center justify-center">
-                        <MegaphoneIllustration />
+                    {/* 확성기 일러스트 — 시안 37:10602 Figma export PNG */}
+                    <div className="mx-auto w-[280px] h-[220px] mb-8 relative">
+                        <Image
+                            src="/images/signup-megaphone.png"
+                            alt="회원가입 완료"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
                     </div>
 
                     <h2 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] mb-3">
-                        회원가입이 완료되었습니다!
+                        {i18n.doneTitle}
                     </h2>
                     <p className="text-sm text-[var(--color-fg-muted)] mb-8">
-                        로그인하고 다양한 서비스를 이용해 보세요.
+                        {i18n.doneDesc}
                     </p>
 
-                    {/* SQUARE 버튼 — 좌: 흰 / 우: 검정 */}
+                    {/* SQUARE 버튼 — 시안: 좌 연회색(no border) / 우 검정 */}
                     <div className="flex items-center justify-center gap-3">
                         <Link
                             href="/mypage"
-                            className="min-w-[140px] py-3 px-6 text-sm bg-[var(--color-surface)] text-[var(--color-fg)] border border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)] transition text-center"
+                            className="min-w-[140px] py-3 px-6 text-sm bg-[var(--color-bg-subtle)] text-[var(--color-fg)] hover:bg-[var(--color-bg-muted)] transition text-center"
                         >
-                            회원정보 수정
+                            {i18n.btnEditProf}
                         </Link>
                         <Link
                             href="/"
                             className="min-w-[140px] py-3 px-6 text-sm bg-[var(--color-fg)] text-[var(--color-bg)] hover:opacity-90 transition text-center"
                         >
-                            쇼핑하러가기
+                            {i18n.btnShop}
                         </Link>
                     </div>
                 </section>
@@ -562,19 +716,19 @@ function ChoiceScreen({ onKorean, onForeign }: { onKorean: () => void; onForeign
     }
     return (
         <div className="py-8 md:py-16 text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] mb-3">
+            <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-fg)] mb-3">
                 회원가입을 시작해 볼까요?
             </h1>
-            <p className="text-sm text-[var(--color-fg-muted)] mb-10">
+            <p className="text-sm text-[var(--color-fg-muted)] mb-12">
                 회원가입으로 구매시 40% 할인을 할수 있습니다!
             </p>
 
-            <div className="max-w-[460px] mx-auto space-y-3">
-                {/* 카카오 — 노란색 */}
+            <div className="max-w-[640px] mx-auto space-y-3">
+                {/* 카카오 — 노란색 (시안: 각진 모서리 rounded-none) */}
                 <button
                     type="button"
                     onClick={() => social("KAKAO")}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[6px] bg-[#FEE500] text-[#191919] text-sm font-medium hover:brightness-95 transition"
+                    className="w-full flex items-center justify-center gap-2 py-[18px] rounded-none bg-[#FEE500] text-[#191919] text-sm font-medium hover:brightness-95 transition"
                 >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="#191919">
                         <path d="M12 3C6.48 3 2 6.52 2 10.87c0 2.75 1.81 5.16 4.56 6.55-.2.71-.73 2.65-.84 3.06-.13.51.19.51.41.37.17-.12 2.74-1.86 3.83-2.6.66.09 1.34.14 2.04.14 5.52 0 10-3.52 10-7.87S17.52 3 12 3z"/>
@@ -582,11 +736,11 @@ function ChoiceScreen({ onKorean, onForeign }: { onKorean: () => void; onForeign
                     카카오로 3초만에 가입하기
                 </button>
 
-                {/* 구글 — 흰색 + 보더 */}
+                {/* 구글 — 흰색 + 보더 (시안: 각진 모서리 rounded-none) */}
                 <button
                     type="button"
                     onClick={() => social("GOOGLE")}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[6px] bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
+                    className="w-full flex items-center justify-center gap-2 py-[18px] rounded-none bg-[var(--color-surface)] border border-[var(--color-border)] text-sm font-medium text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
                 >
                     <svg width="18" height="18" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -597,20 +751,20 @@ function ChoiceScreen({ onKorean, onForeign }: { onKorean: () => void; onForeign
                     구글로 3초만에 가입하기
                 </button>
 
-                {/* 일반 회원가입 — 검정 */}
+                {/* 일반 회원가입 — 검정 (시안: 각진 모서리 rounded-none) */}
                 <button
                     type="button"
                     onClick={onKorean}
-                    className="w-full py-3.5 rounded-[6px] bg-[var(--color-fg)] text-[var(--color-bg)] text-sm font-medium hover:opacity-90 transition"
+                    className="w-full py-[18px] rounded-none bg-[var(--color-fg)] text-[var(--color-bg)] text-sm font-medium hover:opacity-90 transition"
                 >
                     일반 회원가입
                 </button>
 
-                {/* 외국인 회원가입 — 연회색 */}
+                {/* 외국인 회원가입 — 연회색 (시안: 각진 모서리 rounded-none) */}
                 <button
                     type="button"
                     onClick={onForeign}
-                    className="w-full py-3.5 rounded-[6px] bg-[var(--color-bg-subtle)] text-[var(--color-fg)] text-sm font-medium hover:bg-[var(--color-bg-muted)] transition"
+                    className="w-full py-[18px] rounded-none bg-[var(--color-bg-subtle)] text-[var(--color-fg)] text-sm font-medium hover:bg-[var(--color-bg-muted)] transition"
                 >
                     외국인 회원가입
                 </button>
@@ -620,75 +774,90 @@ function ChoiceScreen({ onKorean, onForeign }: { onKorean: () => void; onForeign
 }
 
 /* ============================================================
- * CertScreen — Step 2: PASS 본인인증 모달 (37:11763)
+ * CertScreen — Step 2: PASS 본인인증 모달
+ *   - 한국어 (37:11763): 가입 가능 여부 확인을 위해 본인인증을 진행할게요
+ *   - 외국인 (274:8727): We will verify your identity to check your eligibility
  * ============================================================ */
-function CertScreen({ onPick, onClose }: { onPick: () => void; onClose: () => void }) {
+function CertScreen({ foreign, onPick, onClose }: { foreign?: boolean; onPick: () => void; onClose: () => void }) {
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [onClose]);
 
+    // 시안 매칭 — 배경 타이틀은 두 시안 모두 한국어 ("회원가입을 시작해 볼까요?")
+    const title = foreign ? (
+        <>We will verify your identity<br />to check your eligibility</>
+    ) : (
+        <>가입 가능 여부 확인을 위해<br />본인인증을 진행할게요</>
+    );
+    const bullets = foreign
+        ? [
+            "Phone verification will be processed via mobile authentication",
+            "I-PIN verification is processed through NICE Information Service",
+            "Users under 14 will also need to complete a verification process with their legal guardian",
+        ]
+        : [
+            "휴대폰 인증은 모바일인증을 통해 진행됩니다.",
+            "아이핀 인증은 NICE 정보통신을 통해 진행돼요.",
+            "14세 미만의 경우 본인 이외의 법정 대리인의 인증 절차도 함께 진행돼요.",
+        ];
+    const ipinLabel  = foreign ? "I-PIN Verification"   : "아이핀 인증";
+    const mobileLabel = foreign ? "Mobile Authentication" : "휴대폰 인증";
+
     return (
         <div className="py-8 md:py-16">
-            {/* 배경 타이틀 */}
+            {/* 배경 타이틀 — 시안: 한국어/외국인 모두 한국어 표시 */}
             <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] text-center mb-8 opacity-50">
                 회원가입을 시작해 볼까요?
             </h1>
 
-            {/* 모달 오버레이 */}
+            {/* 모달 오버레이 (시안: 어두운 회색 백드롭 + 각진 흰 모달) */}
             <div className="fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
                 <div
                     onClick={e => e.stopPropagation()}
-                    className="relative w-full max-w-[520px] bg-[var(--color-surface)] rounded-[12px] p-8 md:p-10 shadow-xl"
+                    className="relative w-full max-w-[600px] bg-[var(--color-surface)] rounded-none p-8 md:p-12 shadow-xl"
                 >
-                    {/* 닫기 X */}
+                    {/* 닫기 X — 시안: 크고 또렷한 X */}
                     <button
                         type="button"
                         onClick={onClose}
                         aria-label="닫기"
-                        className="absolute top-5 right-5 w-6 h-6 flex items-center justify-center text-[var(--color-fg)] hover:opacity-70"
+                        className="absolute top-6 right-6 w-7 h-7 flex items-center justify-center text-[var(--color-fg)] hover:opacity-70"
                     >
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M4 4L16 16M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 5L19 19M19 5L5 19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
                         </svg>
                     </button>
 
-                    <h2 className="text-lg md:text-xl font-bold text-[var(--color-fg)] leading-snug mb-5">
-                        가입 가능 여부 확인을 위해<br />
-                        본인인증을 진행할게요
+                    <h2 className="text-xl md:text-2xl font-bold text-[var(--color-fg)] leading-snug mb-6">
+                        {title}
                     </h2>
 
-                    <ul className="space-y-2 text-sm text-[var(--color-fg-muted)] mb-8">
-                        <li className="flex items-start gap-2">
-                            <span className="text-[var(--color-fg-subtle)] mt-1.5">•</span>
-                            <span>휴대폰 인증은 모바일인증을 통해 진행됩니다.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <span className="text-[var(--color-fg-subtle)] mt-1.5">•</span>
-                            <span>아이핀 인증은 NICE 정보통신을 통해 진행돼요.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <span className="text-[var(--color-fg-subtle)] mt-1.5">•</span>
-                            <span>14세 미만의 경우 본인 이외의 법정 대리인의 인증 절차도 함께 진행돼요.</span>
-                        </li>
+                    <ul className="space-y-2.5 text-sm text-[var(--color-fg-muted)] mb-10">
+                        {bullets.map((b, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                                <span className="text-[var(--color-fg-subtle)] mt-1.5">•</span>
+                                <span>{b}</span>
+                            </li>
+                        ))}
                     </ul>
 
-                    {/* 인증 버튼 2개 — 연회색 SQUARE-ish (rounded sm) */}
+                    {/* 인증 버튼 2개 — 시안: 연회색 + 각진 모서리 (rounded-none) */}
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             type="button"
                             onClick={onPick}
-                            className="py-3.5 rounded-[6px] bg-[var(--color-bg-subtle)] text-[var(--color-fg)] text-sm font-medium hover:bg-[var(--color-bg-muted)] transition"
+                            className="py-3.5 rounded-none bg-[var(--color-bg-subtle)] text-[var(--color-fg)] text-sm font-medium hover:bg-[var(--color-bg-muted)] transition"
                         >
-                            아이핀 인증
+                            {ipinLabel}
                         </button>
                         <button
                             type="button"
                             onClick={onPick}
-                            className="py-3.5 rounded-[6px] bg-[var(--color-bg-subtle)] text-[var(--color-fg)] text-sm font-medium hover:bg-[var(--color-bg-muted)] transition"
+                            className="py-3.5 rounded-none bg-[var(--color-bg-subtle)] text-[var(--color-fg)] text-sm font-medium hover:bg-[var(--color-bg-muted)] transition"
                         >
-                            휴대폰 인증
+                            {mobileLabel}
                         </button>
                     </div>
                 </div>
@@ -700,8 +869,12 @@ function CertScreen({ onPick, onClose }: { onPick: () => void; onClose: () => vo
 /* ============================================================
  * Stepper — Step 3·4·5: 약관동의 → 정보입력 → 가입완료
  * ============================================================ */
-function Stepper({ current }: { current: "agree" | "info" | "done" }) {
-    const steps = [
+function Stepper({ current, foreign }: { current: "agree" | "info" | "done"; foreign?: boolean }) {
+    const steps = foreign ? [
+        { id: "agree", label: "Agree to Terms" },
+        { id: "info",  label: "Account Details" },
+        { id: "done",  label: "Welcome" },
+    ] as const : [
         { id: "agree", label: "약관동의" },
         { id: "info",  label: "정보입력" },
         { id: "done",  label: "가입완료" },
@@ -722,12 +895,14 @@ function Stepper({ current }: { current: "agree" | "info" | "done" }) {
                                 className={`w-8 h-8 rounded-full flex items-center justify-center text-xs transition ${
                                     isFilled
                                         ? "bg-[#3b82f6] text-white"
-                                        : "bg-[var(--color-surface)] text-[var(--color-fg-subtle)] border border-[var(--color-border-strong)]"
+                                        : "bg-[var(--color-surface)] text-transparent border border-[var(--color-border-strong)]"
                                 }`}
                             >
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                    <path d="M3 7L6 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+                                {isFilled && (
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <path d="M3 7L6 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                )}
                             </span>
                             <span className={`mt-1.5 text-xs ${active ? "text-[var(--color-fg)] font-semibold" : isFilled ? "text-[var(--color-fg)]" : "text-[var(--color-fg-muted)]"}`}>
                                 {s.label}
@@ -757,7 +932,7 @@ function AgreeCard({
     body?: React.ReactNode;
 }) {
     return (
-        <div className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+        <div className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] overflow-hidden">
             <div className="flex items-center px-5 py-4">
                 <button
                     type="button"
@@ -842,35 +1017,4 @@ function FieldRow({ label, required, children }: { label: string; required?: boo
     );
 }
 
-/* ============================================================
- * MegaphoneIllustration — 가입완료 화면 일러스트 (37:10594)
- * ============================================================ */
-function MegaphoneIllustration() {
-    return (
-        <svg width="240" height="180" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="megaBody" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stopColor="#6FAFEF"/>
-                    <stop offset="1" stopColor="#3b82f6"/>
-                </linearGradient>
-                <linearGradient id="megaCone" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0" stopColor="#A5C7F0"/>
-                    <stop offset="1" stopColor="#5B9BE0"/>
-                </linearGradient>
-            </defs>
-            {/* 손잡이 */}
-            <rect x="30" y="100" width="56" height="28" rx="8" fill="url(#megaBody)"/>
-            {/* 몸통 */}
-            <rect x="78" y="72" width="64" height="56" rx="10" fill="url(#megaBody)"/>
-            {/* 콘 */}
-            <path d="M138 60 L210 30 L210 170 L138 140 Z" fill="url(#megaCone)"/>
-            {/* 콘 입구 하이라이트 */}
-            <ellipse cx="208" cy="100" rx="6" ry="48" fill="#7DB1E4" opacity="0.6"/>
-            {/* 안테나/볼륨 */}
-            <circle cx="155" cy="40" r="6" fill="#FFD66B"/>
-            <path d="M170 30 L180 22 M168 22 L178 15 M178 32 L188 30" stroke="#FFD66B" strokeWidth="2.5" strokeLinecap="round"/>
-            {/* 별 */}
-            <text x="218" y="155" fontSize="12" fill="#A0A0A0">×</text>
-        </svg>
-    );
-}
+/* MegaphoneIllustration 제거 — 시안 37:10602 PNG로 교체 (public/images/signup-megaphone.png) */

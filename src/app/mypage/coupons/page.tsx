@@ -116,7 +116,7 @@ export default function CouponsPage() {
                             </button>
                         </form>
                         <p className="mt-3 text-center text-xs text-[var(--color-fg-muted)]">
-                            반드시 쇼핑몰에서 발행한 쿠폰번호 입력해주세요(10~35자 일렬번호 &quot;-&quot;제외)
+                            반드시 쇼핑몰에서 발행한 쿠폰번호만 입력해주세요(10~35자 일렬번호 &quot;-&quot;제외)
                         </p>
                     </div>
                 </section>
@@ -207,22 +207,23 @@ function CouponCard({ coupon }: { coupon: CouponView }) {
             : `${coupon.discountValue.toLocaleString()}원`;
     return (
         <li className="relative rounded-lg bg-white overflow-hidden">
-            {/* 우측 톱니 장식 (티켓 컷) */}
+            {/* 우측 톱니 장식 (티켓 컷) — 시안: 두꺼운 파란 패턴 */}
             <div
-                className="absolute right-0 top-0 bottom-0 w-3 bg-[#3b82f6]"
+                className="absolute right-0 top-0 bottom-0 w-8 bg-[#3b82f6]"
                 style={{
                     maskImage:
-                        "radial-gradient(circle at 0 6px, transparent 4px, black 4.5px)",
-                    maskSize: "100% 12px",
+                        "radial-gradient(circle at 0 12px, transparent 8px, black 9px)",
+                    maskSize: "100% 24px",
                     maskRepeat: "repeat-y",
                     WebkitMaskImage:
-                        "radial-gradient(circle at 0 6px, transparent 4px, black 4.5px)",
-                    WebkitMaskSize: "100% 12px",
+                        "radial-gradient(circle at 0 12px, transparent 8px, black 9px)",
+                    WebkitMaskSize: "100% 24px",
                     WebkitMaskRepeat: "repeat-y",
                 }}
                 aria-hidden="true"
             />
-            <div className="pr-8 pl-6 py-6 text-center">
+            {/* 시안: 좌측 정렬 텍스트 */}
+            <div className="pr-12 pl-6 py-6 text-left">
                 <p className="text-sm font-medium text-[var(--color-fg)] truncate">
                     {coupon.name || "회원가입시 3천원 쿠폰"}
                 </p>

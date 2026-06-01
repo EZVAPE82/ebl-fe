@@ -43,8 +43,8 @@ export default function MemberGradePage() {
 
                 {/* 상단 2 카드 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* 사용가능한 적립금 카드 */}
-                    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 md:p-6">
+                    {/* 사용가능한 적립금 카드 — 시안: 연회색 fill, 보더 없음 */}
+                    <div className="rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-5 md:p-6">
                         <div className="flex items-center gap-1 text-xs text-[var(--color-fg-muted)] mb-3">
                             <span>사용가능한 적립금</span>
                             <span className="inline-flex w-4 h-4 rounded-full bg-[var(--color-bg-subtle)] items-center justify-center text-[10px]">?</span>
@@ -63,14 +63,14 @@ export default function MemberGradePage() {
                         </dl>
                     </div>
 
-                    {/* 현재 등급 카드 */}
-                    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 md:p-6">
+                    {/* 현재 등급 카드 — 시안: 연회색 fill, 보더 없음 */}
+                    <div className="rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-5 md:p-6">
                         <div className="flex items-center gap-3 mb-3">
                             <GradeBadge name={grade.name} />
                             <span className="text-base md:text-lg font-bold text-[var(--color-fg)]">{grade.name}</span>
                         </div>
                         <p className="text-xs text-[var(--color-fg-muted)] mb-3">
-                            지난달 보다 무려 <strong className="text-[var(--color-fg)] font-semibold">{grade.spent.toLocaleString()}원</strong>이나 더 사용하셨습니다.
+                            지난달 보다 우리 <strong className="text-[var(--color-fg)] font-semibold">{grade.spent.toLocaleString()}원</strong>이나 더 사용하셨습니다.
                         </p>
                         <p className="text-xs text-[var(--color-fg-muted)] mb-2">
                             조금만 더 모으면 다음 등급으로 올라갈 수 있습니다.
@@ -104,9 +104,10 @@ export default function MemberGradePage() {
                                     <th className="px-3 py-3 font-medium text-left">회원등급</th>
                                     {GRADES.map(g => (
                                         <th key={g.key} className="px-3 py-3 font-medium text-center">
-                                            <span className="inline-flex items-center gap-1.5">
-                                                <GradeDot color={g.color} />
-                                                {g.label}
+                                            {/* 시안: 연회색 칩 + 컬러 방패 아이콘 + 등급명 */}
+                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface)] px-3 py-1">
+                                                <ShieldIcon color={g.color} />
+                                                <span className="text-[var(--color-fg)]">{g.label}</span>
                                             </span>
                                         </th>
                                     ))}
@@ -114,7 +115,7 @@ export default function MemberGradePage() {
                             </thead>
                             <tbody className="text-[var(--color-fg)] divide-y divide-[var(--color-border)]">
                                 <tr>
-                                    <td className="px-3 py-3 text-[var(--color-fg-muted)] whitespace-nowrap">조건 (6/9월 누적)</td>
+                                    <td className="px-3 py-3 text-[var(--color-fg-muted)] whitespace-nowrap">조건 (6개월 누적)</td>
                                     {GRADES.map(g => (
                                         <td key={g.key} className="px-3 py-3 text-center">{g.condition}</td>
                                     ))}
@@ -163,6 +164,15 @@ const GRADES: { key: GradeKey; label: string; color: string; condition: string; 
 
 function GradeDot({ color }: { color: string }) {
     return <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: color }} aria-hidden="true" />;
+}
+
+/* 시안 매칭: 등급별 컬러 방패 SVG (테이블 헤더 칩 안에) */
+function ShieldIcon({ color }: { color: string }) {
+    return (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z" fill={color} />
+        </svg>
+    );
 }
 
 function GradeBadge({ name }: { name: GradeKey }) {

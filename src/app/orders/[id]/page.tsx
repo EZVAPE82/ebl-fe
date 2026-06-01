@@ -20,6 +20,7 @@ import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui";
+import { MyPageSideNav } from "@/components/mypage/SideNav";
 
 type OrderView = {
     id: number;
@@ -228,7 +229,7 @@ function OrderInner({ params }: { params: Promise<{ id: string }> }) {
                                     현금영수증 신청
                                 </button>
                                 <button className="rounded border border-[var(--color-border)] text-xs text-[var(--color-fg)] px-3 py-1.5 hover:bg-[var(--color-bg-subtle)]">
-                                    거래명세서 인쇄
+                                    거래명세서 안내
                                 </button>
                             </div>
                         }
@@ -286,13 +287,12 @@ function OrderInner({ params }: { params: Promise<{ id: string }> }) {
 /* ============================================================
  * 레이아웃 / 보조 컴포넌트
  * ============================================================ */
-function Shell({ children, hideTitle }: { children: React.ReactNode; hideTitle?: boolean }) {
+function Shell({ children, hideTitle: _hideTitle }: { children: React.ReactNode; hideTitle?: boolean }) {
+    // 시안 37:12585 — 좌측 마이페이지 사이드바 + 우측 메인, 페이지 타이틀("주문 상세") 없음
     return (
-        <div className="mx-auto max-w-3xl px-4 md:px-8 py-10">
-            {!hideTitle && (
-                <h1 className="text-xl md:text-2xl font-bold mb-8 text-[var(--color-fg)]">주문 상세</h1>
-            )}
-            {children}
+        <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8">
+            <MyPageSideNav />
+            <div>{children}</div>
         </div>
     );
 }

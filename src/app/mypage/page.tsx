@@ -150,9 +150,15 @@ export default function MyPage() {
 
             {/* ===== 우측 메인 ===== */}
             <main className="space-y-6">
-                {/* 환영 카드 — rounded-lg, 보더 회색 */}
-                <div className="rounded-lg border border-[var(--color-border)] bg-white px-6 py-5 flex items-center gap-5">
-                    <div className="w-16 h-16 rounded-full bg-[var(--color-bg-subtle)] flex-shrink-0" />
+                {/* 환영 카드 — 시안: 연회색 fill + 보더 없음 + rounded-[12px] */}
+                <div className="rounded-[12px] bg-[var(--color-bg-subtle)] px-6 py-5 flex items-center gap-5">
+                    <div className="w-16 h-16 rounded-full bg-white flex-shrink-0 flex items-center justify-center text-[var(--color-fg-subtle)]">
+                        {/* 시안 매칭: 기본 사용자 실루엣 아이콘 */}
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.6"/>
+                            <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                        </svg>
+                    </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-base font-semibold text-[var(--color-fg)]">
                             안녕하세요. 엘프바님!
@@ -211,7 +217,7 @@ export default function MyPage() {
                     <h2 className="text-base font-semibold mb-3 text-[var(--color-fg)]">
                         나의 주문처리 현황{" "}
                         <span className="text-xs font-normal text-[var(--color-fg-muted)]">
-                            (최근 1개월)
+                            (최근 1년)
                         </span>
                     </h2>
                     <div className="border-t border-b border-[var(--color-border)] py-6 grid grid-cols-1 md:grid-cols-[1fr_180px] gap-4">
@@ -240,7 +246,7 @@ export default function MyPage() {
                         <h2 className="text-base font-semibold text-[var(--color-fg)]">
                             최근 나의 주문내역{" "}
                             <span className="text-xs font-normal text-[var(--color-fg-muted)]">
-                                (최근 1개월)
+                                (최근 1주일)
                             </span>
                         </h2>
                         <Link
@@ -325,7 +331,7 @@ function StatCard({
     value: string;
 }) {
     return (
-        <div className="rounded-md bg-[var(--color-bg-subtle)] p-4 md:p-5">
+        <div className="rounded-[12px] bg-[var(--color-bg-subtle)] p-4 md:p-5">
             <div className="flex items-center gap-1 text-xs text-[var(--color-fg-muted)]">
                 <span>{label}</span>
                 <span className="w-3.5 h-3.5 rounded-full border border-[var(--color-fg-subtle)] text-[9px] flex items-center justify-center text-[var(--color-fg-muted)]">

@@ -67,11 +67,11 @@ export default async function Home() {
 
                 {/* ===== 7. 시리즈 배너 (시안 — 테두리 X, 간격 X, 꽉 채움) ===== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-                    <Link href="/c/disposable" className="block overflow-hidden hover:opacity-95 transition">
+                    <Link href="/products?series=iceking" className="block overflow-hidden hover:opacity-95 transition">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/images/series-ice.png" alt="ICE COOL AS YOU WANT" className="w-full block" />
                     </Link>
-                    <Link href="/c/disposable" className="block overflow-hidden hover:opacity-95 transition">
+                    <Link href="/products?series=icekingpro" className="block overflow-hidden hover:opacity-95 transition">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/images/series-shimmer.png" alt="SHIMMERING IN YOUR HAND" className="w-full block" />
                     </Link>
@@ -567,7 +567,7 @@ function ReviewCard({ review }: { review: typeof REVIEW_MOCKS[number] }) {
     return (
         // 카드 4 장 높이 통일 — grid stretch + flex column 으로 상품줄을 카드 하단에 고정
         <li className="flex h-full">
-            <Link href="/c/best" className="flex flex-col w-full h-full">
+            <Link href="/reviews/best" className="flex flex-col w-full h-full">
                 {/* 사진 박스 — 업계 표준 1:1 + object-fit cover (Shopify Dawn / Amazon / eBay 패턴).
                     운영 시 사용자 업로드 사진(다양한 비율)도 800×800 thumbnail 자동 생성 후 동일 처리. */}
                 <div
@@ -669,7 +669,7 @@ function BestReviews({ items }: { items: ProductSummary[] }) {
             {list.map((p, i) => (
                 <Link
                     key={p.id ?? i}
-                    href={p.id > 0 ? `/p/${p.id}` : "/c/best"}
+                    href="/reviews/best"
                     className="block rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] hover:shadow-md transition"
                 >
                     <div className="aspect-square bg-[var(--color-bg-subtle)] overflow-hidden">

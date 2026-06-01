@@ -217,7 +217,7 @@ function Tab({ label, href, active }: { label: string; href: string; active?: bo
             href={href}
             className={`inline-flex items-center rounded-md px-4 py-2 text-sm font-medium transition ${
                 active
-                    ? "bg-[#3b82f6] text-white"
+                    ? "bg-[#DBEAFE] text-[#3b82f6]"
                     : "bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
             }`}
         >

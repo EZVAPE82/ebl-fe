@@ -19,8 +19,16 @@ export default function WishlistPage() {
     const router = useRouter();
     const [items, setItems] = useState<ProductSummary[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set());
+    const [qty, setQty] = useState<Record<number, number>>({});
     const [loading, setLoading] = useState(true);
     const [working, setWorking] = useState(false);
+
+    function getQty(id: number) {
+        return qty[id] ?? 1;
+    }
+    function changeQty(id: number, delta: number) {
+        setQty(prev => ({ ...prev, [id]: Math.max(1, (prev[id] ?? 1) + delta) }));
+    }
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -98,7 +106,7 @@ export default function WishlistPage() {
             await api("/api/v1/cart/items", {
                 method: "POST",
                 auth: true,
-                body: JSON.stringify({ productId, quantity: 1 }),
+                body: JSON.stringify({ productId, quantity: getQty(productId) }),
             });
             alert("장바구니에 담았습니다.");
         } catch {
@@ -125,7 +133,8 @@ export default function WishlistPage() {
             <MyPageSideNav />
 
             <div>
-                <header className="flex items-end justify-between pb-3 border-b-2 border-[var(--color-fg)] mb-6">
+                {/* 시안 37:12671 — 헤더 굵은 검정 보더 없음, 단순 타이틀 */}
+                <header className="mb-6">
                     <h2 className="text-xl md:text-2xl font-bold text-[var(--color-fg)]">위시리스트</h2>
                 </header>
 
@@ -198,8 +207,27 @@ export default function WishlistPage() {
                                     <div className="hidden sm:block text-sm font-semibold text-[var(--color-fg)] w-24 md:w-32 text-right tabular-nums">
                                         {formatPrice(p.price)}
                                     </div>
-                                    <div className="hidden sm:block text-xs text-[var(--color-fg-muted)] w-10 text-center">
-                                        1개
+                                    {/* 시안: [- 1 +] 수량 카운터 */}
+                                    <div className="hidden sm:flex items-center gap-2 text-sm text-[var(--color-fg)]">
+                                        <button
+                                            type="button"
+                                            onClick={() => changeQty(p.id, -1)}
+                                            disabled={working || getQty(p.id) <= 1}
+                                            aria-label="수량 감소"
+                                            className="w-6 h-6 flex items-center justify-center border border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)] disabled:opacity-40"
+                                        >
+                                            −
+                                        </button>
+                                        <span className="w-6 text-center tabular-nums">{getQty(p.id)}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => changeQty(p.id, +1)}
+                                            disabled={working}
+                                            aria-label="수량 증가"
+                                            className="w-6 h-6 flex items-center justify-center border border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)] disabled:opacity-40"
+                                        >
+                                            +
+                                        </button>
                                     </div>
                                     <div className="flex gap-2 flex-shrink-0">
                                         <button
@@ -232,13 +260,23 @@ export default function WishlistPage() {
                             ))}
                         </ul>
 
-                        {/* 페이지네이션 */}
+                        {/* 페이지네이션 — 시안: 1 2 3 4 5 ... 30 > */}
                         <nav className="mt-6 flex items-center justify-center gap-1 text-sm text-[var(--color-fg-muted)]">
                             <button
                                 className="w-8 h-8 rounded-md bg-[#3b82f6] text-white font-medium"
                                 aria-current="page"
                             >
                                 1
+                            </button>
+                            {[2, 3, 4, 5].map(n => (
+                                <button key={n} className="w-8 h-8 rounded-md hover:bg-[var(--color-bg-subtle)]">
+                                    {n}
+                                </button>
+                            ))}
+                            <span className="px-1">...</span>
+                            <button className="w-8 h-8 rounded-md hover:bg-[var(--color-bg-subtle)]">30</button>
+                            <button className="w-8 h-8 rounded-md hover:bg-[var(--color-bg-subtle)]" aria-label="다음 페이지">
+                                &gt;
                             </button>
                         </nav>
 

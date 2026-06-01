@@ -243,7 +243,7 @@ export default function CheckoutPage() {
                                         <input type="text" placeholder="상세주소 (선택)" className={inputClass} value={form.address2} onChange={e => setForm(s => ({ ...s, address2: e.target.value }))} />
                                     </div>
                                 </Field>
-                                <Field label="일반전화">
+                                <Field label="일반전화" required>
                                     <div className="flex items-center gap-1.5">
                                         <select className={`${selectClass} max-w-[80px]`} value={form.phoneHome1} onChange={e => setForm(s => ({ ...s, phoneHome1: e.target.value }))}>
                                             <option>02</option><option>031</option><option>032</option><option>051</option>
@@ -265,7 +265,7 @@ export default function CheckoutPage() {
                                         <input type="text" placeholder="5678" className={`${inputClass} max-w-[100px]`} value={form.recipientPhone3} onChange={e => setForm(s => ({ ...s, recipientPhone3: e.target.value }))} />
                                     </div>
                                 </Field>
-                                <Field label="이메일">
+                                <Field label="이메일" required>
                                     <div className="flex items-center gap-1.5">
                                         <input type="text" placeholder="signalsidecode02" className={inputClass} value={form.emailLocal} onChange={e => setForm(s => ({ ...s, emailLocal: e.target.value }))} />
                                         <span className="text-[var(--color-fg-subtle)]">@</span>
@@ -275,14 +275,14 @@ export default function CheckoutPage() {
                                         </select>
                                     </div>
                                 </Field>
-                                <Field label="배송 요청사항">
+                                <Field label="배송 요청사항" required>
                                     <select className={selectClass} value={form.memo} onChange={e => setForm(s => ({ ...s, memo: e.target.value }))}>
                                         <option value="">메시지 선택(선택사항)</option>
                                         <option value="조심히 와주세요">조심히 와주세요</option>
                                     </select>
                                 </Field>
                                 {isGuest && (
-                                    <Field label="기본 배송지 저장">
+                                    <Field label="기본 배송지 저장" required>
                                         <div className="flex items-center gap-4 text-sm">
                                             <label className="flex items-center gap-1.5 cursor-pointer">
                                                 <input type="radio" name="defaultAddress" checked={form.defaultAddress === "save"} onChange={() => setForm(s => ({ ...s, defaultAddress: "save" }))} className="text-[#3b82f6]"/>

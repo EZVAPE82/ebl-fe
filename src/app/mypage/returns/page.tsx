@@ -167,7 +167,7 @@ function Tab({ label, href, active }: { label: string; href: string; active?: bo
             href={href}
             className={`inline-flex items-center rounded-md px-4 py-2 text-sm font-medium transition ${
                 active
-                    ? "bg-[var(--color-fg)] text-[var(--color-bg)]"
+                    ? "bg-[#3b82f6] text-white"
                     : "bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
             }`}
         >
@@ -202,9 +202,10 @@ function DateInput({ value, onChange }: { value: string; onChange: (v: string) =
 }
 
 /**
- * Figma 상에서:
- *  - 처리완료(COMPLETED): 검정 배경 + 흰 글씨 pill
- *  - 기타(REQUESTED/IN_PROGRESS): 회색 배경 + 회색 글씨 pill
+ * Figma 시안 매칭:
+ *  - 취소완료(kind=취소): 검정 fill + 흰 텍스트, 도트 없음
+ *  - 교환완료/반품완료(kind=교환/반품): 연회색 fill + 회색 도트 + 회색 텍스트
+ *  - 진행중/접수/반려는 회색 톤 유지
  */
 function ReturnPill({ status, kind }: { status: ReturnRow["status"]; kind: ReturnRow["kind"] }) {
     const label =
@@ -213,20 +214,19 @@ function ReturnPill({ status, kind }: { status: ReturnRow["status"]; kind: Retur
         : status === "REJECTED" ? `${kind}반려`
         : `${kind}접수`;
 
-    const isDone = status === "COMPLETED";
+    // 시안: 취소는 강한 검정, 교환/반품은 부드러운 회색 + 도트
+    const isCancelDone = status === "COMPLETED" && kind === "취소";
+
+    if (isCancelDone) {
+        return (
+            <span className="inline-flex items-center rounded-full text-xs font-medium px-3 py-1 bg-[var(--color-fg)] text-[var(--color-bg)]">
+                {label}
+            </span>
+        );
+    }
     return (
-        <span
-            className={`inline-flex items-center gap-1.5 rounded-full text-xs font-medium px-3 py-1 ${
-                isDone
-                    ? "bg-[var(--color-fg)] text-[var(--color-bg)]"
-                    : "bg-[var(--color-bg-muted)] text-[var(--color-fg-muted)]"
-            }`}
-        >
-            <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                    isDone ? "bg-[var(--color-bg)]" : "bg-[var(--color-fg-muted)]"
-                }`}
-            />
+        <span className="inline-flex items-center gap-1.5 rounded-full text-xs font-medium px-3 py-1 bg-[var(--color-bg-muted)] text-[var(--color-fg-muted)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-fg-muted)]" />
             {label}
         </span>
     );
