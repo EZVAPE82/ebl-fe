@@ -35,20 +35,20 @@ export function ProductCard({ p }: { p: ProductSummary }) {
                             src={thumb}
                             alt={p.name}
                             loading="lazy"
-                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ease-in-out ${
                                 hoverOk ? "group-hover:opacity-0" : ""
                             }`}
                         />
-                        {/* hover 시 fade-in 풍부한 배경 카드. 파일 없으면 onError → 비활성화 (default 만 유지) */}
+                        {/* hover 풍부한 배경 카드 — 사전 로드(prefetch) 해서 첫 호버 시에도 부드러운 0.3초 fade 보장.
+                            파일 없으면 onError → 비활성화 (default 만 유지). */}
                         {hoverOk && hoverThumb && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={hoverThumb}
                                 alt=""
-                                loading="lazy"
                                 onError={() => setHoverOk(false)}
                                 aria-hidden="true"
-                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
                             />
                         )}
                     </>
