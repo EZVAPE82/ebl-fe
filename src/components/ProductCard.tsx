@@ -11,14 +11,16 @@ export function ProductCard({ p }: { p: ProductSummary }) {
             href={`/p/${p.id}`}
             className="group flex flex-col rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition"
         >
-            <div className="aspect-square bg-[var(--color-bg-subtle)] relative">
+            {/* device 이미지가 세로로 긴 비율(0.4~0.8)이라 정사각형에 cover 하면 잘림.
+                카드를 약간 세로(4:5)로 잡고 contain 으로 device 전체가 보이게 한다. */}
+            <div className="aspect-[4/5] bg-[var(--color-bg-subtle)] relative">
                 {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                         src={thumb}
                         alt={p.name}
                         loading="lazy"
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition"
+                        className="absolute inset-0 w-full h-full object-contain p-2 group-hover:scale-105 transition"
                     />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-[var(--color-fg-subtle)] text-xs">
