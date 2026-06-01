@@ -11,16 +11,17 @@ export function ProductCard({ p }: { p: ProductSummary }) {
             href={`/p/${p.id}`}
             className="group flex flex-col rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition"
         >
-            {/* device 이미지가 세로로 긴 비율(0.4~0.8)이라 정사각형에 cover 하면 잘림.
-                카드를 약간 세로(4:5)로 잡고 contain 으로 device 전체가 보이게 한다. */}
-            <div className="aspect-[4/5] bg-[var(--color-bg-subtle)] relative">
+            {/* 시안 카드 thumbnail 영역은 정사각형(445x445). icekingpro 처럼 풍부한 배경+device 1:1 이미지는
+                cover 로 꽉 채워지고, 일부 series 의 세로 길쭉 device-only 이미지(0.4~0.8)는 contain 으로 letterbox 처리.
+                여기서는 모든 series 호환을 위해 contain 유지 — 정사각형 1:1 은 letterbox 거의 없음. */}
+            <div className="aspect-square bg-[var(--color-bg-subtle)] relative">
                 {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                         src={thumb}
                         alt={p.name}
                         loading="lazy"
-                        className="absolute inset-0 w-full h-full object-contain p-2 group-hover:scale-105 transition"
+                        className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition"
                     />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-[var(--color-fg-subtle)] text-xs">

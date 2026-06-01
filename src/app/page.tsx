@@ -227,14 +227,14 @@ function BestItemGrid({ items }: { items: ProductSummary[] }) {
                 {items.map(p => (
                     <li key={p.id}>
                         <Link href={`/p/${p.id}`} className="block group">
-                            {/* device 이미지가 세로로 긴 비율(0.4~0.8) — 4:5 + contain 으로 전체가 보이게 한다. */}
-                            <div className="aspect-[4/5] rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)]">
+                            {/* 시안 카드(정사각형 1:1) 매칭 + 다른 series 와의 호환 위해 contain 유지. */}
+                            <div className="aspect-square rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)]">
                                 {p.thumbnailUrl ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
                                         src={p.thumbnailUrl}
                                         alt={p.name}
-                                        className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"
+                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
                                     />
                                 ) : null}
                             </div>
