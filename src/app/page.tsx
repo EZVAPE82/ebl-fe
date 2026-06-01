@@ -227,15 +227,25 @@ function BestItemGrid({ items }: { items: ProductSummary[] }) {
                 {items.map(p => (
                     <li key={p.id}>
                         <Link href={`/p/${p.id}`} className="block group">
-                            {/* 시안 카드(정사각형 1:1) 매칭 + 다른 series 와의 호환 위해 contain 유지. */}
-                            <div className="aspect-square rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)]">
+                            {/* 시안 정사각형 카드. hover 시 -hover.png 풍부한 배경 카드로 fade-in swap (CSS only). */}
+                            <div className="aspect-square rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)] relative">
                                 {p.thumbnailUrl ? (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img
-                                        src={p.thumbnailUrl}
-                                        alt={p.name}
-                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                                    />
+                                    <>
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={p.thumbnailUrl}
+                                            alt={p.name}
+                                            className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300 group-hover:opacity-0"
+                                        />
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={p.thumbnailUrl.replace(/(\.[a-z]+)$/i, "-hover$1")}
+                                            alt=""
+                                            aria-hidden="true"
+                                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                        />
+                                    </>
                                 ) : null}
                             </div>
                             <div className="mt-3 space-y-1">
