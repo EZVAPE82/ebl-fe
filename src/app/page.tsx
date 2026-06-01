@@ -242,7 +242,6 @@ function BestItemGrid({ items }: { items: ProductSummary[] }) {
                                             src={p.thumbnailUrl.replace(/(\.[a-z]+)$/i, "-hover$1")}
                                             alt=""
                                             aria-hidden="true"
-                                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                                             className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                         />
                                     </>
