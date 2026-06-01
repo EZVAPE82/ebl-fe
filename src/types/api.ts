@@ -22,6 +22,8 @@ export type ProductSummary = {
     thumbnailUrl: string | null;
     reviewCount: number;
     ratingAvg: number;
+    /** 메인 페이지 "엘프바의 추천 아이템" 슬롯 (1~4) — NULL = 추천 아님 */
+    featuredOrder?: number | null;
 };
 
 export type ProductOption = {

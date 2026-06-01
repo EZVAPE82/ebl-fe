@@ -21,14 +21,13 @@ async function safeFetch<T>(path: string, fallback: T): Promise<T> {
 export default async function Home() {
     const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 8, first: true, last: true, empty: true };
 
-    const [bannersHero, _newest, popular, categoriesRaw, notices] = await Promise.all([
+    const [bannersHero, featured, popular, categoriesRaw, notices] = await Promise.all([
         safeFetch<Banner[]>("/api/v1/public/banners?placement=MAIN_HERO", []),
-        safeFetch<Page<ProductSummary>>("/api/v1/public/products?sort=newest&size=8", emptyPage as Page<ProductSummary>),
+        safeFetch<ProductSummary[]>("/api/v1/public/products/featured", []),
         safeFetch<Page<ProductSummary>>("/api/v1/public/products?sort=popular&size=8", emptyPage as Page<ProductSummary>),
         safeFetch<Category[]>("/api/v1/public/categories", []),
         safeFetch<Page<Notice>>("/api/v1/public/notices?size=4", { ...emptyPage, content: [] } as unknown as Page<Notice>),
     ]);
-    void _newest;
 
     const categories = categoriesRaw.length > 0 ? categoriesRaw : DEFAULT_CATEGORIES;
     const heroSlides = bannersHero.length > 0 ? bannersHero : DESIGN_FALLBACK_MAIN_HERO;
@@ -46,13 +45,13 @@ export default async function Home() {
             <CategoryIcons categories={categories} />
 
             <div className="mx-auto max-w-screen-2xl px-4 space-y-16 pb-16">
-                {/* ===== 3. 엘프바의 추천 아이템 (시안 11:864 4 카드 통이미지) ===== */}
+                {/* ===== 3. 엘프바의 추천 아이템 — 어드민 설정 (featured_order 1~4) ===== */}
                 <section>
                     <div className="mb-4">
                         <p className="text-xs text-[var(--color-fg-muted)]">Best Item</p>
                         <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">엘프바의 추천 아이템</h2>
                     </div>
-                    <BestItemGrid />
+                    <BestItemGrid items={featured} />
                 </section>
 
                 {/* ===== 5. 우리의 이벤트 (2 banner card 그리드) ===== */}
@@ -197,36 +196,43 @@ function ProductGrid({ items }: { items: ProductSummary[] }) {
 /* ============================================================
  * BestItemGrid — 시안 11:864 4 product 카드 (상단: 컬러 제품 통이미지, 하단: HTML 정보)
  * ============================================================ */
-function BestItemGrid() {
-    const cards = [
-        { id: 1, src: "/images/prod-apple-ice.png",    name: "Apple Ice",     sub: "5000모금 일회용 · 청사과 + 멘솔" },
-        { id: 2, src: "/images/prod-blue-razz.png",    name: "Blue Razz Ice", sub: "5000모금 일회용 · 블루라즈 + 멘솔" },
-        { id: 3, src: "/images/prod-cola-ice.png",     name: "Cola Ice",      sub: "5000모금 일회용 · 콜라 + 멘솔" },
-        { id: 4, src: "/images/prod-grape-cherry.png", name: "Grape Cherry",  sub: "5000모금 일회용 · 포도 + 체리" },
-    ];
+/** 어드민 설정 추천 아이템 — featured_order 1~4 슬롯에 배치된 실제 DB 상품. */
+function BestItemGrid({ items }: { items: ProductSummary[] }) {
+    if (items.length === 0) {
+        return (
+            <p className="text-sm text-[var(--color-fg-subtle)] py-8 text-center">
+                추천 아이템이 설정되지 않았습니다. 어드민에서 4개 상품을 추천 슬롯에 배치해주세요.
+            </p>
+        );
+    }
     return (
         <>
             <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {cards.map(c => (
-                    <li key={c.id}>
-                        <Link href={`/p/${c.id}`} className="block group">
-                            <div className="rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)]">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={c.src} alt={c.name} className="w-full block group-hover:scale-105 transition-transform" />
+                {items.map(p => (
+                    <li key={p.id}>
+                        <Link href={`/p/${p.id}`} className="block group">
+                            <div className="aspect-square rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)]">
+                                {p.thumbnailUrl ? (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img
+                                        src={p.thumbnailUrl}
+                                        alt={p.name}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                    />
+                                ) : null}
                             </div>
                             <div className="mt-3 space-y-1">
-                                <p className="text-sm md:text-base font-medium text-[var(--color-fg)] line-clamp-1">{c.name}</p>
-                                <p className="text-xs text-[var(--color-fg-muted)] line-clamp-1">{c.sub}</p>
-                                <p className="text-xs text-[var(--color-fg-subtle)] line-through tabular-nums">25,000원</p>
+                                <p className="text-sm md:text-base font-medium text-[var(--color-fg)] line-clamp-1">{p.name}</p>
+                                <p className="text-xs text-[var(--color-fg-subtle)] line-through tabular-nums">{formatPrice(Math.round(p.price * 1.4))}</p>
                                 <p className="text-sm font-semibold tabular-nums">
                                     <span className="text-[var(--color-danger)] mr-1">40%</span>
-                                    <span className="text-[var(--color-fg)]">25,000원</span>
+                                    <span className="text-[var(--color-fg)]">{formatPrice(p.price)}</span>
                                 </p>
                                 <p className="text-xs text-[var(--color-fg-muted)] flex items-center gap-1">
                                     <span className="text-yellow-400">★</span>
-                                    <span className="font-medium text-[var(--color-fg)]">4.9</span>
+                                    <span className="font-medium text-[var(--color-fg)]">{(p.ratingAvg ?? 0).toFixed(1)}</span>
                                     <span>|</span>
-                                    <span>20건</span>
+                                    <span>{p.reviewCount}건</span>
                                 </p>
                             </div>
                         </Link>
@@ -235,7 +241,7 @@ function BestItemGrid() {
             </ul>
             <div className="mt-6 flex justify-center">
                 <Link
-                    href="/c/new"
+                    href="/products"
                     className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border-strong)] px-6 py-2.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)]"
                 >
                     더 알아보기
