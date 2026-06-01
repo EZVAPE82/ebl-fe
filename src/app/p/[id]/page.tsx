@@ -6,7 +6,7 @@ import { ProductQna } from "@/components/ProductQna";
 import { DetailTabs } from "@/components/DetailTabs";
 import { Button } from "@/components/ui";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
-import { formatPrice } from "@/lib/format";
+import { displayPrice, formatPrice } from "@/lib/format";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -83,7 +83,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                             </button>
                         </div>
                         <div className="mt-3 flex items-end gap-2">
-                            <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">{formatPrice(product.price)}</span>
+                            <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">{formatPrice(displayPrice(product))}</span>
                         </div>
                         <div className="mt-2 flex items-center gap-2 text-sm">
                             <span className="text-[var(--color-warning)]">★ {product.ratingAvg?.toFixed?.(1) ?? "0.0"}</span>
@@ -97,7 +97,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         <dt className="text-[var(--color-fg-muted)]">배송</dt>
                         <dd className="text-[var(--color-fg)]">평일 13시 이전 주문 시 당일 발송 · 3만원 이상 무료배송</dd>
                         <dt className="text-[var(--color-fg-muted)]">적립금</dt>
-                        <dd className="text-[var(--color-fg)]">{Math.floor(product.price * 0.01).toLocaleString()}원 (구매 1% · 리뷰 추가 적립)</dd>
+                        <dd className="text-[var(--color-fg)]">{Math.floor(displayPrice(product) * 0.01).toLocaleString()}원 (구매 1% · 리뷰 추가 적립)</dd>
                         <dt className="text-[var(--color-fg-muted)]">인증</dt>
                         <dd className="text-[var(--color-fg)]">만 19세 이상 성인 인증 후 결제 가능</dd>
                     </dl>
@@ -143,7 +143,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                     {/* 총 가격 */}
                     <div className="flex items-baseline justify-between pt-3 border-t border-[var(--color-border)]">
                         <span className="text-sm text-[var(--color-fg-muted)]">총 결제 금액</span>
-                        <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(product.price)}</span>
+                        <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(displayPrice(product))}</span>
                     </div>
 
                     {/* PC 액션 — 시안: 찜하기(하트 흰) + 장바구니(검정 메인) */}

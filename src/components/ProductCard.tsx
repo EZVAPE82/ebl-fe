@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ProductSummary } from "@/types/api";
-import { formatPrice } from "@/lib/format";
+import { displayPrice, formatPrice } from "@/lib/format";
 import { safeImageUrl } from "@/lib/url";
 
 export function ProductCard({ p }: { p: ProductSummary }) {
@@ -33,7 +33,7 @@ export function ProductCard({ p }: { p: ProductSummary }) {
             </div>
             <div className="p-3 space-y-1">
                 <h3 className="text-sm font-medium leading-tight line-clamp-2 text-[var(--color-fg)]">{p.name}</h3>
-                <div className="text-base font-semibold text-[var(--color-fg)]">{formatPrice(p.price)}</div>
+                <div className="text-base font-semibold text-[var(--color-fg)]">{formatPrice(displayPrice(p))}</div>
                 <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-fg-subtle)]">
                     <span>★ {p.ratingAvg?.toFixed?.(1) ?? "0.0"}</span>
                     <span>·</span>
