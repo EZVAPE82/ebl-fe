@@ -1,52 +1,35 @@
 /**
- * 어드민 전용 API 호출 + 토큰 관리.
- * 일반 회원 sessionStorage 토큰(accessToken)과 분리: adminAccessToken
+ * 어드민 전용 API 호출.
+ *
+ * 인증: httpOnly 쿠키(adminAccess)만 사용 — 토큰을 JS(sessionStorage)에 보관하지 않음(XSS 차단).
+ * 로그인 상태는 verifyAdminSession()(GET /api/v1/admin/me)으로 확인.
  *
  * 401 처리:
- *  - 어드민은 refresh 토큰 없음(짧은 15분 access만)
- *  - 401 발생 시 토큰 즉시 정리 + /admin/login 으로 이동
+ *  - 어드민은 refresh 없음(짧은 15분 access). 401/403 시 /admin/login 으로 이동.
  */
 
 import { api, ApiError } from "@/lib/api";
 
-const KEY = "adminAccessToken";
-
-export function getAdminToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return sessionStorage.getItem(KEY);
-}
-
-export function setAdminToken(token: string) {
-    if (typeof window === "undefined") return;
-    sessionStorage.setItem(KEY, token);
-}
-
-export function clearAdminToken() {
-    if (typeof window === "undefined") return;
-    sessionStorage.removeItem(KEY);
+/** 어드민 세션 유효성 확인 — 쿠키 기반. 유효하면 true. */
+export async function verifyAdminSession(): Promise<boolean> {
+    try {
+        await api("/api/v1/admin/me");
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 export async function adminApi<T = unknown>(
     path: string,
     opts: { method?: string; body?: string; headers?: HeadersInit } = {}
 ): Promise<T> {
-    const token = getAdminToken();
-    if (!token) {
-        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/admin/login")) {
-            window.location.replace("/admin/login");
-        }
-        throw new ApiError(401, "ADMIN_UNAUTHENTICATED", "어드민 로그인이 필요합니다.");
-    }
-    const headers: HeadersInit = {
-        ...(opts.headers ?? {}),
-        Authorization: `Bearer ${token}`,
-    };
     try {
-        return await api<T>(path, { ...opts, headers });
+        // 인증은 쿠키(credentials:'include')로 전송 — Authorization 헤더 주입 없음.
+        return await api<T>(path, { ...opts });
     } catch (e) {
-        // 일반 api()는 401 시 일반 회원 refresh를 시도하는데 어드민은 별도 처리 필요
-        if (e instanceof ApiError && (e.status === 401 || e.code === "TOKEN_EXPIRED" || e.code === "TOKEN_INVALID")) {
-            clearAdminToken();
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403
+            || e.code === "TOKEN_EXPIRED" || e.code === "TOKEN_INVALID" || e.code === "ADMIN_UNAUTHENTICATED")) {
             if (typeof window !== "undefined" && !window.location.pathname.startsWith("/admin/login")) {
                 window.location.replace("/admin/login");
             }
@@ -56,14 +39,11 @@ export async function adminApi<T = unknown>(
 }
 
 export async function adminLogin(username: string, password: string) {
-    const res = await api<{ accessToken: string }>("/api/v1/admin/auth/login", {
+    // 응답 토큰은 무시 — 백엔드가 httpOnly 어드민 쿠키(Set-Cookie)를 세팅한다.
+    await api("/api/v1/admin/auth/login", {
         method: "POST",
         body: JSON.stringify({ username, password }),
     });
-    // httpOnly 쿠키도 백엔드에서 자동 발급되므로 향후 sessionStorage 제거 예정.
-    // 현재는 점진 전환 단계: 헤더 + 쿠키 둘 다 운용.
-    setAdminToken(res.accessToken);
-    return res;
 }
 
 export async function adminLogout() {
@@ -72,8 +52,9 @@ export async function adminLogout() {
     } catch {
         // 로그아웃은 어떤 경우에도 클라이언트 상태는 항상 정리
     }
-    clearAdminToken();
+    // 레거시: 과거 세션의 잔존 sessionStorage 토큰 정리
     if (typeof window !== "undefined") {
+        sessionStorage.removeItem("adminAccessToken");
         window.location.replace("/admin/login");
     }
 }

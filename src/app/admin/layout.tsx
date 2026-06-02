@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { clearAdminToken, getAdminToken } from "@/lib/admin";
+import { adminLogout, verifyAdminSession } from "@/lib/admin";
 
 const NAV: { href: string; label: string }[] = [
     { href: "/admin", label: "대시보드" },
@@ -24,16 +24,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const isLoginPage = pathname === "/admin/login";
 
     useEffect(() => {
-        const t = getAdminToken();
-        setAuthed(!!t);
-        if (!isLoginPage && !t) {
-            router.replace("/admin/login");
+        if (isLoginPage) {
+            setAuthed(true); // 로그인 페이지는 게이팅 불필요
+            return;
         }
+        let cancelled = false;
+        // 쿠키 기반 세션 확인 (GET /api/v1/admin/me) — 토큰을 JS 에 보관하지 않음.
+        verifyAdminSession().then(ok => {
+            if (cancelled) return;
+            setAuthed(ok);
+            if (!ok) router.replace("/admin/login");
+        });
+        return () => { cancelled = true; };
     }, [pathname, isLoginPage, router]);
 
     function logout() {
-        clearAdminToken();
-        router.replace("/admin/login");
+        void adminLogout();
     }
 
     if (isLoginPage) {
