@@ -4,46 +4,52 @@ export function Footer() {
     return (
         <footer className="mt-16 border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
             <div className="mx-auto max-w-screen-2xl px-4 py-10 grid gap-8 md:grid-cols-[1fr_auto]">
-                {/* 좌측: 회사정보 */}
-                <div className="text-xs text-[var(--color-fg-muted)] leading-relaxed">
-                    <p className="font-bold tracking-[0.15em] text-[var(--color-fg)] mb-4">ELFBAR</p>
+                {/* 좌측: 회사정보 — 시안 276:10555 폰트 13px(#767676), 라벨 w400 / 값 w500 */}
+                <div className="text-[13px] text-[#767676] leading-relaxed">
+                    {/* 로고 이미지 (시안 127x38) — 텍스트 ELFBAR 대신 컬러 로고 */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/images/logo-elfbar-color.png" alt="ELFBAR" className="h-9 w-auto mb-5" />
                     <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5">
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">상호: </dt><dd className="inline">유한회사 전담이지</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">대표: </dt><dd className="inline">이상헌</dd></div>
-                        <div className="md:col-span-2"><dt className="inline text-[var(--color-fg-subtle)]">주소: </dt><dd className="inline">서울특별시 중구 명동8길 22-4, 1003호 (명동2가, 대한빌딩)</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">사업자등록번호: </dt><dd className="inline tabular-nums">419-86-03748</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">개업일: </dt><dd className="inline">2025년 7월 1일</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">전화번호: </dt><dd className="inline">02-773-4114</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">이메일: </dt><dd className="inline">elfbar@naver.com</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">개인정보관리책임자: </dt><dd className="inline">이상헌</dd></div>
-                        <div><dt className="inline text-[var(--color-fg-subtle)]">배송사: </dt><dd className="inline">로젠택배</dd></div>
+                        <div><dt className="inline text-[#767676]">상호 </dt><dd className="inline font-medium text-[#767676]">유한회사 전담이지</dd></div>
+                        <div><dt className="inline text-[#767676]">대표 </dt><dd className="inline font-medium text-[#767676]">이상헌</dd></div>
+                        <div className="md:col-span-2"><dt className="inline text-[#767676]">주소 </dt><dd className="inline font-medium text-[#767676]">서울특별시 중구 명동8길 22-4, 1003호 (명동2가, 대한빌딩)</dd></div>
+                        <div><dt className="inline text-[#767676]">사업자등록번호 </dt><dd className="inline font-medium text-[#767676] tabular-nums">419-86-03748</dd></div>
+                        <div><dt className="inline text-[#767676]">개업일 </dt><dd className="inline font-medium text-[#767676]">2025년 7월 1일</dd></div>
+                        <div><dt className="inline text-[#767676]">전화번호 </dt><dd className="inline font-medium text-[#767676]">02-773-4114</dd></div>
+                        <div><dt className="inline text-[#767676]">이메일 </dt><dd className="inline font-medium text-[#767676]">elfbar@naver.com</dd></div>
+                        <div><dt className="inline text-[#767676]">개인정보관리책임자 </dt><dd className="inline font-medium text-[#767676]">이상헌</dd></div>
+                        <div><dt className="inline text-[#767676]">배송사 </dt><dd className="inline font-medium text-[#767676]">로젠택배</dd></div>
                     </dl>
 
-                    <nav className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                        <Link href="/about" className="hover:text-[var(--color-fg)]">회사소개</Link>
-                        <Link href="/guide" className="hover:text-[var(--color-fg)]">이용안내</Link>
-                        <Link href="/privacy" className="font-semibold text-[var(--color-fg)] hover:text-[var(--color-accent)]">개인정보처리방침</Link>
-                        <Link href="/terms" className="hover:text-[var(--color-fg)]">이용약관</Link>
-                        <Link href="/youth" className="hover:text-[var(--color-fg)]">청소년보호정책</Link>
+                    {/* 푸터 nav — 시안 13px, 개인정보처리방침만 w500 black */}
+                    <nav className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
+                        <Link href="/about" className="text-[#767676] hover:text-[var(--color-fg)]">회사소개</Link>
+                        <Link href="/guide" className="text-[#767676] hover:text-[var(--color-fg)]">이용안내</Link>
+                        <Link href="/privacy" className="font-medium text-[var(--color-fg)] hover:text-[var(--color-accent)]">개인정보처리방침</Link>
+                        <Link href="/terms" className="text-[#767676] hover:text-[var(--color-fg)]">이용약관</Link>
+                        <Link href="/youth" className="text-[#767676] hover:text-[var(--color-fg)]">청소년보호정책</Link>
                     </nav>
 
-                    <p className="mt-4 text-[11px] text-[var(--color-fg-subtle)]">
+                    {/* 카피라이트 — 시안 14px #767676 */}
+                    <p className="mt-4 text-[13px] text-[#767676]">
                         © {new Date().getFullYear()} 유한회사 전담이지 ALL RIGHTS RESERVED. 본 사이트는 만 19세 이상 성인만 이용 가능합니다.
                     </p>
                 </div>
 
-                {/* 우측: 고객센터 + SNS */}
+                {/* 우측: 고객센터 + SNS — 시안 고객센터 16px w500 black */}
                 <div className="md:text-right">
-                    <p className="text-xs text-[var(--color-fg-muted)] mb-1">고객센터</p>
-                    <p className="text-xl md:text-2xl font-bold text-[var(--color-fg)] tracking-tight">02-773-4114</p>
-                    <dl className="mt-2 text-[11px] text-[var(--color-fg-muted)] space-y-0.5">
+                    <div className="flex items-center md:justify-end gap-2">
+                        <span className="text-base font-medium text-[var(--color-fg)]">고객센터</span>
+                        <span className="text-base font-medium text-[var(--color-fg)] tabular-nums">02-773-4114</span>
+                    </div>
+                    <dl className="mt-2 text-[13px] text-[#767676] space-y-0.5">
                         <div className="flex md:justify-end gap-1">
-                            <dt className="text-[var(--color-fg-subtle)]">평일</dt>
-                            <dd>10:00 - 18:00</dd>
+                            <dt className="text-[#767676]">평일:</dt>
+                            <dd>10:00 ~ 18:00</dd>
                         </div>
                         <div className="flex md:justify-end gap-1">
-                            <dt className="text-[var(--color-fg-subtle)]">점심</dt>
-                            <dd>13:00 - 14:00</dd>
+                            <dt className="text-[#767676]">점심:</dt>
+                            <dd>13:00 ~ 14:00</dd>
                         </div>
                     </dl>
 
