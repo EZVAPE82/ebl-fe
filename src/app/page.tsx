@@ -803,33 +803,71 @@ function InstagramFeed() {
  * HTML form input 은 통이미지와 중복되므로 제거 (사용자가 input 위 그림자 지적 fix).
  * ============================================================ */
 function ContactCTA() {
-    // 배경: cta-purple-clean.png (input/button 영역 클린 — Figma 원본에서 input 자리 비운 버전)
-    // 그 위에 HTML form overlay (input + 문의하기 버튼) — 동작하는 입력칸
     return (
-        <section className="mt-24 relative w-full">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/cta-purple-clean.png" alt="엘프바에게 문의해주세요" className="w-full block" />
-
-            {/* 우측 input + 문의하기 버튼 — 통이미지 위에 HTML overlay */}
-            <form
-                action="/contact"
-                method="get"
-                aria-label="1:1 문의하기"
-                className="absolute z-10 flex items-stretch gap-2 h-10 md:h-12"
-                style={{ left: "55%", right: "5%", top: "50%", transform: "translateY(-50%)" }}
-            >
-                <input
-                    type="text"
-                    placeholder="문의사항을 입력해주세요"
-                    className="flex-1 min-w-0 rounded-[18px] bg-white px-5 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
-                />
-                <button
-                    type="submit"
-                    className="rounded-[18px] bg-[var(--color-fg)] text-white text-sm font-semibold px-6 md:px-8 hover:opacity-90 transition whitespace-nowrap"
+        <>
+            {/* 데스크탑(md+) — 시안 통이미지 가로 카드 + 우측 form overlay */}
+            <section className="mt-24 relative w-full hidden md:block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/cta-purple-clean.png" alt="엘프바에게 문의해주세요" className="w-full block" />
+                <form
+                    action="/contact"
+                    method="get"
+                    aria-label="1:1 문의하기"
+                    className="absolute z-10 flex items-stretch gap-2 h-12"
+                    style={{ left: "55%", right: "5%", top: "50%", transform: "translateY(-50%)" }}
                 >
-                    문의하기
-                </button>
-            </form>
-        </section>
+                    <input
+                        type="text"
+                        placeholder="문의사항을 입력해주세요"
+                        className="flex-1 min-w-0 rounded-[18px] bg-white px-5 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
+                    />
+                    <button
+                        type="submit"
+                        className="rounded-[18px] bg-[var(--color-fg)] text-white text-sm font-semibold px-8 hover:opacity-90 transition whitespace-nowrap"
+                    >
+                        문의하기
+                    </button>
+                </form>
+            </section>
+
+            {/* 모바일(<md) — 시안 276:10403 매칭 세로 카드. 보라 그라데이션 + 라벨 + 타이틀 + 서브 + full-width input/button. */}
+            <section className="mt-16 md:hidden px-4">
+                <div
+                    className="relative overflow-hidden rounded-2xl px-5 py-8"
+                    style={{
+                        background: "linear-gradient(135deg, #b6a3e8 0%, #d1bff0 50%, #c5a9eb 100%)",
+                    }}
+                >
+                    {/* 별빛 일러스트 (왼쪽 위) */}
+                    <span aria-hidden="true" className="absolute top-3 left-3 text-white/80 text-lg">✦</span>
+                    <span aria-hidden="true" className="absolute top-8 left-7 text-white/60 text-sm">✦</span>
+                    {/* 보라 구름 일러스트 (오른쪽 위) */}
+                    <span
+                        aria-hidden="true"
+                        className="absolute -top-2 -right-2 w-20 h-20 rounded-full opacity-60"
+                        style={{ background: "radial-gradient(circle at 30% 30%, #6c4fbf 0%, #4a3299 70%, transparent 100%)" }}
+                    />
+
+                    <p className="relative text-xs text-white/80 mb-1">1:1 문의</p>
+                    <h2 className="relative text-xl font-bold text-white leading-tight mb-1">엘프바에게 문의해주세요</h2>
+                    <p className="relative text-xs text-white/70 mb-6">궁금하신 부분들이 있으시면 언제든지 연락주세요</p>
+
+                    <form action="/contact" method="get" aria-label="1:1 문의하기" className="relative flex flex-col gap-3">
+                        <input
+                            type="text"
+                            name="q"
+                            placeholder="문의사항을 입력해주세요"
+                            className="w-full h-12 rounded-xl bg-white px-4 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-white/60 shadow-sm"
+                        />
+                        <button
+                            type="submit"
+                            className="w-full h-12 rounded-xl bg-[#1a1a1a] text-white text-sm font-semibold hover:opacity-90 transition"
+                        >
+                            문의하기
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </>
     );
 }

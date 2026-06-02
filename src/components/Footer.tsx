@@ -48,9 +48,9 @@ export function Footer() {
                     </dl>
 
                     <ul className="mt-5 flex md:justify-end gap-2">
-                        <SocialLink label="YouTube" href="#" icon={<YouTubeIcon />} />
+                        <SocialLink label="카카오톡 문의" href="#" icon={<ChatBubbleIcon />} />
                         <SocialLink label="Instagram" href="#" icon={<InstagramIcon />} />
-                        <SocialLink label="X" href="#" icon={<XIcon />} />
+                        <SocialLink label="WeChat" href="#" icon={<WeChatIcon />} />
                     </ul>
                 </div>
             </div>
@@ -72,11 +72,11 @@ function SocialLink({ label, href, icon }: { label: string; href: string; icon: 
     );
 }
 
-/* SVG 인라인 아이콘 (외부 라이브러리 없음 + currentColor 로 토큰 호환) */
-function YouTubeIcon() {
+/* SVG 인라인 아이콘 — 시안 (말풍선/Instagram/WeChat) */
+function ChatBubbleIcon() {
     return (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M23.5 6.2c-.3-1-1-1.8-2-2.1C19.8 3.5 12 3.5 12 3.5s-7.8 0-9.5.6c-1 .3-1.8 1-2 2.1C0 7.9 0 12 0 12s0 4.1.5 5.8c.2 1 1 1.8 2 2.1 1.7.6 9.5.6 9.5.6s7.8 0 9.5-.6c1-.3 1.8-1 2-2.1.5-1.7.5-5.8.5-5.8s0-4.1-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z" />
+            <path d="M12 3C6.5 3 2 6.6 2 11c0 2.6 1.6 4.9 4 6.4V21l3.7-2.4c.7.1 1.5.2 2.3.2 5.5 0 10-3.6 10-8s-4.5-7.8-10-7.8z" />
         </svg>
     );
 }
@@ -89,10 +89,10 @@ function InstagramIcon() {
         </svg>
     );
 }
-function XIcon() {
+function WeChatIcon() {
     return (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M18.244 2H21.5l-7.5 8.57L23 22h-7l-5.4-7.04L4.5 22H1.244l8.07-9.22L1 2h7.2l4.86 6.43L18.244 2zm-1.18 18h1.78L6.92 4H5.04l12.024 16z" />
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8.7 4C4.5 4 1 6.9 1 10.5c0 1.9 1 3.6 2.6 4.7l-.6 2.1 2.4-1.2c.7.2 1.5.3 2.3.3.3 0 .6 0 .8-.1-.2-.5-.3-1.1-.3-1.7 0-3.3 3.1-5.9 6.9-5.9.3 0 .5 0 .8.1C15.2 6 12.3 4 8.7 4zm-2.5 3.4c.5 0 .9.4.9.9s-.4.9-.9.9-.9-.4-.9-.9.4-.9.9-.9zm5 0c.5 0 .9.4.9.9s-.4.9-.9.9-.9-.4-.9-.9.4-.9.9-.9z M22.9 14.5c0-3-2.9-5.4-6.4-5.4-3.6 0-6.4 2.4-6.4 5.4S12.9 20 16.5 20c.7 0 1.4-.1 2-.3l1.9 1-.5-1.7c1.6-.9 2.5-2.3 2.5-3.9zm-8.4-1.4c-.4 0-.8-.3-.8-.8s.3-.8.8-.8.8.3.8.8-.4.8-.8.8zm4.3 0c-.4 0-.8-.3-.8-.8s.3-.8.8-.8.8.3.8.8-.4.8-.8.8z" />
         </svg>
     );
 }
