@@ -104,7 +104,9 @@ export function HeroCarousel({
                             <img
                                 src={s.img}
                                 alt={s.alt}
-                                className="absolute inset-0 w-full h-full object-cover"
+                                // 모바일은 wide 원본(2754x1536)을 세로 frame 에 cover crop — object-position 우측 60%
+                                // 으로 device 가 시안과 같은 위치에 오게. 데스크탑은 center.
+                                className="absolute inset-0 w-full h-full object-cover object-[60%_50%] md:object-center"
                                 draggable={false}
                             />
                         </picture>

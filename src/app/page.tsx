@@ -54,8 +54,7 @@ export default async function Home() {
         <div>
             {/* ===== 1. Hero 캐러셀 (MAIN_HERO 다중 슬라이드) =====
                 헤더가 홈에서 fixed 투명 오버레이라 Hero 위 spacer 불필요 — Hero 가 헤더 위로 침범. */}
-            {/* 데스크탑(md+): TrustBadges 는 Hero 안 하단에 absolute 로 박힘 (시안 214:17775).
-                모바일(<md): Hero 가 세로 비율이라 absolute 로 박을 공간 부족 — Hero 외부 별도 섹션으로 출력 (시안 276:9846). */}
+            {/* TrustBadges (혜택 안내 5카드): 데스크탑만 Hero 안 absolute. 모바일은 사용자 요청으로 완전 제거. */}
             <HeroCarousel
                 banners={heroSlides}
                 fallbackImage="/images/hero.png"
@@ -65,15 +64,6 @@ export default async function Home() {
                     <TrustBadges />
                 </div>
             </HeroCarousel>
-            {/* 모바일 전용 TrustBadges — Hero 바로 아래 다크 보라 영역 */}
-            <div
-                className="md:hidden"
-                style={{
-                    background: "linear-gradient(180deg, #1a0f3d 0%, #261658 100%)",
-                }}
-            >
-                <TrustBadges />
-            </div>
 
             {/* ===== 카테고리 아이콘 ===== */}
             <CategoryIcons categories={categories} />
