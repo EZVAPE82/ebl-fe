@@ -9,6 +9,11 @@ import type { Banner, Category, Page, ProductSummary } from "@/types/api";
 import Link from "next/link";
 
 type Notice = { id: number; title: string; createdAt: string; pinned: boolean };
+type ReviewView = {
+    id: number; productId: number; memberId: number; rating: number; content: string | null;
+    hasPhoto: boolean; photoUrls: string[]; createdAt: string;
+    productName?: string | null; productThumbnailUrl?: string | null;
+};
 
 async function safeFetch<T>(path: string, fallback: T): Promise<T> {
     try {
@@ -21,16 +26,29 @@ async function safeFetch<T>(path: string, fallback: T): Promise<T> {
 export default async function Home() {
     const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 8, first: true, last: true, empty: true };
 
-    const [bannersHero, featured, popular, categoriesRaw, notices] = await Promise.all([
+    const [bannersHero, featured, popular, categoriesRaw, notices, bestReviews] = await Promise.all([
         safeFetch<Banner[]>("/api/v1/public/banners?placement=MAIN_HERO", []),
         safeFetch<ProductSummary[]>("/api/v1/public/products/featured", []),
         safeFetch<Page<ProductSummary>>("/api/v1/public/products?sort=popular&size=8", emptyPage as Page<ProductSummary>),
         safeFetch<Category[]>("/api/v1/public/categories", []),
         safeFetch<Page<Notice>>("/api/v1/public/notices?size=4", { ...emptyPage, content: [] } as unknown as Page<Notice>),
+        safeFetch<Page<ReviewView>>("/api/v1/public/reviews/best?page=0&size=4", { ...emptyPage, content: [] } as unknown as Page<ReviewView>),
     ]);
 
     const categories = categoriesRaw.length > 0 ? categoriesRaw : DEFAULT_CATEGORIES;
     const heroSlides = bannersHero.length > 0 ? bannersHero : DESIGN_FALLBACK_MAIN_HERO;
+
+    // 실제 V23/V30 시드 리뷰 → BestReviewsCarousel 의 ReviewMock 으로 매핑.
+    // 리뷰 사진(photoUrls)이 비면 product thumbnail 로 fallback.
+    const realReviews = bestReviews.content.map(r => ({
+        photo: (r.photoUrls && r.photoUrls[0]) || r.productThumbnailUrl || "/images/elfbar-product-1.png",
+        rating: Math.min(5, Math.max(0, r.rating)),
+        review: r.content ?? "",
+        author: `테스트${String(r.memberId).slice(-1)}_** 님`,
+        date: formatDate(r.createdAt),
+        product: r.productName || "상품",
+        productThumb: r.productThumbnailUrl || "/images/elfbar-product-1.png",
+    }));
 
     return (
         <div>
@@ -99,7 +117,8 @@ export default async function Home() {
                 </div>
 
                 {/* ===== 베스트 제품 후기 — Lightbox 연결 client component ===== */}
-                <BestReviewsCarousel reviews={REVIEW_MOCKS} />
+                {/* 실제 V23/V30 시드 리뷰 — 없으면 섹션 자체 hide */}
+                {realReviews.length > 0 && <BestReviewsCarousel reviews={realReviews} />}
             </div>
 
             {/* ===== CTA 풀폭 배너 ===== */}
