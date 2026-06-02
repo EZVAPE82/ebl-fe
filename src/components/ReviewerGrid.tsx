@@ -93,16 +93,7 @@ export function ReviewerGrid({ reviews }: { reviews: ReviewItem[] }) {
                 ))}
             </ul>
 
-            {/* 페이지네이션 (시각만) */}
-            <div className="mt-10 md:mt-14 flex justify-center items-center gap-1.5 text-sm">
-                <span className="min-w-9 h-9 inline-flex items-center justify-center bg-[var(--color-accent)] text-white font-medium">1</span>
-                {[2, 3, 4, 5].map(p => (
-                    <span key={p} className="min-w-9 h-9 inline-flex items-center justify-center text-[var(--color-fg-muted)]">{p}</span>
-                ))}
-                <span className="px-2 text-[var(--color-fg-subtle)]">…</span>
-                <span className="min-w-9 h-9 inline-flex items-center justify-center text-[var(--color-fg-muted)]">30</span>
-                <span className="min-w-9 h-9 inline-flex items-center justify-center text-[var(--color-fg-muted)]">›</span>
-            </div>
+            {/* 페이지네이션은 server component(page.tsx) 에서 처리 — 동적 Link */}
 
             {/* 후기 팝업 모달 (시안 34:7826) */}
             {openIndex !== null && (
