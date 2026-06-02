@@ -231,18 +231,19 @@ function BestItemGrid({ items }: { items: ProductSummary[] }) {
                             <div className="aspect-square rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)] relative">
                                 {p.thumbnailUrl ? (
                                     <>
+                                        {/* 순차 fade — default 먼저 사라지고 hover 늦게 나타남. ProductCard 와 동일 패턴. */}
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={p.thumbnailUrl}
                                             alt={p.name}
-                                            className="absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ease-in-out group-hover:opacity-0"
+                                            className="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out delay-200 group-hover:delay-0 group-hover:opacity-0"
                                         />
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={p.thumbnailUrl.replace(/(\.[a-z]+)$/i, "-hover$1")}
                                             alt=""
                                             aria-hidden="true"
-                                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+                                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out group-hover:delay-200"
                                         />
                                     </>
                                 ) : null}

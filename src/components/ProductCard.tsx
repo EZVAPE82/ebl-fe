@@ -30,17 +30,18 @@ export function ProductCard({ p }: { p: ProductSummary }) {
             <div className="aspect-square bg-[var(--color-bg-subtle)] relative">
                 {thumb ? (
                     <>
+                        {/* 순차 fade — 호버 ON: default 가 먼저 사라지고(0~500ms) hover 가 늦게 나타남(200~700ms).
+                            호버 OFF: hover 가 먼저 사라지고(0~500ms) default 가 늦게 돌아옴(200~700ms).
+                            delay-200 + group-hover:delay-0 (default) ↔ group-hover:delay-200 (hover) 의 비대칭 delay 로 구현. */}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={thumb}
                             alt={p.name}
                             loading="lazy"
-                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ease-in-out ${
+                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out delay-200 group-hover:delay-0 ${
                                 hoverOk ? "group-hover:opacity-0" : ""
                             }`}
                         />
-                        {/* hover 풍부한 배경 카드 — 사전 로드(prefetch) 해서 첫 호버 시에도 부드러운 0.3초 fade 보장.
-                            파일 없으면 onError → 비활성화 (default 만 유지). */}
                         {hoverOk && hoverThumb && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -48,7 +49,7 @@ export function ProductCard({ p }: { p: ProductSummary }) {
                                 alt=""
                                 onError={() => setHoverOk(false)}
                                 aria-hidden="true"
-                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out group-hover:delay-200"
                             />
                         )}
                     </>
