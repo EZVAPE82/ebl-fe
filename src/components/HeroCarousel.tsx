@@ -21,7 +21,7 @@ export function HeroCarousel({
     banners,
     fallbackImage = "/images/hero-bg.png",
     fallbackMobileImage,
-    heightClass = "aspect-[9/13] md:aspect-[12/5] md:min-h-[440px] md:max-h-[720px]",
+    heightClass = "aspect-[360/520] md:aspect-[12/5] md:min-h-[440px] md:max-h-[720px]",
     showOverlay = true,
     defaultOverlay = DESIGN_DEFAULT_OVERLAY,
     children,
@@ -104,9 +104,8 @@ export function HeroCarousel({
                             <img
                                 src={s.img}
                                 alt={s.alt}
-                                // 모바일은 wide 원본(2754x1536)을 세로 frame 에 cover crop — object-position 우측 60%
-                                // 으로 device 가 시안과 같은 위치에 오게. 데스크탑은 center.
-                                className="absolute inset-0 w-full h-full object-cover object-[60%_50%] md:object-center"
+                                // 모바일은 wide 원본(2754x1536)을 세로 frame 에 cover crop. 시안 매칭 위해 center.
+                                className="absolute inset-0 w-full h-full object-cover object-center"
                                 draggable={false}
                             />
                         </picture>
