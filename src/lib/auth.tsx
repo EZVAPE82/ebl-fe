@@ -17,7 +17,7 @@ import {
     createContext, useCallback, useContext, useEffect, useMemo, useState,
     type ReactNode
 } from "react";
-import { api, ApiError } from "@/lib/api";
+import { api } from "@/lib/api";
 
 const TOKEN_KEY = "accessToken";
 const REFRESH_KEY = "refreshToken";
@@ -41,13 +41,8 @@ type AuthState = {
 
 const Ctx = createContext<AuthState | null>(null);
 
-function setTokens(access: string, refresh: string) {
-    if (typeof window === "undefined") return;
-    sessionStorage.setItem(TOKEN_KEY, access);
-    if (refresh) sessionStorage.setItem(REFRESH_KEY, refresh);
-}
-
 function clearTokens() {
+    // 토큰은 httpOnly 쿠키로만 보관 — 과거 세션의 잔존 sessionStorage 만 정리 (레거시 클린업).
     if (typeof window === "undefined") return;
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(REFRESH_KEY);
@@ -74,11 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [fetchMe]);
 
     const login = useCallback(async (email: string, password: string) => {
-        const res = await api<{ accessToken: string; refreshToken: string }>(
-            "/api/v1/auth/login",
-            { method: "POST", body: JSON.stringify({ email, password }) }
-        );
-        setTokens(res.accessToken, res.refreshToken);
+        // 로그인 응답의 토큰은 무시 — 백엔드가 httpOnly 쿠키(Set-Cookie)로 세팅한다.
+        // 인증 상태는 fetchMe()(쿠키로 /members/me 호출)로 확인.
+        await api("/api/v1/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
         await fetchMe();
     }, [fetchMe]);
 
@@ -91,13 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const refresh = useCallback(async () => {
-        const rt = sessionStorage.getItem(REFRESH_KEY);
-        if (!rt) throw new ApiError(401, "NO_REFRESH", "리프레시 토큰이 없습니다.");
-        const res = await api<{ accessToken: string; refreshToken: string }>(
-            "/api/v1/auth/refresh",
-            { method: "POST", body: JSON.stringify({ refreshToken: rt }) }
-        );
-        setTokens(res.accessToken, res.refreshToken);
+        // refresh 토큰도 httpOnly 쿠키 — body 없이 호출(백엔드 쿠키 fallback). 새 쿠키는 Set-Cookie 로 갱신.
+        await api("/api/v1/auth/refresh", { method: "POST" });
         await fetchMe();
     }, [fetchMe]);
 

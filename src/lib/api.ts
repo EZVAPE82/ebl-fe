@@ -49,12 +49,8 @@ export async function api<T = unknown>(path: string, opts: FetchOptions = {}): P
         ...(headers ?? {}),
     };
 
-    if (auth && typeof window !== "undefined") {
-        const token = sessionStorage.getItem(ACCESS_KEY);
-        if (token) {
-            (finalHeaders as Record<string, string>).Authorization = `Bearer ${token}`;
-        }
-    }
+    // 인증은 httpOnly 쿠키(credentials:'include')로만 전송 — 토큰을 JS(sessionStorage)에 보관하지 않음(XSS 토큰 탈취 차단).
+    // `auth` 플래그는 401 시 자동 refresh 재시도 여부만 제어한다.
 
     const res = await fetch(`${BASE_URL}${path}`, {
         ...rest,
@@ -105,21 +101,15 @@ async function tryRefresh(): Promise<boolean> {
     if (refreshInFlight) return refreshInFlight;
 
     refreshInFlight = (async () => {
-        const rt = sessionStorage.getItem(REFRESH_KEY);
-        if (!rt) return false;
         try {
+            // refresh 토큰도 httpOnly 쿠키로 전송 — body 없이 호출(백엔드가 쿠키 fallback 지원).
+            // 새 access/refresh 쿠키는 백엔드 Set-Cookie 로 갱신된다.
             const res = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refreshToken: rt }),
                 credentials: "include",
             });
-            if (!res.ok) return false;
-            const data = await res.json() as { accessToken?: string; refreshToken?: string };
-            if (!data.accessToken) return false;
-            sessionStorage.setItem(ACCESS_KEY, data.accessToken);
-            if (data.refreshToken) sessionStorage.setItem(REFRESH_KEY, data.refreshToken);
-            return true;
+            return res.ok;
         } catch {
             return false;
         } finally {
@@ -131,6 +121,10 @@ async function tryRefresh(): Promise<boolean> {
 }
 
 function clearMemberTokens() {
-    sessionStorage.removeItem(ACCESS_KEY);
-    sessionStorage.removeItem(REFRESH_KEY);
+    // 토큰은 httpOnly 쿠키라 JS 로 지울 수 없음(백엔드 logout 이 만료시킴).
+    // 과거 세션의 잔존 sessionStorage 토큰만 정리 (레거시 클린업).
+    if (typeof window !== "undefined") {
+        sessionStorage.removeItem(ACCESS_KEY);
+        sessionStorage.removeItem(REFRESH_KEY);
+    }
 }

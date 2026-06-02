@@ -134,11 +134,11 @@ function PhotoUploader({
         try {
             const fd = new FormData();
             list.forEach(f => fd.append("files", f));
-            const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+            // 인증은 httpOnly 쿠키로 — credentials:'include'. (기존 localStorage 토큰은 항상 null 인 죽은 코드였음)
             const res = await fetch(`${API_BASE}/api/v1/me/images/batch`, {
                 method: "POST",
                 body: fd,
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                credentials: "include",
             });
             if (!res.ok) throw new Error("업로드 실패: " + res.status);
             const json = await res.json() as Array<{ url: string; thumbnailUrl: string }>;
