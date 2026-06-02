@@ -14,6 +14,8 @@ export type ReviewItem = {
     photoUrls: string[];
     pointRewarded: boolean;
     createdAt: string;
+    productName?: string | null;
+    productThumbnailUrl?: string | null;
 };
 
 /* 시안 252:10915 매칭 — 카테고리 탭 + 4 cols 그리드 + 카드 클릭 시 ReviewLightbox */
@@ -110,25 +112,27 @@ export function ReviewerGrid({ reviews }: { reviews: ReviewItem[] }) {
 }
 
 function ReviewCard({ review, onClick }: { review: ReviewItem; onClick: () => void }) {
-    const thumb = review.photoUrls?.[0];
+    // 후기 사진 우선, 없으면 product thumbnail 로 fallback (사진 미등록 리뷰도 시각적으로 비지 않게)
+    const thumb = review.photoUrls?.[0] || review.productThumbnailUrl || "";
+    const pname = review.productName || "상품";
     return (
         <button
             type="button"
             onClick={onClick}
             className="flex flex-col w-full h-full text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded-[18px]"
         >
-            <div className="w-full overflow-hidden rounded-[18px]" style={{ aspectRatio: "1 / 1" }}>
+            <div className="w-full overflow-hidden rounded-[18px] bg-[var(--color-bg-subtle)]" style={{ aspectRatio: "1 / 1" }}>
                 {thumb ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                         src={thumb}
-                        alt=""
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        alt={pname}
+                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                         draggable={false}
                     />
                 ) : (
-                    <div className="w-full h-full bg-[var(--color-bg-subtle)]" aria-hidden="true" />
+                    <div className="w-full h-full flex items-center justify-center text-[var(--color-fg-subtle)] text-xs">no image</div>
                 )}
             </div>
             <div className="mt-3 flex flex-col flex-1 space-y-1.5">
@@ -139,17 +143,20 @@ function ReviewCard({ review, onClick }: { review: ReviewItem; onClick: () => vo
                 <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-2">{review.content ?? ""}</p>
                 <p className="text-[11px] text-[var(--color-fg-muted)] tabular-nums">{formatDate(review.createdAt)}</p>
             </div>
-            {/* 시안 매칭 — 카드 하단에 제품 thumbnail + 제품명 */}
+            {/* 카드 하단 — 실제 product name + thumbnail */}
             <div className="mt-3 pt-3 border-t border-[var(--color-border)] flex items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src="/images/elfbar-product-1.png"
-                    alt=""
-                    className="w-10 h-10 rounded bg-[var(--color-bg-subtle)] object-cover flex-shrink-0"
-                />
+                {review.productThumbnailUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={review.productThumbnailUrl}
+                        alt=""
+                        className="w-10 h-10 rounded bg-[var(--color-bg-subtle)] object-contain flex-shrink-0"
+                    />
+                ) : (
+                    <div className="w-10 h-10 rounded bg-[var(--color-bg-subtle)] flex-shrink-0" />
+                )}
                 <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-[var(--color-fg)] line-clamp-1">제품 타이틀</p>
-                    <p className="text-[11px] text-[var(--color-fg-muted)] line-clamp-1">제품 상세타이틀 아이템</p>
+                    <p className="text-xs font-medium text-[var(--color-fg)] line-clamp-2">{pname}</p>
                 </div>
             </div>
         </button>
@@ -178,7 +185,9 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
     onNext: () => void;
 }) {
     const review = reviews[index];
-    const photos = review.photoUrls?.length ? review.photoUrls : ["/images/review-photo-1-v2.png"];
+    const photos = review.photoUrls?.length ? review.photoUrls
+                 : review.productThumbnailUrl ? [review.productThumbnailUrl]
+                 : [];
     const main = photos[0];
     // 같은 상품의 다른 리뷰 5개 추출 (시안의 "이 상품의 다른 리뷰" 영역)
     const otherReviews = reviews.filter((_, i) => i !== index).slice(0, 5);

@@ -15,6 +15,8 @@ export type ReviewView = {
     photoUrls: string[];
     pointRewarded: boolean;
     createdAt: string;
+    productName?: string | null;
+    productThumbnailUrl?: string | null;
 };
 
 type Search = Promise<{ page?: string; size?: string }>;
