@@ -805,10 +805,32 @@ function InstagramFeed() {
 function ContactCTA() {
     return (
         <>
-            {/* 데스크탑(md+) — 시안 통이미지 가로 카드 + 우측 form overlay */}
+            {/* 데스크탑(md+) — 시안 41:10474 통이미지 + 좌/우 일러스트 floating + 우측 form overlay.
+                좌측 일러스트(노란 바구니+선물박스), 우측 일러스트(보라 구름)는 카드 위로 튀어나오게 absolute. */}
             <section className="mt-24 relative w-full hidden md:block">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/cta-purple-clean.png" alt="엘프바에게 문의해주세요" className="w-full block" />
+
+                {/* 좌측 floating 일러스트 (노란 바구니 + 보라 선물) — 카드 좌측 약 30% 지점, 위로 튀어나옴 */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src="/images/cta-illust-left.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute pointer-events-none z-[5]"
+                    style={{ left: "30.8%", top: "-26%", width: "5.4%" }}
+                />
+
+                {/* 우측 floating 일러스트 (보라 구름) — 카드 우측 끝쪽, 위로 튀어나옴 */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src="/images/cta-illust-right.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute pointer-events-none z-[5]"
+                    style={{ left: "86%", top: "-18%", width: "7%" }}
+                />
+
                 <form
                     action="/contact"
                     method="get"
@@ -830,10 +852,18 @@ function ContactCTA() {
                 </form>
             </section>
 
-            {/* 모바일(<md) — 시안 276:10403 매칭 세로 카드. 보라 그라데이션 + 라벨 + 타이틀 + 서브 + full-width input/button. */}
-            <section className="mt-16 md:hidden px-4">
+            {/* 모바일(<md) — 시안 276:10403 매칭 세로 카드. 보라 그라데이션 + 일러스트 + 라벨 + 타이틀 + 서브 + full-width input/button. */}
+            <section className="mt-20 md:hidden px-4 relative">
+                {/* 우측 상단 보라 구름 일러스트 — 카드 위로 튀어나옴 */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src="/images/cta-illust-right.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute pointer-events-none right-3 -top-10 w-24 z-10"
+                />
                 <div
-                    className="relative overflow-hidden rounded-2xl px-5 py-8"
+                    className="relative overflow-visible rounded-2xl px-5 py-8"
                     style={{
                         background: "linear-gradient(135deg, #b6a3e8 0%, #d1bff0 50%, #c5a9eb 100%)",
                     }}
@@ -841,12 +871,6 @@ function ContactCTA() {
                     {/* 별빛 일러스트 (왼쪽 위) */}
                     <span aria-hidden="true" className="absolute top-3 left-3 text-white/80 text-lg">✦</span>
                     <span aria-hidden="true" className="absolute top-8 left-7 text-white/60 text-sm">✦</span>
-                    {/* 보라 구름 일러스트 (오른쪽 위) */}
-                    <span
-                        aria-hidden="true"
-                        className="absolute -top-2 -right-2 w-20 h-20 rounded-full opacity-60"
-                        style={{ background: "radial-gradient(circle at 30% 30%, #6c4fbf 0%, #4a3299 70%, transparent 100%)" }}
-                    />
 
                     <p className="relative text-xs text-white/80 mb-1">1:1 문의</p>
                     <h2 className="relative text-xl font-bold text-white leading-tight mb-1">엘프바에게 문의해주세요</h2>
