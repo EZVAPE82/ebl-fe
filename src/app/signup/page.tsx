@@ -570,21 +570,23 @@ function SignupFlow() {
                     </FieldRow>
 
                     <FieldRow label={i18n.lblEmail} required>
-                        <div className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-2">
-                            <input type="text" placeholder={i18n.phEmail}
-                                className={inputCls}
-                                value={form.emailLocal} onChange={e => update("emailLocal", e.target.value)} />
-                            <span className="text-[var(--color-fg-subtle)]">@</span>
-                            <input type="text"
-                                className={inputCls}
-                                value={form.emailDomainCustom} onChange={e => update("emailDomainCustom", e.target.value)} />
+                        <div className="space-y-2">
+                            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                                <input type="text" placeholder={i18n.phEmail}
+                                    className={inputCls}
+                                    value={form.emailLocal} onChange={e => update("emailLocal", e.target.value)} />
+                                <span className="text-[var(--color-fg-subtle)]">@</span>
+                                <input type="text"
+                                    className={inputCls}
+                                    value={form.emailDomainCustom} onChange={e => update("emailDomainCustom", e.target.value)} />
+                            </div>
                             <select
                                 value={form.emailDomain}
                                 onChange={e => {
                                     update("emailDomain", e.target.value);
                                     if (e.target.value !== "") update("emailDomainCustom", e.target.value);
                                 }}
-                                className={selectCls}>
+                                className={`${selectCls} w-full`}>
                                 <option value="">{i18n.domainManually}</option>
                                 <option value="naver.com">naver.com</option>
                                 <option value="gmail.com">gmail.com</option>
@@ -1022,8 +1024,8 @@ function Radio({ label, checked, onChange }: { label: string; checked: boolean; 
  * ============================================================ */
 function FieldRow({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
     return (
-        <div className="grid grid-cols-[120px_1fr] items-start gap-4 py-3 border-b border-[var(--color-border)]">
-            <div className="text-sm text-[var(--color-fg)] pt-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-1.5 md:gap-4 md:items-start py-3 border-b border-[var(--color-border)]">
+            <div className="text-sm text-[var(--color-fg)] md:pt-2.5">
                 {label}{required && <span className="text-[#3b82f6] ml-0.5">*</span>}
             </div>
             <div>{children}</div>

@@ -279,12 +279,19 @@ export default function CheckoutPage() {
                                     </div>
                                 </Field>
                                 <Field label="이메일" required>
-                                    <div className="flex items-center gap-1.5">
-                                        <input type="text" placeholder="signalsidecode02" className={inputClass} value={form.emailLocal} onChange={e => setForm(s => ({ ...s, emailLocal: e.target.value }))} />
-                                        <span className="text-[var(--color-fg-subtle)]">@</span>
-                                        <input type="text" placeholder="naver.com" className={inputClass} value={form.emailDomain} onChange={e => setForm(s => ({ ...s, emailDomain: e.target.value }))} />
-                                        <select className={`${selectClass} max-w-[120px]`}>
-                                            <option>직접입력</option><option>naver.com</option><option>gmail.com</option>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-1.5">
+                                            <input type="text" placeholder="이메일" className={`${inputClass} flex-1 min-w-0`} value={form.emailLocal} onChange={e => setForm(s => ({ ...s, emailLocal: e.target.value }))} />
+                                            <span className="text-[var(--color-fg-subtle)]">@</span>
+                                            <input type="text" placeholder="naver.com" className={`${inputClass} flex-1 min-w-0`} value={form.emailDomain} onChange={e => setForm(s => ({ ...s, emailDomain: e.target.value }))} />
+                                        </div>
+                                        <select className={`${selectClass} w-full`} value="" onChange={e => { if (e.target.value) setForm(s => ({ ...s, emailDomain: e.target.value })); }}>
+                                            <option value="">직접입력</option>
+                                            <option value="naver.com">naver.com</option>
+                                            <option value="gmail.com">gmail.com</option>
+                                            <option value="daum.net">daum.net</option>
+                                            <option value="hanmail.net">hanmail.net</option>
+                                            <option value="kakao.com">kakao.com</option>
                                         </select>
                                     </div>
                                 </Field>
@@ -441,8 +448,8 @@ export default function CheckoutPage() {
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
     return (
-        <div className="grid grid-cols-[100px_1fr] md:grid-cols-[120px_1fr] gap-3 items-start">
-            <dt className="text-[var(--color-fg-muted)] pt-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-1.5 md:gap-3 md:items-start">
+            <dt className="text-[var(--color-fg-muted)] md:pt-2.5">
                 {label}
                 {required && <span className="text-[var(--color-danger)] ml-0.5">*</span>}
             </dt>
