@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
-import type { ProductDetail } from "@/types/api";
+import { ProductCard } from "@/components/ProductCard";
+import type { Page, ProductDetail, ProductSummary } from "@/types/api";
 
 /* 시안 14:9910 매칭 — 좌: 구매상품 라인 / 우: 결제정보 (회색 박스 + 큰 라운딩) */
 
@@ -37,6 +38,7 @@ export default function CartPage() {
     const [lines, setLines] = useState<CartLine[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [working, setWorking] = useState(false);
+    const [recommend, setRecommend] = useState<ProductSummary[]>([]);
 
     const refresh = useCallback(async () => {
         try {
@@ -82,6 +84,13 @@ export default function CartPage() {
         }
         if (user) refresh();
     }, [user, authLoading, refresh, router]);
+
+    // 추천 상품(실데이터) — "이 아이템도 같이 사면 좋아요" 섹션용
+    useEffect(() => {
+        api<Page<ProductSummary>>("/api/v1/public/products?size=4")
+            .then((p) => setRecommend(p.content ?? []))
+            .catch(() => setRecommend([]));
+    }, []);
 
     async function changeQty(itemId: number, qty: number) {
         if (qty <= 0) return;
@@ -151,6 +160,8 @@ export default function CartPage() {
                                         {l.name}
                                     </Link>
                                     <p className="text-xs text-[var(--color-fg-muted)] tabular-nums mt-0.5">#{String(l.productId).padStart(10, "2021156")}</p>
+                                    {/* 모바일: 가격 인라인 노출 (데스크톱은 우측 컬럼) */}
+                                    <p className="md:hidden mt-1 text-sm font-semibold text-[var(--color-fg)] tabular-nums">{formatPrice(l.unitPrice * l.quantity)}</p>
                                 </div>
                                 {/* 옵션변경 select — 시안: "옵션변경" 라벨 displayed (선택된 옵션은 dropdown에 표시) */}
                                 {l.optionText && (
@@ -171,13 +182,13 @@ export default function CartPage() {
                                     <button
                                         onClick={() => changeQty(l.id, l.quantity - 1)}
                                         disabled={working || l.quantity <= 1}
-                                        className="w-7 h-7 flex items-center justify-center text-[var(--color-fg)] disabled:opacity-40 hover:bg-[var(--color-bg-subtle)] transition"
+                                        className="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center text-[var(--color-fg)] disabled:opacity-40 hover:bg-[var(--color-bg-subtle)] transition"
                                     >–</button>
                                     <span className="text-sm w-8 text-center text-[var(--color-fg)] tabular-nums">{l.quantity}</span>
                                     <button
                                         onClick={() => changeQty(l.id, l.quantity + 1)}
                                         disabled={working}
-                                        className="w-7 h-7 flex items-center justify-center text-[var(--color-fg)] disabled:opacity-40 hover:bg-[var(--color-bg-subtle)] transition"
+                                        className="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center text-[var(--color-fg)] disabled:opacity-40 hover:bg-[var(--color-bg-subtle)] transition"
                                     >+</button>
                                 </div>
                                 {/* X 삭제 */}
@@ -252,50 +263,17 @@ export default function CartPage() {
                 </aside>
             </div>
 
-            {/* ===== 이 아이템도 같이 사면 좋아요! ===== */}
-            <section className="mt-12 md:mt-16">
-                <div className="flex items-center justify-between mb-5">
-                    <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)]">이 아이템도 같이 사면 좋아요!</h3>
-                    <div className="flex gap-1.5">
-                        <button aria-label="이전" className="w-8 h-8 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
-                        </button>
-                        <button aria-label="다음" className="w-8 h-8 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-                        </button>
+            {/* ===== 이 아이템도 같이 사면 좋아요! (실제 상품) ===== */}
+            {recommend.length > 0 && (
+                <section className="mt-12 md:mt-16">
+                    <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)] mb-5">이 아이템도 같이 사면 좋아요!</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+                        {recommend.map((p) => (
+                            <ProductCard key={p.id} p={p} />
+                        ))}
                     </div>
-                </div>
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-                    {[
-                        { id: 1, name: "Apple Ice", img: "/images/prod-apple-ice.png" },
-                        { id: 2, name: "Blue Razz Ice", img: "/images/prod-blue-razz.png" },
-                        { id: 3, name: "Cola Ice", img: "/images/prod-cola-ice.png" },
-                        { id: 4, name: "Grape Cherry", img: "/images/prod-grape-cherry.png" },
-                    ].map(p => (
-                        <li key={p.id}>
-                            <Link href={`/p/${p.id}`} className="block group">
-                                <div className="relative aspect-square rounded-[12px] overflow-hidden bg-[var(--color-bg-subtle)]">
-                                    <span className="absolute top-3 left-3 z-10 inline-flex items-center justify-center rounded-[6px] bg-[#6f70ff] text-white text-[10px] font-medium px-2 py-1">
-                                        Best 1
-                                    </span>
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={p.img} alt={p.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
-                                </div>
-                                <p className="mt-2.5 text-sm font-medium text-[var(--color-fg)] line-clamp-1">{p.name}</p>
-                                <p className="text-xs text-[var(--color-fg-muted)] line-clamp-1">제품 상세타이틀 아이템 아이템</p>
-                                <p className="text-xs text-[var(--color-fg-subtle)] line-through tabular-nums mt-1">{formatPrice(50000)}</p>
-                                <p className="text-sm flex items-baseline gap-1 tabular-nums">
-                                    <span className="text-[var(--color-danger)] font-bold">40%</span>
-                                    <span className="text-[var(--color-fg)] font-bold">{formatPrice(30000)}</span>
-                                </p>
-                                <p className="text-xs text-[var(--color-fg-muted)] mt-1">
-                                    <span className="text-yellow-400">★</span> 4.9 <span className="text-[var(--color-fg-subtle)]">|</span> 22건
-                                </p>
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-            </section>
+                </section>
+            )}
         </CartShell>
     );
 }

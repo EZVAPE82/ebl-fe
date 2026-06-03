@@ -44,7 +44,7 @@ export default async function Home() {
         photo: (r.photoUrls && r.photoUrls[0]) || r.productThumbnailUrl || "/images/elfbar-product-1.png",
         rating: Math.min(5, Math.max(0, r.rating)),
         review: r.content ?? "",
-        author: `테스트${String(r.memberId).slice(-1)}_** 님`,
+        author: "구매고객 님",
         date: formatDate(r.createdAt),
         product: r.productName || "상품",
         productThumb: r.productThumbnailUrl || "/images/elfbar-product-1.png",
@@ -480,7 +480,7 @@ function FaqBox() {
                     <li key={f.id}>
                         <Link href="/faq" className="flex items-center gap-3 px-1 py-4 hover:opacity-70 transition">
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm md:text-base text-[var(--color-fg)] line-clamp-1 font-medium">FAQ 질문입니다</p>
+                                <p className="text-sm md:text-base text-[var(--color-fg)] line-clamp-1 font-medium">{f.q}</p>
                                 <p className="mt-1.5 flex items-center gap-1 text-[11px] text-[var(--color-fg-subtle)]">
                                     <CalendarIconMini />
                                     <span>{f.date}</span>

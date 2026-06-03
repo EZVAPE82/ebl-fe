@@ -4,11 +4,10 @@ import { ProductReviews } from "@/components/ProductReviews";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductQna } from "@/components/ProductQna";
 import { DetailTabs } from "@/components/DetailTabs";
-import { Button } from "@/components/ui";
+import { ProductBuyBox } from "@/components/ProductBuyBox";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice } from "@/lib/format";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 
 type Params = Promise<{ id: string }>;
 
@@ -34,7 +33,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
         []
     );
 
-    const isSoldOut = product.status === "SOLD_OUT";
+    // 구매 동작·품절 처리는 ProductBuyBox(클라이언트)가 담당
 
     // 갤러리: thumbnail + product images (없으면 thumbnail 만)
     const gallery = product.thumbnailUrl
@@ -102,36 +101,6 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         <dd className="text-[var(--color-fg)]">만 19세 이상 성인 인증 후 결제 가능</dd>
                     </dl>
 
-                    {/* 옵션 — select dropdowns (시안: 맛/수량) */}
-                    {product.options.length > 0 && (
-                        <div className="space-y-2.5 pt-2">
-                            {/* 옵션 그룹별로 select */}
-                            {Array.from(new Set(product.options.map(o => o.optionGroup))).map(group => {
-                                const opts = product.options.filter(o => o.optionGroup === group);
-                                return (
-                                    <div key={group} className="grid grid-cols-[80px_1fr] gap-3 items-center">
-                                        <label className="text-xs font-medium text-[var(--color-fg-muted)]">{group}</label>
-                                        <select className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-3 py-2.5 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg-muted)] appearance-none cursor-pointer">
-                                            <option value="">{group} 선택</option>
-                                            {opts.map(o => (
-                                                <option key={o.id} value={o.id} disabled={o.stock <= 0}>
-                                                    {o.optionValue}{o.priceDelta !== 0 ? ` (+${formatPrice(o.priceDelta)})` : ""}{o.stock <= 0 ? " — 품절" : ""}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                );
-                            })}
-                            {/* 수량 selector */}
-                            <div className="grid grid-cols-[80px_1fr] gap-3 items-center">
-                                <label className="text-xs font-medium text-[var(--color-fg-muted)]">수량</label>
-                                <select className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-3 py-2.5 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg-muted)] appearance-none cursor-pointer">
-                                    {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                    )}
-
                     {/* 호환성 정보 */}
                     {product.compatibilityInfo && (
                         <div>
@@ -140,31 +109,16 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         </div>
                     )}
 
-                    {/* 총 가격 */}
-                    <div className="flex items-baseline justify-between pt-3 border-t border-[var(--color-border)]">
-                        <span className="text-sm text-[var(--color-fg-muted)]">총 결제 금액</span>
-                        <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(displayPrice(product))}</span>
-                    </div>
-
-                    {/* PC 액션 — 시안: 찜하기(하트 흰) + 장바구니(검정 메인) */}
-                    <div className="hidden md:flex gap-3 pt-2">
-                        <button
-                            type="button"
-                            aria-label="찜하기"
-                            className="shrink-0 inline-flex items-center justify-center w-14 h-12 rounded-[8px] border border-[var(--color-border-strong)] bg-white text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                            </svg>
-                        </button>
-                        <button
-                            type="button"
-                            disabled={isSoldOut}
-                            className="flex-1 inline-flex items-center justify-center rounded-[8px] bg-[var(--color-fg)] text-[var(--color-bg)] py-3.5 text-sm font-bold hover:opacity-90 transition disabled:opacity-50"
-                        >
-                            {isSoldOut ? "품절" : "장바구니"}
-                        </button>
-                    </div>
+                    {/* 구매 영역 — 옵션/수량/총액/장바구니·바로구매·찜 (클라이언트) */}
+                    <ProductBuyBox
+                        productId={product.id}
+                        basePrice={displayPrice(product)}
+                        productSoldOut={product.soldOut === true || product.status === "SOLD_OUT"}
+                        options={product.options.map((o) => ({
+                            id: o.id, optionGroup: o.optionGroup, optionValue: o.optionValue,
+                            priceDelta: o.priceDelta, stock: o.stock,
+                        }))}
+                    />
                 </div>
             </div>
 
@@ -254,20 +208,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 <ProductQna productId={product.id} />
             </section>
 
-            {/* ===== 모바일 하단 고정 CTA ===== */}
-            <div className="md:hidden fixed bottom-0 inset-x-0 z-20 border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur">
-                <div className="flex gap-2 px-4 py-3">
-                    <Link
-                        href="/cart"
-                        className="flex-1 inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border-strong)] py-3.5 text-sm font-medium text-[var(--color-fg)]"
-                    >
-                        장바구니
-                    </Link>
-                    <Button size="lg" fullWidth disabled={isSoldOut} className="flex-1">
-                        {isSoldOut ? "품절" : "바로구매"}
-                    </Button>
-                </div>
-            </div>
+            {/* 모바일 하단 고정 CTA 는 ProductBuyBox 가 렌더 */}
         </div>
     );
 }

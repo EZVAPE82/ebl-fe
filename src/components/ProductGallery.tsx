@@ -39,13 +39,13 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                             type="button"
                             onClick={prev}
                             aria-label="이전 이미지"
-                            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg)] opacity-0 group-hover:opacity-100 hover:bg-white transition shadow-sm"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg)] opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-white transition shadow-sm"
                         >‹</button>
                         <button
                             type="button"
                             onClick={next}
                             aria-label="다음 이미지"
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg)] opacity-0 group-hover:opacity-100 hover:bg-white transition shadow-sm"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/85 border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg)] opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-white transition shadow-sm"
                         >›</button>
                     </>
                 )}
