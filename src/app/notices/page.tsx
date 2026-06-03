@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 // 목데이터 fallback — 백엔드 데이터 비어있을 때 시안에 보이는 형태로 렌더.
 const MOCK_NOTICES: Notice[] = [
     { id: 1001, title: "주문 폭주로 인한 출고 일정 순차 진행 안내", pinned: true,  createdAt: "2026-05-22T10:00:00", viewCount: 245, content: "" },
-    { id: 1002, title: "공지사항 임시텍스트입니다.",                  pinned: false, createdAt: "2026-05-22T09:00:00", viewCount: 198, content: "" },
-    { id: 1003, title: "공지사항 임시텍스트입니다.",                  pinned: false, createdAt: "2026-05-21T15:00:00", viewCount: 187, content: "" },
+    { id: 1002, title: "택배사 물량 증가로 인한 일부 지역 배송 지연 안내", pinned: false, createdAt: "2026-05-22T09:00:00", viewCount: 198, content: "" },
+    { id: 1003, title: "리뷰 작성 적립금 지급 정책 변경 안내",          pinned: false, createdAt: "2026-05-21T15:00:00", viewCount: 187, content: "" },
     { id: 1004, title: "주문 폭주로 인한 출고 일정 순차 진행 안내",    pinned: false, createdAt: "2026-05-20T10:00:00", viewCount: 165, content: "" },
     { id: 1005, title: "무통장 입금 주문 건 확인 지연 관련 안내드립니다",pinned: false, createdAt: "2026-05-19T12:00:00", viewCount: 142, content: "" },
     { id: 1006, title: "카드사 및 간편결제 시스템 점검으로 인한 결제 제한 안내", pinned: false, createdAt: "2026-05-18T14:00:00", viewCount: 134, content: "" },

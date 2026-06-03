@@ -5,6 +5,13 @@ import type { ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice } from "@/lib/format";
 import { safeImageUrl } from "@/lib/url";
 
+// -hover.png 변형 자산이 실제로 존재하는 시리즈 접두어만 호버 스왑 시도 → 없는 상품의 404 방지.
+const HOVER_PREFIXES = ["crosamba", "frozen", "iceking", "icekingpro", "joinwon-kit"];
+function hasHoverVariant(url: string): boolean {
+    const file = url.split("/").pop() ?? "";
+    return HOVER_PREFIXES.some((pre) => file.startsWith(pre));
+}
+
 /**
  * 상품 카드 — 시안 매칭:
  *  - default: device-only 깔끔한 thumbnail (object-contain, 세로 비율 그대로 letterbox)
@@ -16,7 +23,7 @@ import { safeImageUrl } from "@/lib/url";
 export function ProductCard({ p }: { p: ProductSummary }) {
     const isSoldOut = p.status === "SOLD_OUT" || p.soldOut === true;
     const thumb = safeImageUrl(p.thumbnailUrl);
-    const hoverThumb = thumb ? thumb.replace(/(\.[a-z]+)$/i, "-hover$1") : "";
+    const hoverThumb = thumb && hasHoverVariant(thumb) ? thumb.replace(/(\.[a-z]+)$/i, "-hover$1") : "";
     const [hoverOk, setHoverOk] = useState(true);
 
     return (

@@ -41,6 +41,23 @@ type PageResp<T> = {
     size: number;
 };
 
+// 백엔드 /api/v1/orders 응답(OrderView) — 목록 표시용으로 매핑한다.
+type RawOrderItem = { productName: string; kind: string };
+type RawOrder = {
+    id: number; orderNo: string; status: string;
+    totalAmount: number; orderedAt: string; items: RawOrderItem[];
+};
+function toSummary(o: RawOrder): OrderSummary {
+    const paid = (o.items ?? []).filter(i => i.kind !== "FREE_GIFT");
+    const items = paid.length ? paid : (o.items ?? []);
+    return {
+        id: o.id, orderNo: o.orderNo, status: o.status,
+        totalAmount: o.totalAmount, createdAt: o.orderedAt,
+        itemCount: items.length, productName: items[0]?.productName,
+        thumbnailUrl: null,
+    };
+}
+
 const STATUS_LABEL: Record<string, string> = {
     PENDING_PAYMENT: "결제대기",
     PAID: "결제완료",
@@ -73,8 +90,9 @@ export default function MypageOrdersPage() {
         }
         if (!user) return;
         setLoading(true);
-        api<PageResp<OrderSummary>>(`/api/v1/members/me/orders?page=0&size=${pageSize}`, { auth: true })
-            .then(r => setOrders(r.content ?? []))
+        // 내 주문 목록 — 백엔드 정식 경로는 /api/v1/orders (OrderView). 표시용으로 매핑.
+        api<PageResp<RawOrder>>(`/api/v1/orders?page=0&size=${pageSize}`, { auth: true })
+            .then(r => setOrders((r.content ?? []).map(toSummary)))
             .catch(() => setOrders([]))
             .finally(() => setLoading(false));
     }, [user, authLoading, pageSize, router]);
