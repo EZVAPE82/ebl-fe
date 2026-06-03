@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -63,6 +63,14 @@ export default function CheckoutPage() {
     });
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    // 멱등키 — 더블클릭/네트워크 재시도가 같은 키를 보내 이중주문/이중청구를 막는다.
+    // 실패 후 사용자가 재시도하면 새 키를 발급(아래 catch)해 정상적인 새 결제 시도로 처리.
+    const idemKeyRef = useRef<string>("");
+    if (!idemKeyRef.current) {
+        idemKeyRef.current = (typeof crypto !== "undefined" && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : `ck-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
 
     useEffect(() => {
         if (authLoading) return;
@@ -157,10 +165,15 @@ export default function CheckoutPage() {
                     memo: form.memo,
                     paymentToken: "stub-token-" + Date.now(),
                     paymentMethod: form.paymentMethod,
+                    idempotencyKey: idemKeyRef.current,
                 }),
             });
             router.replace(`/checkout/complete?orderNo=${order.orderNo}`);
         } catch (e) {
+            // 결제 실패 → 다음 시도는 새 멱등키로 (이전 시도의 취소된 주문과 분리)
+            idemKeyRef.current = (typeof crypto !== "undefined" && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : `ck-${Date.now()}-${Math.random().toString(36).slice(2)}`;
             setError(e instanceof ApiError ? e.message : "결제에 실패했습니다.");
         } finally {
             setSubmitting(false);
