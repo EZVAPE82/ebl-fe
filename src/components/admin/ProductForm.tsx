@@ -26,6 +26,8 @@ export type ProductInitial = {
     status: "DRAFT" | "ACTIVE" | "SOLD_OUT" | "DISCONTINUED";
     thumbnailUrl: string;
     stockThreshold: number;
+    /** 상품 레벨 재고 (옵션 없는 상품용). null/빈값 = 무제한, 숫자 = 재고 추적. */
+    stock?: number | null;
     options: OptionInput[];
     images: ImageInput[];
     /** 메인 페이지 추천 슬롯 (1~4). 1~4만 가능, 빈값=추천 안 함. */
@@ -35,7 +37,7 @@ export type ProductInitial = {
 const EMPTY: ProductInitial = {
     name: "", slug: "", description: "", compatibilityInfo: "",
     price: 0, onlinePrice: null, status: "DRAFT", thumbnailUrl: "", stockThreshold: 0,
-    options: [], images: [], featuredOrder: null,
+    stock: null, options: [], images: [], featuredOrder: null,
 };
 
 export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitial; mode: "create" | "edit" }) {
@@ -59,6 +61,7 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                 status: f.status,
                 thumbnailUrl: f.thumbnailUrl,
                 stockThreshold: f.stockThreshold,
+                stock: f.stock ?? null,
                 options: f.options,
                 images: f.images,
             };
@@ -132,6 +135,7 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                     <F label="기본 판매가 *"><input type="number" required value={f.price} onChange={e => up("price", Number(e.target.value))} className={ic} placeholder="오프라인 매장 등" /></F>
                     <F label="온라인몰 판매가"><input type="number" value={f.onlinePrice ?? ""} onChange={e => up("onlinePrice", e.target.value ? Number(e.target.value) : null)} className={ic} placeholder="비우면 기본가 사용" /></F>
                     <F label="재고 임계치"><input type="number" value={f.stockThreshold} onChange={e => up("stockThreshold", Number(e.target.value))} className={ic} /></F>
+                    <F label="재고 (옵션 없을 때)"><input type="number" min={0} value={f.stock ?? ""} onChange={e => up("stock", e.target.value ? Number(e.target.value) : null)} className={ic} placeholder="비우면 무제한" /></F>
                     <F label="추천 슬롯">
                         <select
                             value={f.featuredOrder ?? ""}

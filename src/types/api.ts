@@ -27,6 +27,8 @@ export type ProductSummary = {
     ratingAvg: number;
     /** 메인 페이지 "엘프바의 추천 아이템" 슬롯 (1~4) — NULL = 추천 아님 */
     featuredOrder?: number | null;
+    /** 옵션 없는 상품의 품절 여부(상품 레벨 재고 추적 중 0 이하). 옵션 상품은 옵션 재고로 판단. */
+    soldOut?: boolean;
 };
 
 export type ProductOption = {
@@ -50,6 +52,8 @@ export type ProductImage = {
 export type ProductDetail = ProductSummary & {
     description: string | null;
     compatibilityInfo: string | null;
+    /** 상품 레벨 재고 (옵션 없는 상품). null = 무제한. 옵션 있는 상품은 옵션 재고 사용. */
+    stock?: number | null;
     options: ProductOption[];
     images: ProductImage[];
 };

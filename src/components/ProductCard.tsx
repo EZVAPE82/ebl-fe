@@ -14,7 +14,7 @@ import { safeImageUrl } from "@/lib/url";
  * Convention: /images/foo.png → /images/foo-hover.png (자동 추론)
  */
 export function ProductCard({ p }: { p: ProductSummary }) {
-    const isSoldOut = p.status === "SOLD_OUT";
+    const isSoldOut = p.status === "SOLD_OUT" || p.soldOut === true;
     const thumb = safeImageUrl(p.thumbnailUrl);
     const hoverThumb = thumb ? thumb.replace(/(\.[a-z]+)$/i, "-hover$1") : "";
     const [hoverOk, setHoverOk] = useState(true);
