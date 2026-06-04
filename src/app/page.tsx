@@ -3,7 +3,6 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { TrustBadges } from "@/components/TrustBadges";
 import { BestReviewsCarousel } from "@/components/BestReviewsCarousel";
 import { ProductCard } from "@/components/ProductCard";
-import { hoverImageUrl } from "@/lib/url";
 import { EventPopup } from "@/components/EventPopup";
 import { formatDate, formatPrice } from "@/lib/format";
 import type { Banner, Category, Page, ProductSummary } from "@/types/api";
@@ -233,51 +232,10 @@ function BestItemGrid({ items }: { items: ProductSummary[] }) {
     }
     return (
         <>
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {items.map(p => (
-                    <li key={p.id}>
-                        <Link href={`/p/${p.id}`} className="block group">
-                            {/* 시안 정사각형 카드. hover 시 -hover.png 풍부한 배경 카드로 fade-in swap (CSS only). */}
-                            <div className="aspect-square rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)] relative">
-                                {p.thumbnailUrl ? (
-                                    <>
-                                        {/* 순차 fade — default 먼저 사라지고 hover 늦게 나타남. ProductCard 와 동일 패턴. */}
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={p.thumbnailUrl}
-                                            alt={p.name}
-                                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out delay-200 group-hover:delay-0 ${hoverImageUrl(p.thumbnailUrl) ? "group-hover:opacity-0" : ""}`}
-                                        />
-                                        {hoverImageUrl(p.thumbnailUrl) && (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img
-                                                src={hoverImageUrl(p.thumbnailUrl)!}
-                                                alt=""
-                                                aria-hidden="true"
-                                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out group-hover:delay-200"
-                                            />
-                                        )}
-                                    </>
-                                ) : null}
-                            </div>
-                            <div className="mt-3 space-y-1">
-                                <p className="text-sm md:text-base font-medium text-[var(--color-fg)] line-clamp-1">{p.name}</p>
-                                <p className="text-xs text-[var(--color-fg-subtle)] line-through tabular-nums">{formatPrice(Math.round(p.price * 1.4))}</p>
-                                <p className="text-sm font-semibold tabular-nums">
-                                    <span className="text-[var(--color-danger)] mr-1">40%</span>
-                                    <span className="text-[var(--color-fg)]">{formatPrice(p.price)}</span>
-                                </p>
-                                <p className="text-xs text-[var(--color-fg-muted)] flex items-center gap-1">
-                                    <span className="text-yellow-400">★</span>
-                                    <span className="font-medium text-[var(--color-fg)]">{(p.ratingAvg ?? 0).toFixed(1)}</span>
-                                    <span>|</span>
-                                    <span>{p.reviewCount}건</span>
-                                </p>
-                            </div>
-                        </Link>
-                    </li>
-                ))}
-            </ul>
+            {/* 제품/목록 페이지와 동일한 ProductCard 사용 (호버 배경 스왑 포함 — 자산 있는 시리즈만) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                {items.map(p => <ProductCard key={p.id} p={p} />)}
+            </div>
             <div className="mt-6 flex justify-center">
                 <Link
                     href="/products"
