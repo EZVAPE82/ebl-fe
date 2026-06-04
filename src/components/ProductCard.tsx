@@ -3,14 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice } from "@/lib/format";
-import { safeImageUrl } from "@/lib/url";
-
-// -hover.png 변형 자산이 실제로 존재하는 시리즈 접두어만 호버 스왑 시도 → 없는 상품의 404 방지.
-const HOVER_PREFIXES = ["crosamba", "frozen", "iceking", "icekingpro", "joinwon-kit"];
-function hasHoverVariant(url: string): boolean {
-    const file = url.split("/").pop() ?? "";
-    return HOVER_PREFIXES.some((pre) => file.startsWith(pre));
-}
+import { hoverImageUrl, safeImageUrl } from "@/lib/url";
 
 /**
  * 상품 카드 — 시안 매칭:
@@ -23,7 +16,7 @@ function hasHoverVariant(url: string): boolean {
 export function ProductCard({ p }: { p: ProductSummary }) {
     const isSoldOut = p.status === "SOLD_OUT" || p.soldOut === true;
     const thumb = safeImageUrl(p.thumbnailUrl);
-    const hoverThumb = thumb && hasHoverVariant(thumb) ? thumb.replace(/(\.[a-z]+)$/i, "-hover$1") : "";
+    const hoverThumb = hoverImageUrl(thumb) ?? "";
     const [hoverOk, setHoverOk] = useState(true);
 
     return (
@@ -46,7 +39,7 @@ export function ProductCard({ p }: { p: ProductSummary }) {
                             alt={p.name}
                             loading="lazy"
                             className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out delay-200 group-hover:delay-0 ${
-                                hoverOk ? "group-hover:opacity-0" : ""
+                                hoverOk && hoverThumb ? "group-hover:opacity-0" : ""
                             }`}
                         />
                         {hoverOk && hoverThumb && (

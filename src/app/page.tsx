@@ -3,6 +3,7 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { TrustBadges } from "@/components/TrustBadges";
 import { BestReviewsCarousel } from "@/components/BestReviewsCarousel";
 import { ProductCard } from "@/components/ProductCard";
+import { hoverImageUrl } from "@/lib/url";
 import { EventPopup } from "@/components/EventPopup";
 import { formatDate, formatPrice } from "@/lib/format";
 import type { Banner, Category, Page, ProductSummary } from "@/types/api";
@@ -245,15 +246,17 @@ function BestItemGrid({ items }: { items: ProductSummary[] }) {
                                         <img
                                             src={p.thumbnailUrl}
                                             alt={p.name}
-                                            className="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out delay-200 group-hover:delay-0 group-hover:opacity-0"
+                                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out delay-200 group-hover:delay-0 ${hoverImageUrl(p.thumbnailUrl) ? "group-hover:opacity-0" : ""}`}
                                         />
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={p.thumbnailUrl.replace(/(\.[a-z]+)$/i, "-hover$1")}
-                                            alt=""
-                                            aria-hidden="true"
-                                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out group-hover:delay-200"
-                                        />
+                                        {hoverImageUrl(p.thumbnailUrl) && (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={hoverImageUrl(p.thumbnailUrl)!}
+                                                alt=""
+                                                aria-hidden="true"
+                                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out group-hover:delay-200"
+                                            />
+                                        )}
                                     </>
                                 ) : null}
                             </div>

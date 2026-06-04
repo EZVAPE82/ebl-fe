@@ -56,3 +56,19 @@ export function safeImageUrl(raw: string | null | undefined): string {
     }
     return "";
 }
+
+/**
+ * 상품 카드 호버 배경 스왑용 — `{base}-hover.png` 변형 자산이 실제 존재하는 시리즈만 처리.
+ * 자산이 없는 상품에 호버 스왑을 걸면 404 + 호버 시 빈칸이 되므로, 존재하는 접두어만 허용한다.
+ * (public/images 의 -hover.png 자산 접두어 목록)
+ */
+const HOVER_PREFIXES = ["crosamba", "frozen", "iceking", "icekingpro", "joinwon-kit"];
+
+/** 썸네일에 -hover.png 호버 변형 자산이 존재하면 그 URL, 없으면 null. */
+export function hoverImageUrl(thumbnail: string | null | undefined): string | null {
+    if (!thumbnail) return null;
+    const file = thumbnail.split("/").pop() ?? "";
+    const hasVariant = HOVER_PREFIXES.some((pre) => file.startsWith(pre));
+    if (!hasVariant) return null;
+    return thumbnail.replace(/(\.[a-z]+)$/i, "-hover$1");
+}
