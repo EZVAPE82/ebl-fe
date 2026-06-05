@@ -18,7 +18,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
             </h1>
             <p className="mt-3 text-sm text-[var(--color-fg-muted)] leading-relaxed">
                 잠시 후 다시 시도해주세요. 문제가 계속되면<br />
-                고객센터 02-773-4114 로 문의해주세요.
+                고객센터 010-8662-8575 로 문의해주세요.
             </p>
             {error.digest && (
                 <p className="mt-2 text-[11px] text-[var(--color-fg-subtle)] font-mono">

@@ -14,10 +14,9 @@ export function Footer() {
                         <div><dt className="inline text-[#767676]">대표 </dt><dd className="inline font-medium text-[#767676]">이상헌</dd></div>
                         <div className="md:col-span-2"><dt className="inline text-[#767676]">주소 </dt><dd className="inline font-medium text-[#767676]">서울특별시 중구 명동8길 22-4, 1003호 (명동2가, 대한빌딩)</dd></div>
                         <div><dt className="inline text-[#767676]">사업자등록번호 </dt><dd className="inline font-medium text-[#767676] tabular-nums">419-86-03748</dd></div>
-                        <div><dt className="inline text-[#767676]">개업일 </dt><dd className="inline font-medium text-[#767676]">2025년 7월 1일</dd></div>
                         <div><dt className="inline text-[#767676]">전화번호 </dt><dd className="inline font-medium text-[#767676]">02-773-4114</dd></div>
                         <div><dt className="inline text-[#767676]">이메일 </dt><dd className="inline font-medium text-[#767676]">elfbar@naver.com</dd></div>
-                        <div><dt className="inline text-[#767676]">개인정보관리책임자 </dt><dd className="inline font-medium text-[#767676]">이상헌</dd></div>
+                        <div><dt className="inline text-[#767676]">개인정보관리책임자 </dt><dd className="inline font-medium text-[#767676]">이종훈</dd></div>
                         <div><dt className="inline text-[#767676]">배송사 </dt><dd className="inline font-medium text-[#767676]">로젠택배</dd></div>
                     </dl>
 
@@ -40,7 +39,7 @@ export function Footer() {
                 <div className="md:text-right">
                     <div className="flex items-center md:justify-end gap-2">
                         <span className="text-base font-medium text-[var(--color-fg)]">고객센터</span>
-                        <span className="text-base font-medium text-[var(--color-fg)] tabular-nums">02-773-4114</span>
+                        <span className="text-base font-medium text-[var(--color-fg)] tabular-nums">010-8662-8575</span>
                     </div>
                     <dl className="mt-2 text-[13px] text-[#767676] space-y-0.5">
                         <div className="flex md:justify-end gap-1">
