@@ -103,3 +103,71 @@ export type SortKey =
     | "price_desc"
     | "rating"
     | "reviews";
+
+// ── 캠페인(적립금/쿠폰) 룰 엔진 ───────────────────────────────
+export type CampaignTrigger = "ORDER_PAID" | "SIGNUP" | "REVIEW_WRITTEN";
+
+export type CampaignCondition = { field: string; op: string; value?: unknown };
+
+export type CampaignReward = {
+    type: "POINT_FIXED" | "POINT_RATE" | "COUPON_ISSUE";
+    target?: "SELF" | "REFERRER";
+    amount?: number | null;
+    rate?: number | null;
+    base?: string | null;
+    cap?: number | null;
+    couponId?: number | null;
+};
+
+export type CampaignView = {
+    id: number;
+    name: string;
+    description: string | null;
+    trigger: CampaignTrigger;
+    conditions: CampaignCondition[];
+    rewards: CampaignReward[];
+    priority: number;
+    stackable: boolean;
+    active: boolean;
+    validFrom: string | null;
+    validTo: string | null;
+    perMemberLimit: number | null;
+    totalLimit: number | null;
+    grantCount: number;
+    createdAt: string;
+};
+
+// 카탈로그 (어드민 UI 동적 렌더용) — GET /api/v1/admin/campaigns/catalog
+export type CatalogOption = { value: string; label: string };
+export type CatalogField = {
+    field: string; label: string; valueType: string;
+    ops: string[]; triggers: string[]; options: CatalogOption[];
+};
+export type CatalogRewardParam = {
+    key: string; label: string; type: string; required: boolean; options: CatalogOption[];
+};
+export type CatalogReward = {
+    type: string; label: string; triggers: string[]; targets: string[]; params: CatalogRewardParam[];
+};
+export type CatalogOperator = { op: string; label: string };
+export type CatalogTrigger = { key: string; label: string };
+export type CampaignCatalog = {
+    triggers: CatalogTrigger[];
+    fields: CatalogField[];
+    rewards: CatalogReward[];
+    operators: CatalogOperator[];
+    targets: string[];
+};
+
+export type CouponSummary = {
+    id: number;
+    code: string | null;
+    name: string;
+    type: string;
+    discountType: string;
+    discountValue: number;
+    minOrderAmount: number;
+    maxDiscount: number;
+    validDays: number;
+    active: boolean;
+};
