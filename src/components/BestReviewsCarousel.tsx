@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Lightbox } from "@/components/Lightbox";
+import { useGated, useAdultGate } from "@/components/AdultGate";
 
 /**
  * 베스트 후기 4 카드 + Lightbox.
@@ -76,23 +77,24 @@ export function BestReviewsCarousel({ reviews }: { reviews: ReviewMock[] }) {
 
 function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick: (e: React.MouseEvent) => void }) {
     const isColor = review.photo.startsWith("#");
+    const gated = useGated();
+    const { openGate } = useAdultGate();
     return (
         <li className="flex h-full">
             <Link href="/reviews/best" className="flex flex-col w-full h-full">
-                {/* 사진 박스 — 1:1 + object-fit cover (Shopify Dawn / Amazon 표준).
-                    클릭 시 Lightbox 로 원본 풀 사이즈 보기 (텍스트 영역 클릭은 /c/best 로 이동). */}
+                {/* 사진 박스 — 비회원은 블러+자물쇠(클릭 시 성인인증), 회원은 Lightbox 원본 보기. */}
                 <button
                     type="button"
-                    aria-label={`${review.product} 사진 크게 보기`}
-                    onClick={onPhotoClick}
-                    className="w-full block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent,#7c5cff)] rounded-[18px]"
+                    aria-label={gated ? "성인인증 후 확인 가능" : `${review.product} 사진 크게 보기`}
+                    onClick={gated ? (e) => { e.preventDefault(); e.stopPropagation(); openGate(); } : onPhotoClick}
+                    className="relative w-full block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent,#7c5cff)] rounded-[18px]"
                     style={{
                         aspectRatio: "1 / 1",
                         overflow: "hidden",
                         borderRadius: 18,
                         backgroundColor: isColor ? review.photo : undefined,
                         flexShrink: 0,
-                        cursor: "zoom-in",
+                        cursor: gated ? "pointer" : "zoom-in",
                     }}
                 >
                     {!isColor && (
@@ -100,9 +102,16 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
                         <img
                             src={review.photo}
                             alt={review.product}
+                            className={gated ? "blur-lg" : undefined}
                             style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
                             draggable={false}
                         />
+                    )}
+                    {gated && (
+                        <span className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 bg-black/25 text-white" aria-hidden="true">
+                            <span className="text-xl">🔒</span>
+                            <span className="text-[10px] font-semibold drop-shadow">성인인증 후 확인</span>
+                        </span>
                     )}
                 </button>
 

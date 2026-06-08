@@ -13,6 +13,7 @@ const NAV: { href: string; label: string }[] = [
     { href: "/admin/campaigns", label: "캠페인" },
     { href: "/admin/coupons", label: "쿠폰" },
     { href: "/admin/referral", label: "추천인 보상" },
+    { href: "/admin/legacy", label: "기존 회원" },
     { href: "/admin/foreign-verifications", label: "외국인 승인" },
     { href: "/admin/content", label: "콘텐츠" },
     { href: "/admin/settings", label: "정책 설정" },

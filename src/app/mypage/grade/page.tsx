@@ -101,7 +101,7 @@ export default function MemberGradePage() {
                     <div className="flex items-end justify-between mb-3">
                         <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)]">회원등급별 혜택안내</h3>
                         <p className="text-[11px] text-[var(--color-fg-muted)] hidden md:block">
-                            등급 체계 : 브론즈 / 실버 / 골드 / 다이아 / VIP
+                            등급 체계 : 실버 / 골드 / 다이아 / VIP
                         </p>
                     </div>
 
@@ -135,7 +135,7 @@ export default function MemberGradePage() {
                                     ))}
                                 </tr>
                                 <tr>
-                                    <td className="px-3 py-3 text-[var(--color-fg-muted)] whitespace-nowrap">무등급 추가적립</td>
+                                    <td className="px-3 py-3 text-[var(--color-fg-muted)] whitespace-nowrap">무통장 추가적립</td>
                                     {GRADES.map(g => (
                                         <td key={g.key} className="px-3 py-3 text-center tabular-nums">{g.bonusPoint}</td>
                                     ))}
@@ -160,7 +160,7 @@ export default function MemberGradePage() {
     );
 }
 
-type GradeKey = "STANDARD" | "BRONZE" | "SILVER" | "GOLD" | "DIAMOND" | "VIP";
+type GradeKey = "SILVER" | "GOLD" | "DIA" | "VIP";
 
 type GradeDetail = {
     grade: string; accumulatedAmount: number;
@@ -169,19 +169,18 @@ type GradeDetail = {
 
 // 백엔드 GradeCode → 표시 라벨 (혜택 테이블의 등급명과 일치)
 const GRADE_DISPLAY: Record<string, string> = {
-    ENTRY: "브론즈",
-    TIER_10K: "실버",
-    TIER_25K: "골드",
-    TIER_40K: "다이아",
+    SILVER: "실버",
+    GOLD: "골드",
+    DIA: "다이아",
     VIP: "VIP",
 };
 
+// 클라이언트 확정 등급표 (6개월 누적 / 기본적립 / 무통장 추가적립)
 const GRADES: { key: GradeKey; label: string; color: string; condition: string; basePoint: string; bonusPoint: string; payment: string }[] = [
-    { key: "BRONZE",  label: "브론즈", color: "#cd7f32", condition: "회원가입",    basePoint: "0%",   bonusPoint: "0%",   payment: "지급" },
-    { key: "SILVER",  label: "실버",   color: "#c0c0c0", condition: "7만원 이상",  basePoint: "0%",   bonusPoint: "0.5%", payment: "지급" },
-    { key: "GOLD",    label: "골드",   color: "#fbbf24", condition: "15만원 이상", basePoint: "1%",   bonusPoint: "0.5%", payment: "지급" },
-    { key: "DIAMOND", label: "다이아", color: "#60a5fa", condition: "30만원 이상", basePoint: "1.5%", bonusPoint: "0.5%", payment: "지급" },
-    { key: "VIP",     label: "VIP",    color: "#f87171", condition: "50만원 이상", basePoint: "2%",   bonusPoint: "0.5%", payment: "지급" },
+    { key: "SILVER", label: "실버",   color: "#c0c0c0", condition: "30만원 미만",  basePoint: "1.0%", bonusPoint: "0.5%", payment: "지급" },
+    { key: "GOLD",   label: "골드",   color: "#fbbf24", condition: "30만원 이상",  basePoint: "1.5%", bonusPoint: "0.5%", payment: "지급" },
+    { key: "DIA",    label: "다이아", color: "#60a5fa", condition: "50만원 이상",  basePoint: "2.5%", bonusPoint: "1.0%", payment: "지급" },
+    { key: "VIP",    label: "VIP",    color: "#f87171", condition: "70만원 이상",  basePoint: "3.5%", bonusPoint: "1.0%", payment: "지급" },
 ];
 
 /* 시안 매칭: 등급별 컬러 방패 SVG (테이블 헤더 칩 안에) */

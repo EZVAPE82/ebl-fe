@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice } from "@/lib/format";
 import { hoverImageUrl, safeImageUrl } from "@/lib/url";
+import { useGated, useAdultGate, GateOverlay } from "@/components/AdultGate";
 
 /**
  * 상품 카드 — 시안 매칭:
@@ -18,10 +19,13 @@ export function ProductCard({ p }: { p: ProductSummary }) {
     const thumb = safeImageUrl(p.thumbnailUrl);
     const hoverThumb = hoverImageUrl(thumb) ?? "";
     const [hoverOk, setHoverOk] = useState(true);
+    const gated = useGated();
+    const { openGate } = useAdultGate();
 
     return (
         <Link
             href={`/p/${p.id}`}
+            onClick={(e) => { if (gated) { e.preventDefault(); openGate(); } }}
             className="group flex flex-col rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition"
         >
             {/* 카드 thumbnail 영역 — 시안 정사각형(445x445).
@@ -63,6 +67,7 @@ export function ProductCard({ p }: { p: ProductSummary }) {
                         품절
                     </span>
                 )}
+                {gated && <GateOverlay />}
             </div>
             <div className="p-3 space-y-1">
                 <h3 className="text-sm font-medium leading-tight line-clamp-2 text-[var(--color-fg)]">{p.name}</h3>

@@ -6,13 +6,15 @@ import { Footer } from "@/components/Footer";
 import { FloatingDock } from "@/components/FloatingDock";
 import { Analytics } from "@/components/Analytics";
 import { AuthProvider } from "@/lib/auth";
+import { AdultGateProvider } from "@/components/AdultGate";
 import { ThemeProvider, themeInitScript } from "@/lib/theme";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://elfbarlounge.co.kr";
-const isProd = SITE_URL.includes("elfbarlounge.co.kr");
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://elfbarlounge.com";
+// 운영 도메인(.com/.co.kr 모두) 이면 색인 허용 — 비회원에도 텍스트는 노출(SEO).
+const isProd = SITE_URL.includes("elfbarlounge.");
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
@@ -57,10 +59,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-fg)]">
             <ThemeProvider>
                 <AuthProvider>
-                    <HeaderStack />
-                    <main className="flex-1">{children}</main>
-                    <Footer />
-                    <FloatingDock />
+                    <AdultGateProvider>
+                        <HeaderStack />
+                        <main className="flex-1">{children}</main>
+                        <Footer />
+                        <FloatingDock />
+                    </AdultGateProvider>
                 </AuthProvider>
             </ThemeProvider>
             <Analytics />

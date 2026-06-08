@@ -7,10 +7,13 @@
  */
 
 import { useState } from "react";
+import { useGated, useAdultGate, GateOverlay } from "@/components/AdultGate";
 
 export function ProductGallery({ images, alt }: { images: string[]; alt: string }) {
     const [idx, setIdx] = useState(0);
     const total = images.length;
+    const gated = useGated();
+    const { openGate } = useAdultGate();
     if (total === 0) {
         return (
             <div className="aspect-square bg-[var(--color-bg-subtle)] rounded-[var(--radius-lg)] flex items-center justify-center text-[var(--color-fg-subtle)] text-xs">
@@ -49,6 +52,7 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                         >›</button>
                     </>
                 )}
+                {gated && <GateOverlay />}
             </div>
 
             {/* dot indicator */}
@@ -75,14 +79,15 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
                         <button
                             key={i}
                             type="button"
-                            onClick={() => setIdx(i)}
-                            className={`aspect-square rounded-[var(--radius-sm)] overflow-hidden border-2 transition ${
+                            onClick={() => (gated ? openGate() : setIdx(i))}
+                            className={`relative aspect-square rounded-[var(--radius-sm)] overflow-hidden border-2 transition ${
                                 i === idx ? "border-[var(--color-fg)]" : "border-transparent hover:border-[var(--color-border-strong)]"
                             }`}
-                            aria-label={`썸네일 ${i + 1}`}
+                            aria-label={gated ? "성인인증 후 확인" : `썸네일 ${i + 1}`}
                         >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={src} alt="" className="w-full h-full object-contain p-1" />
+                            <img src={src} alt="" className={`w-full h-full object-contain p-1 ${gated ? "blur-md" : ""}`} />
+                            {gated && <span className="absolute inset-0 bg-black/15" aria-hidden="true" />}
                         </button>
                     ))}
                 </div>
