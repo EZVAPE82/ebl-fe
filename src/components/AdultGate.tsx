@@ -16,6 +16,14 @@ import {
 } from "react";
 import { useAuth } from "@/lib/auth";
 
+/**
+ * 성인인증 이미지 게이팅 전역 스위치.
+ *   false = OFF (원래대로, 블러/자물쇠/게이트 전부 비활성)
+ *   true  = ON  (비회원 이미지 블러 + 클릭 시 성인인증 모달)
+ * 다시 적용할 땐 이 값만 true 로 바꾸면 모든 영역(홈 배너·상품·후기·이벤트 등)에 즉시 재적용된다.
+ */
+const GATING_ENABLED = false;
+
 type GateCtx = { openGate: () => void };
 const Ctx = createContext<GateCtx | null>(null);
 
@@ -69,9 +77,10 @@ export function useAdultGate(): GateCtx {
     return v ?? { openGate: () => {} }; // provider 밖이면 안전한 no-op
 }
 
-/** 가려야 하는가 — 미로그인 또는 인증 로딩 중(비회원에 원본 노출 방지). */
+/** 가려야 하는가 — 미로그인 또는 인증 로딩 중(비회원에 원본 노출 방지). 전역 스위치 OFF 면 항상 false. */
 export function useGated(): boolean {
     const { user, loading } = useAuth();
+    if (!GATING_ENABLED) return false;
     return loading || !user;
 }
 
