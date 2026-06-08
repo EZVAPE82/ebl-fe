@@ -3,6 +3,7 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { TrustBadges } from "@/components/TrustBadges";
 import { BestReviewsCarousel } from "@/components/BestReviewsCarousel";
 import { ProductCard } from "@/components/ProductCard";
+import { GatedMedia } from "@/components/GatedMedia";
 import { EventPopup } from "@/components/EventPopup";
 import { formatDate, formatPrice } from "@/lib/format";
 import type { Banner, Category, Page, ProductSummary } from "@/types/api";
@@ -55,18 +56,22 @@ export default async function Home() {
             {/* ===== 1. Hero 캐러셀 (MAIN_HERO 다중 슬라이드) =====
                 헤더가 홈에서 fixed 투명 오버레이라 Hero 위 spacer 불필요 — Hero 가 헤더 위로 침범. */}
             {/* TrustBadges (혜택 안내 5카드): 데스크탑만 Hero 안 absolute. 모바일은 사용자 요청으로 완전 제거. */}
-            <HeroCarousel
-                banners={heroSlides}
-                fallbackImage="/images/hero.png"
-                fallbackMobileImage="/images/hero-mobile-1.png"
-            >
-                <div className="hidden md:block">
-                    <TrustBadges />
-                </div>
-            </HeroCarousel>
+            <GatedMedia>
+                <HeroCarousel
+                    banners={heroSlides}
+                    fallbackImage="/images/hero.png"
+                    fallbackMobileImage="/images/hero-mobile-1.png"
+                >
+                    <div className="hidden md:block">
+                        <TrustBadges />
+                    </div>
+                </HeroCarousel>
+            </GatedMedia>
 
             {/* ===== 카테고리 아이콘 ===== */}
-            <CategoryIcons categories={categories} />
+            <GatedMedia>
+                <CategoryIcons categories={categories} />
+            </GatedMedia>
 
             <div className="mx-auto max-w-screen-2xl px-4 space-y-16 pb-16">
                 {/* ===== 3. 엘프바의 추천 아이템 — 어드민 설정 (featured_order 1~4) ===== */}
@@ -80,16 +85,16 @@ export default async function Home() {
 
                 {/* ===== 5. 우리의 이벤트 (2 banner card 그리드) ===== */}
                 <Section title="우리의 이벤트" href="/events">
-                    <EventCards />
+                    <GatedMedia><EventCards /></GatedMedia>
                 </Section>
 
                 {/* ===== 6. 핫한 아이템 순위 (라이프스타일 photo + 진짜 product 9 → 3 그룹) ===== */}
                 <Section title="핫한 아이템 순위" href="/c/best">
-                    <Ranking items={popular.content.slice(0, 9)} />
+                    <GatedMedia><Ranking items={popular.content.slice(0, 9)} /></GatedMedia>
                 </Section>
 
                 {/* ===== 7. 시리즈 배너 (시안 — 테두리 X, 간격 X, 꽉 채움) ===== */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                <GatedMedia className="grid grid-cols-1 md:grid-cols-2 gap-0">
                     <Link href="/products?series=iceking" className="block overflow-hidden hover:opacity-95 transition">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/images/series-ice.png" alt="ICE COOL AS YOU WANT" className="w-full block" />
@@ -98,7 +103,7 @@ export default async function Home() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/images/series-shimmer.png" alt="SHIMMERING IN YOUR HAND" className="w-full block" />
                     </Link>
-                </div>
+                </GatedMedia>
 
                 {/* ===== 공지사항 + FAQ 2컬럼 ===== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

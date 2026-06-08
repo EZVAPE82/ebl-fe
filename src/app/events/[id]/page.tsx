@@ -2,6 +2,7 @@ import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import { safeImageUrl } from "@/lib/url";
+import { GatedMedia } from "@/components/GatedMedia";
 
 export const dynamic = "force-dynamic";
 
@@ -79,12 +80,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {/* 배너 이미지 — 가운데 정렬, 자세히 보기 버튼은 이미지에 포함 */}
                 <div className="mt-8 md:mt-10 flex justify-center">
                     {event.bannerUrl && safeImageUrl(event.bannerUrl) && (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                            src={safeImageUrl(event.bannerUrl)}
-                            alt={event.title}
-                            className="max-w-md w-full h-auto block rounded-[18px]"
-                        />
+                        <GatedMedia className="max-w-md w-full">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={safeImageUrl(event.bannerUrl)}
+                                alt={event.title}
+                                className="w-full h-auto block rounded-[18px]"
+                            />
+                        </GatedMedia>
                     )}
                 </div>
             </article>

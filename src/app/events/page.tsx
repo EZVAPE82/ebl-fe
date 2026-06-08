@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { safeImageUrl } from "@/lib/url";
+import { GatedMedia } from "@/components/GatedMedia";
 import type { Page } from "@/types/api";
 
 export const dynamic = "force-dynamic";
@@ -84,7 +85,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                             href={`/events/${e.id}`}
                             className="block rounded-[18px] overflow-hidden bg-[var(--color-bg-subtle)] hover:opacity-95 transition group"
                         >
-                            <div className="aspect-[16/9] overflow-hidden">
+                            <GatedMedia className="aspect-[16/9] overflow-hidden">
                                 {e.bannerUrl && safeImageUrl(e.bannerUrl) && (
                                     /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
@@ -93,7 +94,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
                                 )}
-                            </div>
+                            </GatedMedia>
                         </Link>
                     ))}
                 </div>
