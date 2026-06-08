@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
+import { useGated, useAdultGate } from "@/components/AdultGate";
 
 export type ReviewItem = {
     id: number;
@@ -115,24 +116,32 @@ function ReviewCard({ review, onClick }: { review: ReviewItem; onClick: () => vo
     // 후기 사진 우선, 없으면 product thumbnail 로 fallback (사진 미등록 리뷰도 시각적으로 비지 않게)
     const thumb = review.photoUrls?.[0] || review.productThumbnailUrl || "";
     const pname = review.productName || "상품";
+    const gated = useGated();
+    const { openGate } = useAdultGate();
     return (
         <button
             type="button"
-            onClick={onClick}
+            onClick={gated ? openGate : onClick}
             className="flex flex-col w-full h-full text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded-[18px]"
         >
-            <div className="w-full overflow-hidden rounded-[18px] bg-[var(--color-bg-subtle)]" style={{ aspectRatio: "1 / 1" }}>
+            <div className="relative w-full overflow-hidden rounded-[18px] bg-[var(--color-bg-subtle)]" style={{ aspectRatio: "1 / 1" }}>
                 {thumb ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                         src={thumb}
                         alt={pname}
-                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                        className={`w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300 ${gated ? "blur-lg" : ""}`}
                         loading="lazy"
                         draggable={false}
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-[var(--color-fg-subtle)] text-xs">no image</div>
+                )}
+                {gated && (
+                    <span className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 bg-black/25 text-white" aria-hidden="true">
+                        <span className="text-xl">🔒</span>
+                        <span className="text-[10px] font-semibold drop-shadow">성인인증 후 확인</span>
+                    </span>
                 )}
             </div>
             <div className="mt-3 flex flex-col flex-1 space-y-1.5">
@@ -150,7 +159,7 @@ function ReviewCard({ review, onClick }: { review: ReviewItem; onClick: () => vo
                     <img
                         src={review.productThumbnailUrl}
                         alt=""
-                        className="w-10 h-10 rounded bg-[var(--color-bg-subtle)] object-contain flex-shrink-0"
+                        className={`w-10 h-10 rounded bg-[var(--color-bg-subtle)] object-contain flex-shrink-0 ${gated ? "blur-md" : ""}`}
                     />
                 ) : (
                     <div className="w-10 h-10 rounded bg-[var(--color-bg-subtle)] flex-shrink-0" />
