@@ -1,24 +1,23 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
 import type { ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice } from "@/lib/format";
 import { hoverImageUrl, safeImageUrl } from "@/lib/url";
 import { useGated, useAdultGate, GateOverlay } from "@/components/AdultGate";
 
 /**
- * 상품 카드 — 시안 매칭:
- *  - default: device-only 깔끔한 thumbnail (object-contain, 세로 비율 그대로 letterbox)
- *  - hover  : 같은 파일명에 `-hover` suffix 가 있는 풍부한 배경 카드(1:1 정사각형)로 fade-in swap
- *             파일이 없으면 onError 로 default 그대로 유지.
+ * 상품 카드.
+ *  - 기본 이미지: `-hover` 배경 변형이 있으면 그걸 cover 로 꽉 채워 노출(배경 있는 이미지).
+ *    변형이 없으면 device-only thumbnail 을 contain 으로 letterbox.
+ *  - 호버 이미지 스왑 없음.
  *
- * Convention: /images/foo.png → /images/foo-hover.png (자동 추론)
+ * Convention: /images/foo.png → /images/foo-hover.png (배경 변형, 자동 추론)
  */
 export function ProductCard({ p }: { p: ProductSummary }) {
     const isSoldOut = p.status === "SOLD_OUT" || p.soldOut === true;
     const thumb = safeImageUrl(p.thumbnailUrl);
-    const hoverThumb = hoverImageUrl(thumb) ?? "";
-    const [hoverOk, setHoverOk] = useState(true);
+    const bg = hoverImageUrl(thumb);     // 배경 있는 변형(-hover) URL (없으면 null)
+    const displayImg = bg || thumb;      // 기본 이미지 = 배경 있는 이미지 우선
     const gated = useGated();
     const { openGate } = useAdultGate();
 
@@ -28,35 +27,16 @@ export function ProductCard({ p }: { p: ProductSummary }) {
             onClick={(e) => { if (gated) { e.preventDefault(); openGate(); } }}
             className="group flex flex-col rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-border-strong)] transition"
         >
-            {/* 카드 thumbnail 영역 — 시안 정사각형(445x445).
-                device-only 세로 길쭉(0.4~0.8) 이미지는 contain 으로 letterbox.
-                hover 시 -hover.png(1:1 풍부한 배경)가 cover 로 fade-in. */}
+            {/* 카드 이미지 — 배경 있는 변형(-hover)이 있으면 cover 로 꽉 채워 기본 노출. 호버 스왑 없음. */}
             <div className="aspect-square bg-[var(--color-bg-subtle)] relative">
-                {thumb ? (
-                    <>
-                        {/* 순차 fade — 호버 ON: default 가 먼저 사라지고(0~500ms) hover 가 늦게 나타남(200~700ms).
-                            호버 OFF: hover 가 먼저 사라지고(0~500ms) default 가 늦게 돌아옴(200~700ms).
-                            delay-200 + group-hover:delay-0 (default) ↔ group-hover:delay-200 (hover) 의 비대칭 delay 로 구현. */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={thumb}
-                            alt={p.name}
-                            loading="lazy"
-                            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out delay-200 group-hover:delay-0 ${
-                                hoverOk && hoverThumb ? "group-hover:opacity-0" : ""
-                            }`}
-                        />
-                        {hoverOk && hoverThumb && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                src={hoverThumb}
-                                alt=""
-                                onError={() => setHoverOk(false)}
-                                aria-hidden="true"
-                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out group-hover:delay-200"
-                            />
-                        )}
-                    </>
+                {displayImg ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={displayImg}
+                        alt={p.name}
+                        loading="lazy"
+                        className={`absolute inset-0 w-full h-full ${bg ? "object-cover" : "object-contain"}`}
+                    />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-[var(--color-fg-subtle)] text-xs">
                         no image
