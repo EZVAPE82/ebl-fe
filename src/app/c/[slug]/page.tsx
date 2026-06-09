@@ -42,6 +42,7 @@ export default async function CategoryPage({
 
     const categories = await safeFetch<Category[]>("/api/v1/public/categories", []);
     const cat = categories.find(c => c.slug === slug);
+    const isBest = slug === "best";  // 베스트 = best_mode(판매량/조회수/직접지정) 정책으로 산정
 
     const qs = new URLSearchParams();
     qs.set("sort", sort);
@@ -52,10 +53,15 @@ export default async function CategoryPage({
     if (sp.minPrice) qs.set("minPrice", sp.minPrice);
     if (sp.maxPrice) qs.set("maxPrice", sp.maxPrice);
 
-    const list = await safeFetch<Page<ProductSummary>>(
-        `/api/v1/public/products?${qs.toString()}`,
-        { content: [], totalElements: 0, totalPages: 0, number: 0, size: 20, first: true, last: true, empty: true }
-    );
+    const list: Page<ProductSummary> = isBest
+        ? await (async () => {
+            const items = await safeFetch<ProductSummary[]>("/api/v1/public/products/best?size=60", []);
+            return { content: items, totalElements: items.length, totalPages: 1, number: 0, size: Math.max(items.length, 1), first: true, last: true, empty: items.length === 0 };
+        })()
+        : await safeFetch<Page<ProductSummary>>(
+            `/api/v1/public/products?${qs.toString()}`,
+            { content: [], totalElements: 0, totalPages: 0, number: 0, size: 20, first: true, last: true, empty: true }
+        );
 
     const pages = compactPagination(page, list.totalPages);
 
@@ -73,6 +79,7 @@ export default async function CategoryPage({
                 <p className="text-[var(--color-fg-muted)]">
                     총 <span className="text-[var(--color-fg)] font-medium">{list.totalElements}</span>개의 상품
                 </p>
+                {!isBest && (
                 <div className="flex items-center gap-1">
                     {SORTS.map((s, i) => {
                         const params = new URLSearchParams(qs);
@@ -96,6 +103,7 @@ export default async function CategoryPage({
                         );
                     })}
                 </div>
+                )}
             </div>
 
             {/* 목록 */}

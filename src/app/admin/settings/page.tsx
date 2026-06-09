@@ -49,11 +49,23 @@ export default function AdminSettingsPage() {
                                 <div className="font-mono text-xs text-[var(--color-fg-muted)]">{s.key}</div>
                                 <div className="text-xs text-[var(--color-fg-subtle)] mt-0.5">{s.description ?? ""}</div>
                             </div>
-                            <input
-                                value={drafts[s.key] ?? ""}
-                                onChange={e => setDrafts(d => ({ ...d, [s.key]: e.target.value }))}
-                                className="w-40 rounded border border-[var(--color-border)] px-2 py-1 text-sm text-right"
-                            />
+                            {s.key === "best_mode" ? (
+                                <select
+                                    value={drafts[s.key] ?? "VIEWS"}
+                                    onChange={e => setDrafts(d => ({ ...d, [s.key]: e.target.value }))}
+                                    className="w-40 rounded border border-[var(--color-border)] px-2 py-1 text-sm bg-white"
+                                >
+                                    <option value="VIEWS">조회수</option>
+                                    <option value="SALES">판매량</option>
+                                    <option value="MANUAL">직접지정</option>
+                                </select>
+                            ) : (
+                                <input
+                                    value={drafts[s.key] ?? ""}
+                                    onChange={e => setDrafts(d => ({ ...d, [s.key]: e.target.value }))}
+                                    className="w-40 rounded border border-[var(--color-border)] px-2 py-1 text-sm text-right"
+                                />
+                            )}
                             <button
                                 onClick={() => save(s.key)}
                                 disabled={!changed}

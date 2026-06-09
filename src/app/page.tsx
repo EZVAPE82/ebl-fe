@@ -27,10 +27,11 @@ async function safeFetch<T>(path: string, fallback: T): Promise<T> {
 export default async function Home() {
     const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 8, first: true, last: true, empty: true };
 
-    const [bannersHero, featured, popular, categoriesRaw, notices, bestReviews] = await Promise.all([
+    const [bannersHero, featured, bestItems, categoriesRaw, notices, bestReviews] = await Promise.all([
         safeFetch<Banner[]>("/api/v1/public/banners?placement=MAIN_HERO", []),
         safeFetch<ProductSummary[]>("/api/v1/public/products/featured", []),
-        safeFetch<Page<ProductSummary>>("/api/v1/public/products?sort=popular&size=8", emptyPage as Page<ProductSummary>),
+        // 베스트(핫한 아이템 순위) — best_mode 정책(판매량/조회수/직접지정)에 따라 산정
+        safeFetch<ProductSummary[]>("/api/v1/public/products/best?size=9", []),
         safeFetch<Category[]>("/api/v1/public/categories", []),
         safeFetch<Page<Notice>>("/api/v1/public/notices?size=4", { ...emptyPage, content: [] } as unknown as Page<Notice>),
         safeFetch<Page<ReviewView>>("/api/v1/public/reviews/best?page=0&size=4", { ...emptyPage, content: [] } as unknown as Page<ReviewView>),
@@ -90,7 +91,7 @@ export default async function Home() {
 
                 {/* ===== 6. 핫한 아이템 순위 (라이프스타일 photo + 진짜 product 9 → 3 그룹) ===== */}
                 <Section title="핫한 아이템 순위" href="/c/best">
-                    <GatedMedia><Ranking items={popular.content.slice(0, 9)} /></GatedMedia>
+                    <GatedMedia><Ranking items={bestItems.slice(0, 9)} /></GatedMedia>
                 </Section>
 
                 {/* ===== 7. 시리즈 배너 (시안 — 테두리 X, 간격 X, 꽉 채움) ===== */}

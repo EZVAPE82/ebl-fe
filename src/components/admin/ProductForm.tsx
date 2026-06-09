@@ -32,12 +32,14 @@ export type ProductInitial = {
     images: ImageInput[];
     /** 메인 페이지 추천 슬롯 (1~4). 1~4만 가능, 빈값=추천 안 함. */
     featuredOrder?: number | null;
+    /** 베스트 직접지정 순서 (1~). 빈값=베스트 아님. best_mode=MANUAL 일 때만 노출. */
+    bestOrder?: number | null;
 };
 
 const EMPTY: ProductInitial = {
     name: "", slug: "", description: "", compatibilityInfo: "",
     price: 0, onlinePrice: null, status: "DRAFT", thumbnailUrl: "", stockThreshold: 0,
-    stock: null, options: [], images: [], featuredOrder: null,
+    stock: null, options: [], images: [], featuredOrder: null, bestOrder: null,
 };
 
 export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitial; mode: "create" | "edit" }) {
@@ -82,6 +84,12 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
             if (order !== initial.featuredOrder) {
                 const qs = order && order >= 1 && order <= 4 ? `?order=${order}` : "";
                 await adminApi(`/api/v1/admin/products/${productId}/featured${qs}`, { method: "PATCH" });
+            }
+            // 베스트 직접지정 순서 (bestOrder) — 별도 PATCH 엔드포인트
+            const best = f.bestOrder;
+            if (best !== initial.bestOrder) {
+                const bqs = best && best >= 1 ? `?order=${best}` : "";
+                await adminApi(`/api/v1/admin/products/${productId}/best${bqs}`, { method: "PATCH" });
             }
             if (mode === "create") router.replace(`/admin/products/${productId}`);
             else alert("저장되었습니다.");
@@ -136,7 +144,7 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                     <F label="온라인몰 판매가"><input type="number" value={f.onlinePrice ?? ""} onChange={e => up("onlinePrice", e.target.value ? Number(e.target.value) : null)} className={ic} placeholder="비우면 기본가 사용" /></F>
                     <F label="재고 임계치"><input type="number" value={f.stockThreshold} onChange={e => up("stockThreshold", Number(e.target.value))} className={ic} /></F>
                     <F label="재고 (옵션 없을 때)"><input type="number" min={0} value={f.stock ?? ""} onChange={e => up("stock", e.target.value ? Number(e.target.value) : null)} className={ic} placeholder="비우면 무제한" /></F>
-                    <F label="추천 슬롯">
+                    <F label="추천 슬롯 (홈 추천 — 수동)">
                         <select
                             value={f.featuredOrder ?? ""}
                             onChange={e => up("featuredOrder", e.target.value ? Number(e.target.value) : null)}
@@ -148,6 +156,15 @@ export function ProductForm({ initial = EMPTY, mode }: { initial?: ProductInitia
                             <option value="3">3번 슬롯</option>
                             <option value="4">4번 슬롯</option>
                         </select>
+                    </F>
+                    <F label="베스트 순서 (직접지정 모드)">
+                        <input
+                            type="number" min={1}
+                            value={f.bestOrder ?? ""}
+                            onChange={e => up("bestOrder", e.target.value ? Number(e.target.value) : null)}
+                            className={ic}
+                            placeholder="비우면 베스트 아님"
+                        />
                     </F>
                     <F label="상태">
                         <select value={f.status} onChange={e => up("status", e.target.value as ProductInitial["status"])} className={ic}>

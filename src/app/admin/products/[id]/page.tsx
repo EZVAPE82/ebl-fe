@@ -17,6 +17,7 @@ type AdminProductDetail = {
     status: ProductInitial["status"];
     thumbnailUrl: string | null;
     featuredOrder: number | null;
+    bestOrder: number | null;
     stock: number | null;
     options: {
         id: number; optionGroup: string; optionValue: string;
@@ -50,6 +51,7 @@ export default function AdminProductEdit({ params }: { params: Promise<{ id: str
                 stockThreshold: 0,
                 stock: p.stock ?? null,
                 featuredOrder: p.featuredOrder,
+                bestOrder: p.bestOrder,
                 options: p.options.map(o => ({
                     optionGroup: o.optionGroup, optionValue: o.optionValue,
                     priceDelta: o.priceDelta, stock: o.stock, required: o.required,
