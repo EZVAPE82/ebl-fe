@@ -61,9 +61,9 @@ export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
 
 function Header({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
     return (
-        <div className="flex items-end justify-between mb-5">
+        <div className="flex items-end justify-between mb-4">
             <div>
-                <p className="text-xs text-[var(--color-fg-muted)] mb-1">Best Item</p>
+                <p className="text-xs text-[var(--color-fg-muted)] mb-4">Best Item</p>
                 <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">엘프바의 추천 아이템</h2>
             </div>
             <div className="flex gap-2">
