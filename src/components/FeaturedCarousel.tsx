@@ -50,7 +50,7 @@ export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
             <div className="mt-6 flex justify-center">
                 <Link
                     href="/products"
-                    className="inline-flex items-center justify-center rounded-full border border-[var(--color-border-strong)] px-7 py-2.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
+                    className="inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] px-8 py-2.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
                 >
                     더 알아보기
                 </Link>
@@ -130,7 +130,7 @@ function FeaturedCard({ p, rank }: { p: ProductSummary; rank: number }) {
                         <span className="text-xs text-[var(--color-fg-subtle)] line-through tabular-nums">{formatPrice(p.price)}</span>
                     )}
                     {hasDiscount && (
-                        <span className="text-sm font-bold text-[var(--color-danger)] tabular-nums">{pct}%</span>
+                        <span className="text-sm font-bold text-[#16b1c4] tabular-nums">{pct}%</span>
                     )}
                     <span className="text-base font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(final)}</span>
                 </div>
