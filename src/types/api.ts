@@ -17,6 +17,8 @@ export type ProductSummary = {
     brandId: number | null;
     name: string;
     slug: string;
+    /** 카드 한 줄 설명 (추천 아이템 카드 등). */
+    description?: string | null;
     /** 기본 판매가 (오프라인 등). */
     price: number;
     /** 온라인몰 판매가. null 이면 price 사용. 프론트는 displayPrice() 헬퍼로 통일. */

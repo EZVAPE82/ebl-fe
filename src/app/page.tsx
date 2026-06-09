@@ -3,6 +3,7 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { TrustBadges } from "@/components/TrustBadges";
 import { BestReviewsCarousel } from "@/components/BestReviewsCarousel";
 import { ProductCard } from "@/components/ProductCard";
+import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { GatedMedia } from "@/components/GatedMedia";
 import { EventPopup } from "@/components/EventPopup";
 import { formatDate, formatPrice } from "@/lib/format";
@@ -75,14 +76,8 @@ export default async function Home() {
             </GatedMedia>
 
             <div className="mx-auto max-w-screen-2xl px-4 space-y-16 pb-16">
-                {/* ===== 3. 엘프바의 추천 아이템 — 어드민 설정 (featured_order 1~4) ===== */}
-                <section>
-                    <div className="mb-4">
-                        <p className="text-xs text-[var(--color-fg-muted)]">Best Item</p>
-                        <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">엘프바의 추천 아이템</h2>
-                    </div>
-                    <BestItemGrid items={featured} />
-                </section>
+                {/* ===== 3. 엘프바의 추천 아이템 — 어드민 설정 (featured_order 1~4) · 시안 캐러셀 ===== */}
+                <FeaturedCarousel items={featured} />
 
                 {/* ===== 5. 우리의 이벤트 (2 banner card 그리드) ===== */}
                 <Section title="우리의 이벤트" href="/events">
@@ -221,36 +216,6 @@ function ProductGrid({ items }: { items: ProductSummary[] }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {items.slice(0, 4).map(p => <ProductCard key={p.id} p={p} />)}
         </div>
-    );
-}
-
-/* ============================================================
- * BestItemGrid — 시안 11:864 4 product 카드 (상단: 컬러 제품 통이미지, 하단: HTML 정보)
- * ============================================================ */
-/** 어드민 설정 추천 아이템 — featured_order 1~4 슬롯에 배치된 실제 DB 상품. */
-function BestItemGrid({ items }: { items: ProductSummary[] }) {
-    if (items.length === 0) {
-        return (
-            <p className="text-sm text-[var(--color-fg-subtle)] py-8 text-center">
-                추천 아이템이 설정되지 않았습니다. 어드민에서 4개 상품을 추천 슬롯에 배치해주세요.
-            </p>
-        );
-    }
-    return (
-        <>
-            {/* 제품/목록 페이지와 동일한 ProductCard 사용 (호버 배경 스왑 포함 — 자산 있는 시리즈만) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {items.map(p => <ProductCard key={p.id} p={p} />)}
-            </div>
-            <div className="mt-6 flex justify-center">
-                <Link
-                    href="/products"
-                    className="inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border-strong)] px-6 py-2.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)]"
-                >
-                    더 알아보기
-                </Link>
-            </div>
-        </>
     );
 }
 
