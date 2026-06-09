@@ -22,11 +22,10 @@ export function TrustBadges() {
     return (
         <section
             aria-label="혜택 안내"
-            // 시안: 배경 완전 투명. Hero 이미지 그대로 비침. 아이콘/텍스트만 표시.
-            className="bg-transparent"
+            className="mx-auto max-w-screen-2xl px-3 md:px-4"
         >
-            {/* 데스크톱: flex justify-between. 모바일: 가로 스크롤 (시안 매칭) */}
-            <div className="mx-auto max-w-screen-2xl px-4 md:px-10 py-4 md:py-8 flex md:flex-wrap items-center md:justify-between gap-x-5 md:gap-x-4 gap-y-4 overflow-x-auto md:overflow-visible scrollbar-hide snap-x">
+            {/* 시안: 반투명 다크 패널(둥근 모서리) 위에 혜택 5종 — Hero 가 패널 뒤로 은은히 비침. */}
+            <div className="rounded-2xl bg-[#160f33]/45 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex md:flex-wrap items-center md:justify-between gap-x-5 md:gap-x-4 gap-y-4 overflow-x-auto md:overflow-visible scrollbar-hide snap-x">
                 {items.map(it => (
                     <div key={it.title} className="flex items-center gap-2.5 md:gap-4 flex-shrink-0 md:min-w-0 snap-start">
                         {/* 아이콘 컨테이너 — 시안 매칭: 둥근 사각형 (rounded-xl) + 어두운 보라 + 살짝 그라데이션 */}

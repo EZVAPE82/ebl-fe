@@ -166,7 +166,8 @@ function CategoryIcons({ categories: _categories }: { categories: Category[] }) 
     ];
     return (
         <section className="mx-auto max-w-screen-2xl px-4 py-8 md:py-12">
-            <ul className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+            {/* 시안: 풀폭 분산이 아니라 가운데 클러스터(아이콘 간 일정 간격) */}
+            <ul className="flex flex-wrap justify-center gap-x-8 sm:gap-x-12 lg:gap-x-16 gap-y-6">
                 {items.map(it => (
                     <li key={it.label}>
                         <Link
@@ -174,7 +175,7 @@ function CategoryIcons({ categories: _categories }: { categories: Category[] }) 
                             aria-label={it.label}
                             className="group flex flex-col items-center gap-2 hover:opacity-90 transition"
                         >
-                            <span className="w-20 h-20 md:w-24 md:h-24 group-hover:scale-105 transition-transform">
+                            <span className="w-[68px] h-[68px] md:w-[84px] md:h-[84px] group-hover:scale-105 transition-transform">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={it.src} alt={it.label} className="w-full h-full object-contain" />
                             </span>
