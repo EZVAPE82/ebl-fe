@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
-import { formatDate } from "@/lib/format";
 import type { Notice } from "@/types/api";
 
 export const dynamic = "force-dynamic";
 
-/* 시안 34:9462 매칭 — NOTICE 상세 페이지. */
+/* Figma 공지사항 상세 — NOTICE (가운데 정렬 본문 + 메타 + 텍스트 본문) */
 
 const MOCK_DETAIL: Notice = {
     id: 1001,
     title: "설 연휴 물류 일정 조정으로 인한 배송 지연 안내드립니다",
     pinned: true,
+    visible: true,
     createdAt: "2026-05-22T10:00:00",
     viewCount: 128,
     content:
@@ -30,63 +30,110 @@ const MOCK_DETAIL: Notice = {
 고객님의 너그러운 양해를 부탁드리며, 가족과 함께 따뜻하고 행복한 설 연휴 보내시길 바랍니다.
 
 감사합니다.`,
-} as unknown as Notice;
+};
 
-export default async function NoticeDetail({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-
-    let n: Notice;
+async function fetchNotice(id: string): Promise<Notice> {
     try {
-        n = await api<Notice>(`/api/v1/public/notices/${id}`, { cache: "no-store" });
+        return await api<Notice>(`/api/v1/public/notices/${id}`, { cache: "no-store" });
     } catch (e) {
         // 404 또는 fetch 실패 시 목데이터 fallback
-        if (e instanceof ApiError) {
-            n = MOCK_DETAIL;
-        } else {
-            n = MOCK_DETAIL;
-        }
+        if (e instanceof ApiError) return MOCK_DETAIL;
+        return MOCK_DETAIL;
     }
+}
+
+/** ISO/날짜 문자열 → "YY.MM.DD" (없으면 "-"). */
+function fmtYYMMDD(iso: string | null | undefined): string {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const y = String(d.getFullYear()).slice(-2);
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}.${m}.${day}`;
+}
+
+/** 본문이 HTML 태그를 포함하는지 (대략) — 태그가 있으면 dangerouslySetInnerHTML 로 렌더. */
+function looksLikeHtml(s: string): boolean {
+    return /<[a-z][\s\S]*>/i.test(s);
+}
+
+function MetaItem({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="flex items-center gap-2">
+            <span className="text-[14px] text-[#000]">{label}</span>
+            <span className="w-px h-3 bg-[#E5E5EC]" />
+            <span className="text-[14px] text-[#767676]">{value}</span>
+        </div>
+    );
+}
+
+export default async function NoticeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const notice = await fetchNotice(id);
+
+    const body = notice.content?.trim() ?? "";
+    const isHtml = looksLikeHtml(body);
+    // 평문은 빈 줄 기준 문단 분리.
+    const paragraphs = isHtml ? [] : body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+    const dateText = fmtYYMMDD(notice.createdAt);
+    const views = (notice.viewCount ?? 0).toLocaleString();
 
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-8 md:py-12">
-            {/* 큰 타이틀 */}
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-6 md:mb-10 text-[var(--color-fg)] tracking-tight">
-                NOTICE
-            </h1>
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20">
+            <div className="flex flex-col items-center gap-[60px]">
+                {/* 1) 타이틀 + 메타 + 본문 */}
+                <div className="w-full flex flex-col gap-8">
+                    {/* 큰 타이틀 */}
+                    <h1 className="text-[40px] md:text-[56px] font-bold leading-tight text-[#222222]">
+                        NOTICE
+                    </h1>
 
-            {/* 굵은 구분선 */}
-            <hr className="border-t-2 border-[var(--color-fg)] mb-6 md:mb-8" />
+                    <div className="w-full flex flex-col">
+                        {/* 메타 블록 */}
+                        <div className="border-t border-[#222] pt-6 pb-6 flex flex-col gap-3">
+                            <h2 className="text-[24px] font-medium text-[#000]">{notice.title}</h2>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <MetaItem label="작성자" value="엘프바 코리아" />
+                                <MetaItem label="게시일" value={dateText || "-"} />
+                                <MetaItem label="조회수" value={views} />
+                            </div>
+                        </div>
 
-            {/* 제목 */}
-            <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)] mb-3 md:mb-4">
-                {n.title}
-            </h2>
-
-            {/* 메타: 작성자 / 게시일 / 조회수 */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs md:text-sm text-[var(--color-fg-muted)] pb-6 border-b border-[var(--color-border)]">
-                <span><span className="font-medium text-[var(--color-fg)]">작성자</span> <span className="ml-2">시그널디코드</span></span>
-                <span className="text-[var(--color-fg-subtle)]">|</span>
-                <span><span className="font-medium text-[var(--color-fg)]">게시일</span> <span className="ml-2 tabular-nums">{formatDate(n.createdAt)}</span></span>
-                <span className="text-[var(--color-fg-subtle)]">|</span>
-                <span><span className="font-medium text-[var(--color-fg)]">조회수</span> <span className="ml-2 tabular-nums">{n.viewCount}</span></span>
-            </div>
-
-            {/* 본문 */}
-            <article className="py-8 md:py-12">
-                <div className="text-sm md:text-base text-[var(--color-fg)] leading-relaxed whitespace-pre-line max-w-4xl">
-                    {n.content}
+                        {/* 본문 블록 */}
+                        <div className="border-y border-[#DDDDDD] py-10 flex flex-col gap-6">
+                            {isHtml ? (
+                                <div
+                                    className="text-[16px] text-[#767676] leading-6 [&_p]:mb-4 [&_a]:underline"
+                                    dangerouslySetInnerHTML={{ __html: body }}
+                                />
+                            ) : paragraphs.length > 0 ? (
+                                paragraphs.map((p, i) => (
+                                    <p
+                                        key={i}
+                                        className="text-[16px] text-[#767676] leading-6 whitespace-pre-line"
+                                    >
+                                        {p}
+                                    </p>
+                                ))
+                            ) : (
+                                <p className="text-[16px] text-[#767676] leading-6">
+                                    등록된 내용이 없습니다.
+                                </p>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            </article>
 
-            {/* 구분선 + 목록으로 버튼 */}
-            <hr className="border-t border-[var(--color-border)] mb-8 md:mb-10" />
-            <div className="flex justify-center">
-                <Link
-                    href="/notices"
-                    className="inline-flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-surface)] px-10 py-3 text-sm md:text-base text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
-                >
-                    목록으로
-                </Link>
+                {/* 2) 목록으로 버튼 — 본문 좌측 정렬 */}
+                <div className="w-full flex justify-start">
+                    <Link
+                        href="/notices"
+                        className="w-[160px] p-4 rounded-[4px] border border-[#DDDDDD] text-center text-[14px] font-medium text-[#000]"
+                    >
+                        목록으로
+                    </Link>
+                </div>
             </div>
         </div>
     );

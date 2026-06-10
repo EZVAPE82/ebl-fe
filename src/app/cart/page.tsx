@@ -1,15 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
-import { ProductCard } from "@/components/ProductCard";
+import { RelatedCarousel } from "@/components/RelatedCarousel";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
 
-/* 시안 14:9910 매칭 — 좌: 구매상품 라인 / 우: 결제정보 (회색 박스 + 큰 라운딩) */
+/* Figma 장바구니 — 좌: 구매상품 라인 / 우: 결제정보(회색 박스) + 함께구매 캐러셀 */
 
 type CartItem = {
     id: number;
@@ -19,6 +19,8 @@ type CartItem = {
 };
 type Cart = { id: number; memberId: number; items: CartItem[] };
 
+type PromoBadge = { id: number; name: string; buyQuantity: number; getQuantity: number; label: string };
+
 type CartLine = CartItem & {
     name: string;
     optionText: string | null;
@@ -27,9 +29,8 @@ type CartLine = CartItem & {
     soldOut: boolean;
     freeQuantity: number;
     promotionLabel: string | null;
+    promotions: PromoBadge[];
 };
-
-type PromoBadge = { id: number; buyQuantity: number; getQuantity: number; label: string };
 
 export default function CartPage() {
     const { user, loading: authLoading } = useAuth();
@@ -39,6 +40,12 @@ export default function CartPage() {
     const [error, setError] = useState<string | null>(null);
     const [working, setWorking] = useState(false);
     const [recommend, setRecommend] = useState<ProductSummary[]>([]);
+
+    // 옵션변경 팝업 — 로컬 UI 상태 (장바구니 로직과 분리). key=line.id
+    const [openPromoFor, setOpenPromoFor] = useState<number | null>(null);
+    const [selectedPromo, setSelectedPromo] = useState<Record<number, number>>({});
+    // 약관 동의 — 시각 상태 (결제 게이팅은 기존 동작 유지: 품절만 차단)
+    const [agreeAll, setAgreeAll] = useState(false);
 
     const refresh = useCallback(async () => {
         try {
@@ -61,12 +68,12 @@ export default function CartPage() {
                         const freeQuantity = promo ? Math.floor(it.quantity / promo.buyQuantity) * promo.getQuantity : 0;
                         return {
                             ...it, name: p.name, unitPrice, optionText, thumbnailUrl: p.thumbnailUrl, soldOut,
-                            freeQuantity, promotionLabel: promo?.label ?? null,
+                            freeQuantity, promotionLabel: promo?.label ?? null, promotions: promos,
                         } as CartLine;
                     } catch {
                         return {
                             ...it, name: `상품 #${it.productId}`, unitPrice: 0, optionText: null, thumbnailUrl: null, soldOut: true,
-                            freeQuantity: 0, promotionLabel: null,
+                            freeQuantity: 0, promotionLabel: null, promotions: [],
                         } as CartLine;
                     }
                 })
@@ -85,9 +92,9 @@ export default function CartPage() {
         if (user) refresh();
     }, [user, authLoading, refresh, router]);
 
-    // 추천 상품(실데이터) — "이 아이템도 같이 사면 좋아요" 섹션용
+    // 함께구매 추천 상품(실데이터) — RelatedCarousel 로 렌더
     useEffect(() => {
-        api<Page<ProductSummary>>("/api/v1/public/products?size=4")
+        api<Page<ProductSummary>>("/api/v1/public/products?size=8")
             .then((p) => setRecommend(p.content ?? []))
             .catch(() => setRecommend([]));
     }, []);
@@ -112,18 +119,18 @@ export default function CartPage() {
         } finally { setWorking(false); }
     }
 
-    if (authLoading || !user) return <CartShell><p className="text-[var(--color-fg-subtle)]">로그인 확인 중...</p></CartShell>;
+    if (authLoading || !user) return <CartShell><p className="text-[#767676]">로그인 확인 중...</p></CartShell>;
     if (error) return <CartShell><p className="text-[var(--color-danger)]">{error}</p></CartShell>;
-    if (!cart) return <CartShell><p className="text-[var(--color-fg-subtle)]">불러오는 중...</p></CartShell>;
+    if (!cart) return <CartShell><p className="text-[#767676]">불러오는 중...</p></CartShell>;
 
     if (lines.length === 0) {
         return (
             <CartShell>
-                <div className="px-4 py-16 text-center">
-                    <p className="text-sm text-[var(--color-fg-subtle)] mb-4">장바구니가 비어 있습니다.</p>
+                <div className="px-4 py-24 text-center">
+                    <p className="text-[16px] text-[#767676] mb-5">장바구니가 비어 있습니다.</p>
                     <Link
-                        href="/"
-                        className="inline-flex items-center justify-center rounded-[8px] bg-[#3b82f6] text-white px-6 py-3 text-sm font-medium hover:opacity-90 transition"
+                        href="/products"
+                        className="inline-flex items-center justify-center rounded-[4px] bg-[#0072DD] text-white px-7 py-3 text-[16px] font-medium hover:opacity-90 transition"
                     >
                         쇼핑하러 가기
                     </Link>
@@ -133,154 +140,234 @@ export default function CartPage() {
     }
 
     const total = lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
-    const shippingFee = 0; // 시안: "0,000원" placeholder
+    const shippingFee = 0;
     const discount = 0;
     const paid = Math.max(0, total + shippingFee - discount);
     const hasSoldOut = lines.some(l => l.soldOut);
 
     return (
         <CartShell>
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 md:gap-8">
-                {/* ===== 좌: 구매상품 ===== */}
-                <div>
-                    <h2 className="text-base md:text-lg font-bold text-[var(--color-fg)] pb-3 border-b-2 border-[var(--color-fg)]">구매상품</h2>
-                    <ul className="divide-y divide-[var(--color-border)]">
-                        {lines.map(l => (
-                            <li key={l.id} className="flex items-center gap-3 py-4">
-                                {/* thumbnail — 사각형 (라운딩 없음) */}
-                                <div className="w-16 h-16 bg-[var(--color-bg-subtle)] flex-shrink-0 overflow-hidden">
-                                    {l.thumbnailUrl && (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={l.thumbnailUrl} alt={l.name} className="w-full h-full object-cover" />
+            {/* ===== TOP ROW ===== */}
+            <div className="flex flex-col gap-20 lg:flex-row lg:justify-between lg:gap-20">
+                {/* ----- 좌: 구매상품 ----- */}
+                <div className="lg:w-[1036px]">
+                    <h2 className="text-[24px] font-medium text-[#000]">구매상품</h2>
+                    <ul className="border-t border-[#222]">
+                        {lines.map(l => {
+                            const sel = selectedPromo[l.id] ?? l.promotions[0]?.id ?? null;
+                            return (
+                                <li key={l.id} className="py-3 flex justify-between items-center gap-3">
+                                    {/* 썸네일 + 이름/주문번호 */}
+                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                        <Link href={`/p/${l.productId}`} className="shrink-0">
+                                            {l.thumbnailUrl ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img src={l.thumbnailUrl} alt={l.name} className="w-[90px] h-[108px] rounded-[4px] object-cover shrink-0" />
+                                            ) : (
+                                                <div className="w-[90px] h-[108px] rounded-[4px] bg-[#F6F7FB] shrink-0" />
+                                            )}
+                                        </Link>
+                                        <div className="flex flex-col gap-1 min-w-0">
+                                            <Link href={`/p/${l.productId}`} className="text-[16px] font-medium text-[#000] line-clamp-1 hover:underline">
+                                                {l.name}
+                                            </Link>
+                                            <p className="text-[14px] font-light text-[#767676]">
+                                                {l.optionText ?? `주문번호 ${String(l.id).padStart(8, "0")}`}
+                                            </p>
+                                            {l.soldOut && <p className="text-[13px] text-[var(--color-danger)]">품절</p>}
+                                        </div>
+                                    </div>
+
+                                    {/* 옵션변경 — 프로모션 있을 때만 */}
+                                    {l.promotions.length > 0 && (
+                                        <PromoPopover
+                                            line={l}
+                                            open={openPromoFor === l.id}
+                                            selectedId={sel}
+                                            onToggle={() => setOpenPromoFor(openPromoFor === l.id ? null : l.id)}
+                                            onClose={() => setOpenPromoFor(null)}
+                                            onSelect={(pid) => {
+                                                setSelectedPromo(s => ({ ...s, [l.id]: pid }));
+                                                setOpenPromoFor(null);
+                                            }}
+                                        />
                                     )}
-                                </div>
-                                {/* 상품 정보 */}
-                                <div className="flex-1 min-w-0">
-                                    <Link href={`/p/${l.productId}`} className="text-sm font-medium text-[var(--color-fg)] hover:underline line-clamp-1">
-                                        {l.name}
-                                    </Link>
-                                    <p className="text-xs text-[var(--color-fg-muted)] tabular-nums mt-0.5">#{String(l.productId).padStart(10, "2021156")}</p>
-                                    {/* 모바일: 가격 인라인 노출 (데스크톱은 우측 컬럼) */}
-                                    <p className="md:hidden mt-1 text-sm font-semibold text-[var(--color-fg)] tabular-nums">{formatPrice(l.unitPrice * l.quantity)}</p>
-                                </div>
-                                {/* 옵션변경 select — 시안: "옵션변경" 라벨 displayed (선택된 옵션은 dropdown에 표시) */}
-                                {l.optionText && (
-                                    <select
-                                        defaultValue=""
-                                        className="hidden md:block bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] px-3 py-2 text-xs text-[var(--color-fg)] focus:outline-none cursor-pointer"
-                                    >
-                                        <option value="" hidden>옵션변경</option>
-                                        <option value="current">{l.optionText}</option>
-                                    </select>
-                                )}
-                                {/* 가격 */}
-                                <div className="text-sm font-medium text-[var(--color-fg)] tabular-nums hidden md:block">
-                                    {formatPrice(l.unitPrice * l.quantity)}
-                                </div>
-                                {/* 수량 (- 1 +) */}
-                                <div className="flex items-center border border-[var(--color-border)] rounded-[8px]">
+
+                                    {/* 가격 */}
+                                    <div className="hidden md:block w-[184px] text-center text-[14px] text-[#000] tabular-nums">
+                                        {formatPrice(l.unitPrice * l.quantity)}
+                                    </div>
+
+                                    {/* 수량 스테퍼 */}
+                                    <div className="w-[184px] flex justify-center">
+                                        <div className="flex items-center border border-[#DDDDDD] rounded-[4px]">
+                                            <button
+                                                onClick={() => changeQty(l.id, l.quantity - 1)}
+                                                disabled={working || l.quantity <= 1}
+                                                aria-label="수량 감소"
+                                                className="w-9 h-9 flex items-center justify-center text-[#000] disabled:opacity-40 hover:bg-[#F6F7FB] transition"
+                                            >−</button>
+                                            <span className="text-[14px] w-9 text-center text-[#000] tabular-nums">{l.quantity}</span>
+                                            <button
+                                                onClick={() => changeQty(l.id, l.quantity + 1)}
+                                                disabled={working}
+                                                aria-label="수량 증가"
+                                                className="w-9 h-9 flex items-center justify-center text-[#000] disabled:opacity-40 hover:bg-[#F6F7FB] transition"
+                                            >+</button>
+                                        </div>
+                                    </div>
+
+                                    {/* 삭제 X */}
                                     <button
-                                        onClick={() => changeQty(l.id, l.quantity - 1)}
-                                        disabled={working || l.quantity <= 1}
-                                        className="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center text-[var(--color-fg)] disabled:opacity-40 hover:bg-[var(--color-bg-subtle)] transition"
-                                    >–</button>
-                                    <span className="text-sm w-8 text-center text-[var(--color-fg)] tabular-nums">{l.quantity}</span>
-                                    <button
-                                        onClick={() => changeQty(l.id, l.quantity + 1)}
+                                        onClick={() => removeItem(l.id)}
                                         disabled={working}
-                                        className="w-9 h-9 md:w-7 md:h-7 flex items-center justify-center text-[var(--color-fg)] disabled:opacity-40 hover:bg-[var(--color-bg-subtle)] transition"
-                                    >+</button>
-                                </div>
-                                {/* X 삭제 */}
-                                <button
-                                    onClick={() => removeItem(l.id)}
-                                    disabled={working}
-                                    aria-label="삭제"
-                                    className="w-7 h-7 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                            </li>
-                        ))}
+                                        aria-label="삭제"
+                                        className="shrink-0 w-8 h-8 flex items-center justify-center text-[#767676] hover:text-[#000] transition"
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
 
-                {/* ===== 우: 결제정보 (sticky) — 회색 배경 + 큰 라운딩 ===== */}
-                <aside className="lg:sticky lg:top-4 lg:self-start">
-                    <div className="rounded-[18px] bg-[var(--color-bg-subtle)] p-5 md:p-6">
-                        <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)] mb-4 pb-3 border-b border-[var(--color-border)]">결제정보</h3>
+                {/* ----- 우: 결제정보 ----- */}
+                <aside className="lg:w-[464px] shrink-0">
+                    <div className="bg-[#F6F7FB] rounded-[10px] p-9 flex flex-col gap-8">
+                        <h3 className="text-[24px] font-medium text-[#000] border-b border-[#222] pb-4">결제정보</h3>
 
-                        <dl className="space-y-2.5 text-sm">
+                        <dl className="flex flex-col gap-4">
                             <div className="flex justify-between">
-                                <dt className="text-[var(--color-fg-muted)]">주문금액</dt>
-                                <dd className="text-[var(--color-fg)] tabular-nums">{formatPrice(total)}</dd>
+                                <dt className="text-[18px] font-light text-[#767676]">주문금액</dt>
+                                <dd className="text-[18px] font-medium text-[#000] tabular-nums">{formatPrice(total)}</dd>
                             </div>
                             <div className="flex justify-between">
-                                <dt className="text-[var(--color-fg-muted)]">할인 혜택</dt>
-                                <dd className="text-[var(--color-fg)] tabular-nums">{discount > 0 ? `- ${formatPrice(discount)}` : "0원"}</dd>
+                                <dt className="text-[18px] font-light text-[#767676]">할인 혜택</dt>
+                                <dd className="text-[18px] font-medium text-[#000] tabular-nums">{discount > 0 ? `- ${formatPrice(discount)}` : "0원"}</dd>
                             </div>
                             <div className="flex justify-between">
-                                <dt className="text-[var(--color-fg-muted)]">배송비</dt>
-                                <dd className="text-[var(--color-fg)] tabular-nums">{shippingFee === 0 ? "0원" : formatPrice(shippingFee)}</dd>
+                                <dt className="text-[18px] font-light text-[#767676]">배송비</dt>
+                                <dd className="text-[18px] font-medium text-[#000] tabular-nums">{shippingFee === 0 ? "0원" : formatPrice(shippingFee)}</dd>
                             </div>
                         </dl>
 
-                        <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex justify-between items-center">
-                            <span className="text-sm text-[var(--color-fg-muted)]">결제 예상 금액</span>
-                            <span className="text-lg font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(paid)}</span>
+                        <div className="flex justify-between items-end">
+                            <span className="text-[16px] text-[#767676]">결제 예정 금액</span>
+                            <span className="text-[26px] font-medium text-[#222] tabular-nums">{formatPrice(paid)}</span>
                         </div>
 
-                        {/* 큰 파란색 결제하기 버튼 */}
                         <button
                             type="button"
                             onClick={() => router.push("/checkout")}
                             disabled={hasSoldOut || working}
-                            className="mt-4 w-full inline-flex items-center justify-center rounded-[8px] bg-[#3b82f6] text-white py-3.5 text-sm font-bold disabled:opacity-50 hover:opacity-90 transition tabular-nums"
+                            className="h-[60px] bg-[#0072DD] rounded-[4px] text-white text-[16px] font-medium disabled:opacity-50 hover:opacity-90 transition tabular-nums"
                         >
                             {formatPrice(paid)} 결제하기
                         </button>
 
-                        {/* 약관 동의 (placeholder accordion) */}
-                        <div className="mt-4 space-y-2 text-xs">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <span className="text-[var(--color-fg)]">전체약관 동의</span>
+                        {/* 약관 동의 */}
+                        <div className="flex flex-col gap-4">
+                            <label className="flex items-center gap-3 cursor-pointer border-b border-[#DDDDDD] pb-3">
+                                <input
+                                    type="checkbox"
+                                    checked={agreeAll}
+                                    onChange={(e) => setAgreeAll(e.target.checked)}
+                                    className="w-7 h-7 accent-[#0072DD]"
+                                />
+                                <span className="text-[18px] font-medium text-[#000]">전체약관 동의</span>
                             </label>
-                            <details className="border-t border-[var(--color-border)] pt-2">
-                                <summary className="flex items-center justify-between cursor-pointer">
-                                    <span className="text-[var(--color-fg-muted)]">이용약관 동의 <span className="text-[var(--color-danger)]">[필수]</span></span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-                                </summary>
-                            </details>
-                            <details className="border-t border-[var(--color-border)] pt-2">
-                                <summary className="flex items-center justify-between cursor-pointer">
-                                    <span className="text-[var(--color-fg-muted)]">비회원 개인정보 수집 이용동의</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-                                </summary>
-                            </details>
+                            <TermRow label="이용약관 동의" required checked={agreeAll} />
+                            <TermRow label="개인정보 수집 이용동의" checked={agreeAll} />
                         </div>
                     </div>
                 </aside>
             </div>
 
-            {/* ===== 이 아이템도 같이 사면 좋아요! (실제 상품) ===== */}
-            {recommend.length > 0 && (
-                <section className="mt-12 md:mt-16">
-                    <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)] mb-5">이 아이템도 같이 사면 좋아요!</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-                        {recommend.map((p) => (
-                            <ProductCard key={p.id} p={p} />
-                        ))}
-                    </div>
-                </section>
-            )}
+            {/* ===== 함께구매 ===== */}
+            <RelatedCarousel items={recommend} />
         </CartShell>
+    );
+}
+
+/* 옵션변경 버튼 + 팝업 */
+function PromoPopover({
+    line, open, selectedId, onToggle, onClose, onSelect,
+}: {
+    line: CartLine;
+    open: boolean;
+    selectedId: number | null;
+    onToggle: () => void;
+    onClose: () => void;
+    onSelect: (promoId: number) => void;
+}) {
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        function onDoc(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+        }
+        document.addEventListener("mousedown", onDoc);
+        return () => document.removeEventListener("mousedown", onDoc);
+    }, [open, onClose]);
+
+    return (
+        <div ref={ref} className="relative shrink-0">
+            <button
+                type="button"
+                onClick={onToggle}
+                className="px-4 py-2 rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#000] hover:bg-[#F6F7FB] transition whitespace-nowrap"
+            >
+                옵션변경
+            </button>
+            {open && (
+                <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-[240px] p-3 bg-white shadow-[4px_4px_4px_rgba(34,51,34,0.12)] rounded-[8px]">
+                    <p className="text-[14px] text-[#000] mb-2">옵션 변경</p>
+                    <ul className="flex flex-col gap-1">
+                        {line.promotions.map((promo) => {
+                            const active = promo.id === selectedId;
+                            return (
+                                <li key={promo.id}>
+                                    <button
+                                        type="button"
+                                        onClick={() => onSelect(promo.id)}
+                                        className={
+                                            active
+                                                ? "w-full text-left bg-[#F6F7FB] rounded-[4px] p-3 text-[14px] font-medium text-[#000]"
+                                                : "w-full text-left p-3 text-[14px] text-[#767676] hover:text-[#000]"
+                                        }
+                                    >
+                                        {promo.label}{promo.name ? ` · ${promo.name}` : ""}
+                                    </button>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* 약관 row — 체크박스 + 라벨 + 우측 chevron (시각) */
+function TermRow({ label, required, checked }: { label: string; required?: boolean; checked: boolean }) {
+    return (
+        <div className="flex items-center justify-between">
+            <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={checked} readOnly className="w-[22px] h-[22px] accent-[#0072DD]" />
+                <span className="text-[14px] font-medium text-[#767676]">
+                    {label} {required && <span className="text-[#0072DD]">[필수]</span>}
+                </span>
+            </label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#767676" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6" /></svg>
+        </div>
     );
 }
 
 function CartShell({ children }: { children: React.ReactNode }) {
     return (
-        <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8">
+        <div className="mx-auto max-w-[1920px] px-4 py-10 xl:px-[170px]">
             {children}
         </div>
     );

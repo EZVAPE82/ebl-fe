@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
+import { SortSelect } from "@/components/SortSelect";
 import type { Page, ProductSummary, SortKey } from "@/types/api";
 
 export const metadata = { title: "전체상품" };
@@ -16,15 +17,6 @@ type Search = Promise<{
     page?: string;
 }>;
 
-const SORTS: { key: SortKey; label: string }[] = [
-    { key: "popular",    label: "인기순" },
-    { key: "newest",     label: "최신순" },
-    { key: "price_asc",  label: "가격 낮은순" },
-    { key: "price_desc", label: "가격 높은순" },
-    { key: "rating",     label: "평점순" },
-    { key: "reviews",    label: "후기많은순" },
-];
-
 // "all" 은 series 필터 없이 전체 상품 조회.
 // 9 시리즈는 slug prefix 와 한글 표시명 매핑.
 const SERIES: { key: string; label: string }[] = [
@@ -32,7 +24,7 @@ const SERIES: { key: string; label: string }[] = [
     { key: "iceking-pro",  label: "아이스킹 프로" },
     { key: "duke",         label: "듀크" },
     { key: "iceking",      label: "아이스킹" },
-    { key: "yangjuyeon",   label: "양주연" },
+    { key: "yangjuyeon",   label: "에디션" },
     { key: "joinwon-kit",  label: "조인원 킷" },
     { key: "joinwon-pot",  label: "조인원 팟" },
     { key: "crosamba",     label: "크로싱바" },
@@ -71,12 +63,6 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
         u.set("page", String(p));
         return `/products?${u.toString()}`;
     }
-    function urlForSort(s: SortKey) {
-        const u = new URLSearchParams();
-        u.set("series", active);
-        u.set("sort", s);
-        return `/products?${u.toString()}`;
-    }
     function urlForSeries(key: string) {
         const u = new URLSearchParams();
         u.set("series", key);
@@ -85,21 +71,22 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
     }
 
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-8 md:py-12">
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-6 md:mb-10 text-[var(--color-fg)] tracking-tight">
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 md:pb-[82px]">
+            {/* 타이틀 — 시안 450:5980: 56/700/#222, 탭과 32 */}
+            <h1 className="mb-8 text-[40px] md:text-[56px] font-bold leading-tight text-[#222222] tracking-tight">
                 {activeMeta.label}
             </h1>
 
-            {/* 시리즈 탭 (9개) */}
-            <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
+            {/* 시리즈 탭 — padding 12/16 · r4 · gap12 · 14/500, 활성 #0072DD */}
+            <div className="flex flex-wrap gap-3 mb-8">
                 {SERIES.map(s => (
                     <Link
                         key={s.key}
                         href={urlForSeries(s.key)}
-                        className={`inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium transition ${
+                        className={`inline-flex items-center justify-center rounded-[4px] px-4 py-3 text-[14px] font-medium leading-none transition ${
                             active === s.key
-                                ? "bg-[var(--color-accent)] text-white"
-                                : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border border-[var(--color-border)] hover:border-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
+                                ? "bg-[#0072DD] text-white"
+                                : "bg-white text-[#000] border border-[var(--color-border)] hover:border-[var(--color-fg-muted)]"
                         }`}
                     >
                         {s.label}
@@ -107,31 +94,12 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
                 ))}
             </div>
 
-            {/* 카운트 + 정렬 */}
-            <div className="flex items-center justify-between mb-4 md:mb-6 pb-3 border-b border-[var(--color-border)]">
-                <p className="text-sm text-[var(--color-fg-muted)]">
-                    총 <span className="text-[var(--color-fg)] font-bold">{list.totalElements}</span>개의 상품
+            {/* 카운트 + 정렬 드롭다운 — 시안 450:5993 */}
+            <div className="mb-6 flex items-center justify-between">
+                <p className="text-[14px] text-[#767676]">
+                    총 <span className="font-medium text-[#0072DD]">{list.totalElements}</span>개의 상품
                 </p>
-                <div className="flex items-center gap-1 text-xs">
-                    {SORTS.map((s, i) => {
-                        const isActive = sort === s.key;
-                        return (
-                            <span key={s.key} className="flex items-center gap-1">
-                                {i > 0 && <span className="text-[var(--color-border-strong)]">·</span>}
-                                <Link
-                                    href={urlForSort(s.key)}
-                                    className={`px-1.5 transition ${
-                                        isActive
-                                            ? "text-[var(--color-fg)] font-semibold"
-                                            : "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
-                                    }`}
-                                >
-                                    {s.label}
-                                </Link>
-                            </span>
-                        );
-                    })}
-                </div>
+                <SortSelect series={active} sort={sort} />
             </div>
 
             {/* 4-cols 그리드 */}
@@ -149,7 +117,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
 
             {/* 페이지네이션 */}
             {list.totalPages > 1 && (
-                <nav className="mt-10 md:mt-14 flex justify-center items-center gap-1.5 text-sm" aria-label="페이지네이션">
+                <nav className="mt-20 md:mt-[140px] flex justify-center items-center gap-1.5 text-sm" aria-label="페이지네이션">
                     {page > 0 && (
                         <Link
                             href={urlForPage(page - 1)}

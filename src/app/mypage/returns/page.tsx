@@ -3,52 +3,85 @@
 /**
  * 교환·반품·취소 내역 (Figma node 257:19883).
  *
- * 주문내역 페이지와 거의 동일하나:
- *  - 두 번째 탭이 active (검정 pill)
- *  - 상태 칩이 일부는 검정(처리완료) / 일부는 회색(접수/처리중) 두 톤 사용
+ * 나의 주문 내역(/mypage/orders)과 구조·스타일 동일. 차이점:
+ *  - 사이드바: "교환/반품/취소 내역" active (pathname)
+ *  - 제목: "교환/반품/취소 내역" + (최근1달내역)
+ *  - 탭: [주문내역조회] = inactive(border) / [취소/반품/교환내역] = active(#0072DD)
+ *  - 목록: 취소/반품/교환 상태(CANCELED/REFUNDED/EXCHANGED)인 주문만 표시
+ *  - 상태 칩 2톤: 취소완료/취소(검정 fill·흰 도트) / 교환·반품완료(연회색 fill·#999 도트)
  *
- * 반품 전용 API가 아직 없어 mock 데이터를 사용한다.
+ * 데이터 보존: 주문 fetch(/api/v1/orders), 디테일 링크(/orders/{id}),
+ * auth(useAuth + /login redirect) 그대로 유지. 주문 페이지와 동일한 소스를 필터링한다.
  */
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { MyPageSideNav } from "@/components/mypage/SideNav";
 
-type ReturnRow = {
+type OrderSummary = {
     id: number;
     orderNo: string;
-    productName: string;
-    productAmount: number;
-    quantity: number;
-    requestedAt: string;
-    /** REQUESTED | IN_PROGRESS | COMPLETED | REJECTED */
-    status: "REQUESTED" | "IN_PROGRESS" | "COMPLETED" | "REJECTED";
-    /** "교환" | "반품" | "취소" */
-    kind: "교환" | "반품" | "취소";
+    status: string;
+    totalAmount: number;
+    createdAt: string;
+    itemCount: number;
+    // optional — backend may populate
+    productName?: string;
+    thumbnailUrl?: string | null;
 };
 
-// === Mock — 반품/교환 전용 API 부재 시 표시용 ===
-const MOCK: ReturnRow[] = [
-    { id: 1, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "COMPLETED", kind: "반품" },
-    { id: 2, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "COMPLETED", kind: "취소" },
-    { id: 3, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "COMPLETED", kind: "교환" },
-    { id: 4, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "COMPLETED", kind: "반품" },
-    { id: 5, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "IN_PROGRESS", kind: "반품" },
-    { id: 6, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "IN_PROGRESS", kind: "취소" },
-    { id: 7, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "REQUESTED", kind: "교환" },
-    { id: 8, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "REQUESTED", kind: "반품" },
-    { id: 9, orderNo: "2021156598898", productName: "상품아이템", productAmount: 25000, quantity: 1, requestedAt: "2025-02-26", status: "REQUESTED", kind: "반품" },
-];
+type PageResp<T> = {
+    content: T[];
+    totalElements: number;
+    totalPages: number;
+    number: number;
+    size: number;
+};
+
+// 백엔드 /api/v1/orders 응답(OrderView) — 목록 표시용으로 매핑한다.
+type RawOrderItem = { productName: string; kind: string };
+type RawOrder = {
+    id: number; orderNo: string; status: string;
+    totalAmount: number; orderedAt: string; items: RawOrderItem[];
+};
+function toSummary(o: RawOrder): OrderSummary {
+    const paid = (o.items ?? []).filter(i => i.kind !== "FREE_GIFT");
+    const items = paid.length ? paid : (o.items ?? []);
+    return {
+        id: o.id, orderNo: o.orderNo, status: o.status,
+        totalAmount: o.totalAmount, createdAt: o.orderedAt,
+        itemCount: items.length, productName: items[0]?.productName,
+        thumbnailUrl: null,
+    };
+}
+
+// 교환/반품/취소로 분류되는 상태들 — 이 페이지는 이 상태만 표시한다.
+const RETURN_STATUSES = ["CANCELED", "REFUNDED", "EXCHANGED", "RETURNED"];
+
+const STATUS_LABEL: Record<string, string> = {
+    PENDING_PAYMENT: "결제대기",
+    PAID: "결제완료",
+    PREPARING: "배송준비중",
+    SHIPPING: "배송중",
+    DELIVERED: "배송완료",
+    CANCELED: "취소완료",
+    REFUNDED: "반품완료",
+    EXCHANGED: "교환완료",
+    RETURNED: "반품완료",
+};
 
 export default function MypageReturnsPage() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
 
-    const [rows] = useState<ReturnRow[]>(MOCK);
+    const [orders, setOrders] = useState<OrderSummary[]>([]);
+    const [loading, setLoading] = useState(true);
 
+    // 필터
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [periodFilter, setPeriodFilter] = useState("1M");
     const [startDate, setStartDate] = useState(defaultStart());
@@ -56,104 +89,203 @@ export default function MypageReturnsPage() {
     const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
-        if (!authLoading && !user) router.replace("/login?redirect=/mypage/returns");
-    }, [user, authLoading, router]);
+        if (!authLoading && !user) {
+            router.replace("/login?redirect=/mypage/returns");
+            return;
+        }
+        if (!user) return;
+        setLoading(true);
+        // 내 주문 목록 — 백엔드 정식 경로는 /api/v1/orders (OrderView). 표시용으로 매핑.
+        api<PageResp<RawOrder>>(`/api/v1/orders?page=0&size=${pageSize}`, { auth: true })
+            .then(r => setOrders((r.content ?? []).map(toSummary)))
+            .catch(() => setOrders([]))
+            .finally(() => setLoading(false));
+    }, [user, authLoading, pageSize, router]);
 
-    const filtered = useMemo(
-        () => rows.filter(r => statusFilter === "ALL" || r.status === statusFilter),
-        [rows, statusFilter]
-    );
+    // 취소/반품/교환 상태인 주문만 + 클라이언트 사이드 필터 (백엔드가 미지원)
+    const filtered = useMemo(() => {
+        return orders.filter(o => {
+            if (!RETURN_STATUSES.includes(o.status)) return false;
+            if (statusFilter !== "ALL" && o.status !== statusFilter) return false;
+            const t = new Date(o.createdAt).getTime();
+            if (!Number.isNaN(new Date(startDate).getTime()) && t < new Date(startDate).getTime()) return false;
+            if (!Number.isNaN(new Date(endDate).getTime()) && t > new Date(endDate).getTime() + 86400000) return false;
+            return true;
+        });
+    }, [orders, statusFilter, startDate, endDate]);
 
-    const orderTabCount = 0; // 다른 페이지에서 채워지므로 0 표시
-    const returnTabCount = rows.length;
+    const orderTabCount = orders.filter(o => !RETURN_STATUSES.includes(o.status)).length;
+    const returnTabCount = orders.filter(o => RETURN_STATUSES.includes(o.status)).length;
 
     if (authLoading || !user) {
-        return <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8 text-sm text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+        return (
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 text-[14px] text-[#767676]">
+                불러오는 중...
+            </div>
+        );
     }
 
     return (
-        <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8">
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flex-col lg:flex-row gap-20">
+            {/* 사이드바 — pathname 으로 "교환/반품/취소 내역" active */}
             <MyPageSideNav />
 
-            <div>
-                <div className="flex items-baseline gap-2 mb-5">
-                    <h1 className="text-2xl md:text-[26px] font-bold text-[var(--color-fg)]">교환/반품/취소 내역</h1>
-                    <span className="text-xs text-[var(--color-fg-muted)]">(최근1달내역)</span>
+            {/* 메인 */}
+            <main className="flex-1 lg:w-[1000px] flex flex-col gap-7">
+                {/* 1) Header */}
+                <header className="flex flex-col gap-5">
+                    <div className="flex items-end gap-1">
+                        <h1 className="text-[32px] font-bold text-[#000000]">교환/반품/취소 내역</h1>
+                        <span className="text-[14px] text-[#767676]">(최근1달내역)</span>
+                    </div>
+
+                    {/* 탭 — returns 탭이 active */}
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                            href="/mypage/orders"
+                            className="px-4 py-3 rounded-[4px] border border-[#DDDDDD] text-[14px] font-medium text-[#000000] hover:bg-[#F6F7FB] transition"
+                        >
+                            주문내역조회 ({orderTabCount})
+                        </Link>
+                        <span className="px-4 py-3 rounded-[4px] bg-[#0072DD] text-white text-[14px] font-medium">
+                            취소/반품/교환내역 ({returnTabCount})
+                        </span>
+                    </div>
+                </header>
+
+                {/* 2) 필터 바 */}
+                <div className="p-6 bg-[#F6F7FB] rounded-[10px] flex flex-wrap justify-center items-center gap-3">
+                    {/* 주문처리상태 드롭다운 */}
+                    <div className="relative w-[260px]">
+                        <select
+                            value={statusFilter}
+                            onChange={e => setStatusFilter(e.target.value)}
+                            className="w-full p-4 bg-white rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#767676] appearance-none cursor-pointer focus:outline-none"
+                        >
+                            <option value="ALL">전체 주문처리상태</option>
+                            <option value="CANCELED">취소완료</option>
+                            <option value="REFUNDED">반품완료</option>
+                            <option value="EXCHANGED">교환완료</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+                    </div>
+
+                    {/* 기간 드롭다운 */}
+                    <div className="relative w-[150px]">
+                        <select
+                            value={periodFilter}
+                            onChange={e => setPeriodFilter(e.target.value)}
+                            className="w-full p-4 bg-white rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#767676] appearance-none cursor-pointer focus:outline-none"
+                        >
+                            <option value="1M">1개월</option>
+                            <option value="3M">3개월</option>
+                            <option value="6M">6개월</option>
+                            <option value="1Y">1년</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+                    </div>
+
+                    {/* 시작 일자 */}
+                    <div className="relative w-[212px]">
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={e => setStartDate(e.target.value)}
+                            placeholder="YYYY-MM-DD"
+                            className="w-full p-4 bg-white rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#767676] focus:outline-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-4 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                        />
+                        <CalendarIcon className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+                    </div>
+
+                    {/* 종료 일자 */}
+                    <div className="relative w-[212px]">
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={e => setEndDate(e.target.value)}
+                            placeholder="YYYY-MM-DD"
+                            className="w-full p-4 bg-white rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#767676] focus:outline-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-4 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                        />
+                        <CalendarIcon className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-2 mb-5">
-                    <Tab label={`주문내역조회 (${orderTabCount})`} href="/mypage/orders" />
-                    <Tab active label={`취소/반품/교환내역 (${returnTabCount})`} href="/mypage/returns" />
+                {/* 3) 페이지 사이즈 컨트롤 */}
+                <div className="flex justify-end">
+                    <div className="relative flex items-center">
+                        <select
+                            value={pageSize}
+                            onChange={e => setPageSize(Number(e.target.value))}
+                            className="appearance-none bg-transparent pr-5 text-[14px] font-light text-[#505050] cursor-pointer focus:outline-none"
+                        >
+                            <option value={10}>10개씩보기</option>
+                            <option value={20}>20개씩보기</option>
+                            <option value={50}>50개씩보기</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2" />
+                    </div>
                 </div>
 
-                <div className="rounded-md bg-[var(--color-bg-subtle)] px-4 py-3 mb-2 flex flex-wrap items-center gap-2">
-                    <Select value={statusFilter} onChange={setStatusFilter} className="min-w-[180px]">
-                        <option value="ALL">전체 처리상태</option>
-                        <option value="REQUESTED">신청접수</option>
-                        <option value="IN_PROGRESS">처리중</option>
-                        <option value="COMPLETED">처리완료</option>
-                        <option value="REJECTED">반려</option>
-                    </Select>
-                    <Select value={periodFilter} onChange={setPeriodFilter} className="min-w-[90px]">
-                        <option value="1M">1개월</option>
-                        <option value="3M">3개월</option>
-                        <option value="6M">6개월</option>
-                    </Select>
-                    <DateInput value={startDate} onChange={setStartDate} />
-                    <DateInput value={endDate} onChange={setEndDate} />
-                </div>
-
-                <div className="flex justify-end mb-2">
-                    <select
-                        value={pageSize}
-                        onChange={e => setPageSize(Number(e.target.value))}
-                        className="text-xs text-[var(--color-fg-muted)] bg-transparent px-2 py-1 focus:outline-none cursor-pointer"
-                    >
-                        <option value={10}>10개씩보기</option>
-                        <option value={20}>20개씩보기</option>
-                        <option value={50}>50개씩보기</option>
-                    </select>
-                </div>
-
-                <div className="border-t border-[var(--color-fg)]">
-                    {filtered.length === 0 ? (
-                        <p className="py-20 text-center text-sm text-[var(--color-fg-subtle)]">처리 내역이 없습니다.</p>
+                {/* 4) 교환/반품/취소 목록 */}
+                <div className="border-t border-[#222222] flex flex-col">
+                    {loading ? (
+                        <p className="py-16 text-center text-[14px] text-[#767676]">불러오는 중...</p>
+                    ) : filtered.length === 0 ? (
+                        <p className="py-20 text-center text-[14px] text-[#767676]">교환/반품/취소 내역이 없습니다.</p>
                     ) : (
-                        <ul className="divide-y divide-[var(--color-border)]">
-                            {filtered.map(r => (
-                                <li key={r.id}>
-                                    <Link
-                                        href={`/orders/${r.id}`}
-                                        className="grid grid-cols-[64px_1fr_auto] md:grid-cols-[80px_1fr_110px_60px_100px_110px] items-center gap-4 px-2 py-4 hover:bg-[var(--color-bg-subtle)] transition"
-                                    >
-                                        <div className="w-16 h-16 md:w-20 md:h-20 rounded bg-[var(--color-bg-subtle)] flex items-center justify-center">
-                                            <div className="w-10 h-12 bg-[var(--color-fg-subtle)]/30 rounded-sm" />
+                        filtered.map(o => (
+                            <Link
+                                key={o.id}
+                                href={`/orders/${o.id}`}
+                                className="py-3 border-b border-[#DDDDDD] flex flex-wrap justify-between items-center gap-3 hover:bg-[#F6F7FB] transition"
+                            >
+                                {/* LEFT: 썸네일 + 상품명/주문번호 */}
+                                <div className="flex items-center gap-3">
+                                    {o.thumbnailUrl ? (
+                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                        <img
+                                            src={o.thumbnailUrl}
+                                            alt=""
+                                            className="w-[90px] h-[108px] rounded-[4px] object-cover bg-[#F6F7FB]"
+                                        />
+                                    ) : (
+                                        <div className="w-[90px] h-[108px] rounded-[4px] bg-[#F6F7FB] flex items-center justify-center">
+                                            <div className="w-9 h-11 rounded-sm bg-[#DDDDDD]" />
                                         </div>
+                                    )}
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <p className="text-[16px] font-medium text-[#000000] line-clamp-1">
+                                            {o.productName ?? "상품아이템"}
+                                            {o.itemCount > 1 && (
+                                                <span className="text-[#767676]"> 외 {o.itemCount - 1}건</span>
+                                            )}
+                                        </p>
+                                        <p className="text-[14px] font-light text-[#767676]">#{o.orderNo}</p>
+                                    </div>
+                                </div>
 
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium text-[var(--color-fg)] line-clamp-1">{r.productName}</p>
-                                            <p className="text-xs text-[var(--color-fg-muted)] mt-1 font-mono">#{r.orderNo}</p>
-                                            <p className="md:hidden text-xs text-[var(--color-fg-muted)] mt-1">
-                                                <span className="text-[var(--color-fg)] font-semibold">{formatPrice(r.productAmount)}</span>
-                                                <span className="mx-1.5">·</span>{r.quantity}개
-                                                <span className="mx-1.5">·</span>{r.requestedAt}
-                                            </p>
-                                        </div>
+                                {/* 가격 */}
+                                <div className="w-[184px] text-center text-[14px] font-medium text-[#000000]">
+                                    {formatPrice(o.totalAmount)}
+                                </div>
 
-                                        <div className="hidden md:block text-sm font-medium text-[var(--color-fg)] text-center">{formatPrice(r.productAmount)}</div>
-                                        <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">{r.quantity}개</div>
-                                        <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">{shortDate(r.requestedAt)}</div>
+                                {/* 수량 */}
+                                <div className="w-[184px] text-center text-[14px] text-[#767676]">
+                                    {o.itemCount}개
+                                </div>
 
-                                        <div className="text-right">
-                                            <ReturnPill status={r.status} kind={r.kind} />
-                                        </div>
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
+                                {/* 날짜 */}
+                                <div className="w-[184px] text-center text-[14px] text-[#767676]">
+                                    {formatDateShort(o.createdAt)}
+                                </div>
+
+                                {/* 상태 pill */}
+                                <StatusPill status={o.status} />
+                            </Link>
+                        ))
                     )}
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
@@ -161,72 +293,48 @@ export default function MypageReturnsPage() {
 /* ============================================================
  * 보조 컴포넌트
  * ============================================================ */
-function Tab({ label, href, active }: { label: string; href: string; active?: boolean }) {
+
+/** 16px chevron-down */
+function ChevronDown({ className }: { className?: string }) {
     return (
-        <Link
-            href={href}
-            className={`inline-flex items-center rounded-md px-4 py-2 text-sm font-medium transition ${
-                active
-                    ? "bg-[#3b82f6] text-white"
-                    : "bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
-            }`}
-        >
-            {label}
-        </Link>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+            <path d="M7 10l5 5 5-5" stroke="#767676" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
     );
 }
 
-function Select({ value, onChange, children, className }: {
-    value: string; onChange: (v: string) => void; children: React.ReactNode; className?: string;
-}) {
+/** 20px calendar */
+function CalendarIcon({ className }: { className?: string }) {
     return (
-        <select
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)] ${className ?? ""}`}
-        >
-            {children}
-        </select>
-    );
-}
-
-function DateInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-    return (
-        <input
-            type="date"
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)]"
-        />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+            <rect x="3.5" y="5" width="17" height="16" rx="2" stroke="#767676" strokeWidth="1.5" />
+            <path d="M3.5 9h17M8 3v4M16 3v4" stroke="#767676" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
     );
 }
 
 /**
- * Figma 시안 매칭:
- *  - 취소완료(kind=취소): 검정 fill + 흰 텍스트, 도트 없음
- *  - 교환완료/반품완료(kind=교환/반품): 연회색 fill + 회색 도트 + 회색 텍스트
- *  - 진행중/접수/반려는 회색 톤 유지
+ * 상태 칩 — 교환/반품/취소 내역 시안 매핑(2톤):
+ *  - 취소완료·취소(CANCELED): bg #222222 / text white / dot white
+ *  - 교환완료·반품완료(EXCHANGED/REFUNDED/RETURNED): bg #F6F7FB / text #767676 / dot #999999
  */
-function ReturnPill({ status, kind }: { status: ReturnRow["status"]; kind: ReturnRow["kind"] }) {
-    const label =
-        status === "COMPLETED" ? `${kind}완료`
-        : status === "IN_PROGRESS" ? `${kind}처리중`
-        : status === "REJECTED" ? `${kind}반려`
-        : `${kind}접수`;
+function StatusPill({ status }: { status: string }) {
+    const label = STATUS_LABEL[status] ?? status;
 
-    // 시안: 취소는 강한 검정, 교환/반품은 부드러운 회색 + 도트
-    const isCancelDone = status === "COMPLETED" && kind === "취소";
-
-    if (isCancelDone) {
-        return (
-            <span className="inline-flex items-center rounded-full text-xs font-medium px-3 py-1 bg-[var(--color-fg)] text-[var(--color-bg)]">
-                {label}
-            </span>
-        );
+    let pillClass: string;
+    let dotClass: string;
+    if (status === "CANCELED") {
+        pillClass = "bg-[#222222] text-white";
+        dotClass = "bg-white";
+    } else {
+        // EXCHANGED / REFUNDED / RETURNED 등
+        pillClass = "bg-[#F6F7FB] text-[#767676]";
+        dotClass = "bg-[#999999]";
     }
+
     return (
-        <span className="inline-flex items-center gap-1.5 rounded-full text-xs font-medium px-3 py-1 bg-[var(--color-bg-muted)] text-[var(--color-fg-muted)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-fg-muted)]" />
+        <span className={`px-[18px] py-2.5 rounded-full text-[14px] font-medium flex items-center gap-1 ${pillClass}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
             {label}
         </span>
     );
@@ -243,7 +351,7 @@ function defaultStart(): string {
 function defaultEnd(): string {
     return new Date().toISOString().slice(0, 10);
 }
-function shortDate(iso: string): string {
+function formatDateShort(iso: string): string {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
     const y = String(d.getFullYear()).slice(2);

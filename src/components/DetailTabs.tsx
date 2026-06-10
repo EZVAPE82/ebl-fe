@@ -9,8 +9,8 @@ import { useEffect, useState } from "react";
 
 const TABS = [
     { id: "info",    label: "상세정보" },
-    { id: "reviews", label: "상품후기" },
-    { id: "ship",    label: "배송·교환·반품" },
+    { id: "ship",    label: "상품구매안내" },
+    { id: "reviews", label: "제품리뷰" },
     { id: "qna",     label: "Q&A" },
 ] as const;
 
@@ -49,27 +49,26 @@ export function DetailTabs() {
     }
 
     return (
-        <nav className="mt-10 border-y border-[var(--color-border)] bg-[var(--color-surface)] sticky top-14 z-10">
-            <ul className="mx-auto max-w-screen-2xl px-4 flex">
+        <nav className="mx-auto max-w-[1920px] px-4 xl:px-[170px] mt-16 md:mt-[100px]">
+            <div className="flex rounded-[8px] bg-[#F6F7FB] p-2">
                 {TABS.map(t => {
                     const isActive = t.id === active;
                     return (
-                        <li key={t.id} className="flex-1">
-                            <a
-                                href={`#${t.id}`}
-                                onClick={e => jump(t.id, e)}
-                                className={`block text-center text-sm py-4 transition border-b-2 ${
-                                    isActive
-                                        ? "border-[var(--color-fg)] text-[var(--color-fg)] font-semibold"
-                                        : "border-transparent text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
-                                }`}
-                            >
-                                {t.label}
-                            </a>
-                        </li>
+                        <a
+                            key={t.id}
+                            href={`#${t.id}`}
+                            onClick={e => jump(t.id, e)}
+                            className={`flex-1 rounded-[4px] px-2 py-4 text-center text-[16px] transition ${
+                                isActive
+                                    ? "bg-white font-medium text-[#000] shadow-[4px_3px_2px_rgba(35,48,59,0.06)]"
+                                    : "font-normal text-[#999999] hover:text-[#000]"
+                            }`}
+                        >
+                            {t.label}
+                        </a>
                     );
                 })}
-            </ul>
+            </div>
         </nav>
     );
 }

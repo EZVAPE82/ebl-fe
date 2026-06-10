@@ -184,108 +184,128 @@ export default function CheckoutPage() {
         return <div className="mx-auto max-w-3xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
     }
 
-    const inputClass = "w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[6px] px-3 py-2.5 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg-muted)] transition";
+    const inputClass = "w-full bg-[var(--color-surface)] p-4 rounded-[4px] border border-[#E5E5EC] text-[14px] text-[#767676] placeholder:text-[#767676] focus:outline-none focus:border-[var(--color-fg-muted)] transition";
     const selectClass = inputClass + " appearance-none cursor-pointer";
 
     return (
-        <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8">
-            <form onSubmit={onSubmit} className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 md:gap-10">
+        <div className="mx-auto max-w-[1580px] px-4 md:px-8 py-8">
+            <form onSubmit={onSubmit} className="flex flex-col lg:flex-row lg:justify-between gap-6 lg:gap-10">
                 {/* ===== 좌: 폼 ===== */}
-                <div className="space-y-10">
+                <div className="flex flex-col gap-[60px] w-full lg:w-[1036px]">
                     {/* 구매상품 */}
                     <section>
-                        <h2 className="text-base md:text-lg font-bold text-[var(--color-fg)] pb-3 border-b-2 border-[var(--color-fg)]">구매상품</h2>
-                        <ul className="divide-y divide-[var(--color-border)]">
-                            {lines.map(l => (
-                                <li key={l.id} className="flex items-center gap-3 py-4">
-                                    <div className="w-14 h-14 bg-[var(--color-bg-subtle)] flex-shrink-0 overflow-hidden">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={l.img} alt={l.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-[var(--color-fg)] line-clamp-1">{l.name}</p>
-                                        <p className="text-xs text-[var(--color-fg-muted)] tabular-nums">{l.orderNo}</p>
-                                    </div>
-                                    <span className="text-sm text-[var(--color-fg)] tabular-nums">{formatPrice(l.price)}</span>
-                                    <span className="text-sm text-[var(--color-fg-muted)] w-12 text-center">– {l.qty} +</span>
-                                    <button type="button" aria-label="삭제" className="w-6 h-6 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
+                        <h2 className="text-[24px] font-medium text-[#000]">구매상품</h2>
+                        <div className="border-t border-[#222]">
+                            <ul className="divide-y divide-[var(--color-border)]">
+                                {lines.map(l => (
+                                    <li key={l.id} className="py-3 flex justify-between items-center gap-3">
+                                        <div className="flex items-center gap-4 min-w-0">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={l.img} alt={l.name} className="w-[90px] h-[108px] rounded-[4px] object-cover flex-shrink-0" />
+                                            <div className="min-w-0">
+                                                <p className="text-[16px] font-medium text-[var(--color-fg)] line-clamp-1">{l.name}</p>
+                                                <p className="text-[14px] font-light text-[#767676] tabular-nums">{l.orderNo}</p>
+                                            </div>
+                                        </div>
+                                        <span className="text-[14px] text-[var(--color-fg)] tabular-nums whitespace-nowrap">{formatPrice(l.price)}</span>
+                                        <span className="text-[14px] text-[var(--color-fg-muted)] inline-flex items-center gap-2 whitespace-nowrap">
+                                            <span aria-hidden>−</span>
+                                            <span className="tabular-nums min-w-[20px] text-center">{l.qty}</span>
+                                            <span aria-hidden>+</span>
+                                        </span>
+                                        <button type="button" aria-label="삭제" className="w-6 h-6 flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] flex-shrink-0">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </section>
 
                     {/* 배송지 */}
                     <section>
-                        <h2 className="text-base md:text-lg font-bold text-[var(--color-fg)] pb-3 border-b-2 border-[var(--color-fg)] mb-5">배송지</h2>
+                        <h2 className="text-[24px] font-medium text-[#000]">배송지</h2>
+                        <div className="border-t border-[#222]">
 
                         {/* 회원만 — 최근배송지 / 직접입력 탭 */}
                         {user && (
-                            <div className="flex gap-2 mb-5">
-                                <button type="button" onClick={() => setAddressMode("recent")} className={`rounded-[8px] px-4 py-2 text-xs font-medium transition ${addressMode === "recent" ? "bg-[#3b82f6] text-white" : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border border-[var(--color-border)]"}`}>최근배송지 입력</button>
-                                <button type="button" onClick={() => setAddressMode("direct")} className={`rounded-[8px] px-4 py-2 text-xs font-medium transition ${addressMode === "direct" ? "bg-[#3b82f6] text-white" : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border border-[var(--color-border)]"}`}>직접입력</button>
+                            <div className="flex gap-3 pt-6">
+                                <button type="button" onClick={() => setAddressMode("recent")} className={`px-4 py-3 rounded-[4px] text-[14px] font-medium transition ${addressMode === "recent" ? "bg-[#0072DD] text-white" : "border border-[#DDDDDD] text-[#000]"}`}>최근배송지 입력</button>
+                                <button type="button" onClick={() => setAddressMode("direct")} className={`px-4 py-3 rounded-[4px] text-[14px] font-medium transition ${addressMode === "direct" ? "bg-[#0072DD] text-white" : "border border-[#DDDDDD] text-[#000]"}`}>직접입력</button>
                             </div>
                         )}
 
                         {user && addressMode === "recent" ? (
-                            <dl className="space-y-3 text-sm">
-                                <Field label="이름"><span className="text-[var(--color-fg)]">시그널디코드</span></Field>
-                                <Field label="주소"><span className="text-[var(--color-fg)]">서울특별시 마포구 서교동 잔다로 센터원빌딩 6층</span></Field>
-                                <Field label="전화번호"><span className="text-[var(--color-fg) tabular-nums]">010-1234-5678</span></Field>
-                                <Field label="배송요청사항">
-                                    <select className={selectClass} value={form.memo} onChange={e => setForm(s => ({ ...s, memo: e.target.value }))}>
-                                        <option value="">배송메시지를 선택해주세요(선택사항)</option>
-                                        <option value="조심히 와주세요">조심히 와주세요</option>
-                                        <option value="문 앞에 놔주세요">문 앞에 놔주세요</option>
-                                    </select>
-                                </Field>
+                            <dl className="flex flex-col gap-5 pt-8 pb-8">
+                                <div className="flex">
+                                    <dt className="w-[120px] text-[16px] text-[#767676]">이름</dt>
+                                    <dd className="text-[16px] font-medium text-[#000]">{form.recipientName || user.name || "시그널디코드"}</dd>
+                                </div>
+                                <div className="flex">
+                                    <dt className="w-[120px] text-[16px] text-[#767676]">주소</dt>
+                                    <dd className="text-[16px] font-medium text-[#000]">{form.address1 ? `${form.address1}${form.address2 ? " " + form.address2 : ""}` : "서울특별시 마포구 서교동 잔다로 센터원빌딩 6층"}</dd>
+                                </div>
+                                <div className="flex">
+                                    <dt className="w-[120px] text-[16px] text-[#767676]">전화번호</dt>
+                                    <dd className="text-[16px] font-medium text-[#000] tabular-nums">{user.phone || "010-1234-5678"}</dd>
+                                </div>
+                                <div className="flex items-start">
+                                    <dt className="w-[120px] text-[16px] text-[#767676] pt-4">배송요청사항</dt>
+                                    <dd>
+                                        <div className="relative w-full md:w-[480px]">
+                                            <select className={`${selectClass} w-full pr-10 flex justify-between text-[14px] text-[#505050]`} value={form.memo} onChange={e => setForm(s => ({ ...s, memo: e.target.value }))}>
+                                                <option value="">배송메시지를 선택해주세요(선택입력)</option>
+                                                <option value="조심히 와주세요">조심히 와주세요</option>
+                                                <option value="문 앞에 놔주세요">문 앞에 놔주세요</option>
+                                            </select>
+                                            <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#505050]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                        </div>
+                                    </dd>
+                                </div>
                             </dl>
                         ) : (
-                            <dl className="space-y-3 text-sm">
+                            <dl className="flex flex-col gap-8 pt-10 pb-10 text-sm">
                                 <Field label="받는 사람" required>
-                                    <input type="text" placeholder="이름을 작성해주세요" className={inputClass} value={form.recipientName} onChange={e => setForm(s => ({ ...s, recipientName: e.target.value }))} />
+                                    <input type="text" placeholder="이름을 작성해주세요" className={`${inputClass} md:w-[480px]`} value={form.recipientName} onChange={e => setForm(s => ({ ...s, recipientName: e.target.value }))} />
                                 </Field>
                                 <Field label="주소" required>
-                                    <div className="space-y-2">
+                                    <div className="flex flex-col gap-2">
                                         <div className="flex gap-2">
-                                            <input type="text" placeholder="우편번호" className={`${inputClass} max-w-[200px]`} value={form.postalCode} onChange={e => setForm(s => ({ ...s, postalCode: e.target.value }))} />
-                                            <button type="button" className="rounded-[6px] bg-[#3b82f6] text-white text-xs font-medium px-4 hover:opacity-90 transition">우편번호 찾기</button>
+                                            <input type="text" placeholder="우편번호" className={`${inputClass} md:w-[260px]`} value={form.postalCode} onChange={e => setForm(s => ({ ...s, postalCode: e.target.value }))} />
+                                            <button type="button" className="w-[140px] p-4 bg-[#0072DD] rounded-[4px] text-white text-[14px] font-medium hover:opacity-90 transition whitespace-nowrap">우편번호 찾기</button>
                                         </div>
-                                        <input type="text" placeholder="기본주소" className={inputClass} value={form.address1} onChange={e => setForm(s => ({ ...s, address1: e.target.value }))} />
-                                        <input type="text" placeholder="상세주소 (선택)" className={inputClass} value={form.address2} onChange={e => setForm(s => ({ ...s, address2: e.target.value }))} />
+                                        <input type="text" placeholder="기본주소" className={`${inputClass} md:w-[600px]`} value={form.address1} onChange={e => setForm(s => ({ ...s, address1: e.target.value }))} />
+                                        <input type="text" placeholder="상세주소 (선택)" className={`${inputClass} md:w-[600px]`} value={form.address2} onChange={e => setForm(s => ({ ...s, address2: e.target.value }))} />
                                     </div>
                                 </Field>
                                 <Field label="일반전화" required>
-                                    <div className="flex items-center gap-1.5">
-                                        <select className={`${selectClass} max-w-[80px]`} value={form.phoneHome1} onChange={e => setForm(s => ({ ...s, phoneHome1: e.target.value }))}>
+                                    <div className="flex items-center gap-2">
+                                        <select className={`${selectClass} md:w-[150px]`} value={form.phoneHome1} onChange={e => setForm(s => ({ ...s, phoneHome1: e.target.value }))}>
                                             <option>02</option><option>031</option><option>032</option><option>051</option>
                                         </select>
-                                        <span className="text-[var(--color-fg-subtle)]">–</span>
-                                        <input type="text" placeholder="123" className={`${inputClass} max-w-[100px]`} value={form.phoneHome2} onChange={e => setForm(s => ({ ...s, phoneHome2: e.target.value }))} />
-                                        <span className="text-[var(--color-fg-subtle)]">–</span>
-                                        <input type="text" placeholder="567" className={`${inputClass} max-w-[100px]`} value={form.phoneHome3} onChange={e => setForm(s => ({ ...s, phoneHome3: e.target.value }))} />
+                                        <span className="w-[7px] h-px bg-[#222] flex-shrink-0" aria-hidden />
+                                        <input type="text" placeholder="123" className={`${inputClass} md:w-[150px]`} value={form.phoneHome2} onChange={e => setForm(s => ({ ...s, phoneHome2: e.target.value }))} />
+                                        <span className="w-[7px] h-px bg-[#222] flex-shrink-0" aria-hidden />
+                                        <input type="text" placeholder="567" className={`${inputClass} md:w-[150px]`} value={form.phoneHome3} onChange={e => setForm(s => ({ ...s, phoneHome3: e.target.value }))} />
                                     </div>
                                 </Field>
                                 <Field label="휴대전화" required>
-                                    <div className="flex items-center gap-1.5">
-                                        <select className={`${selectClass} max-w-[80px]`} value={form.recipientPhone1} onChange={e => setForm(s => ({ ...s, recipientPhone1: e.target.value }))}>
+                                    <div className="flex items-center gap-2">
+                                        <select className={`${selectClass} md:w-[150px]`} value={form.recipientPhone1} onChange={e => setForm(s => ({ ...s, recipientPhone1: e.target.value }))}>
                                             <option>010</option><option>011</option>
                                         </select>
-                                        <span className="text-[var(--color-fg-subtle)]">–</span>
-                                        <input type="text" placeholder="1234" className={`${inputClass} max-w-[100px]`} value={form.recipientPhone2} onChange={e => setForm(s => ({ ...s, recipientPhone2: e.target.value }))} />
-                                        <span className="text-[var(--color-fg-subtle)]">–</span>
-                                        <input type="text" placeholder="5678" className={`${inputClass} max-w-[100px]`} value={form.recipientPhone3} onChange={e => setForm(s => ({ ...s, recipientPhone3: e.target.value }))} />
+                                        <span className="w-[7px] h-px bg-[#222] flex-shrink-0" aria-hidden />
+                                        <input type="text" placeholder="1234" className={`${inputClass} md:w-[150px]`} value={form.recipientPhone2} onChange={e => setForm(s => ({ ...s, recipientPhone2: e.target.value }))} />
+                                        <span className="w-[7px] h-px bg-[#222] flex-shrink-0" aria-hidden />
+                                        <input type="text" placeholder="5678" className={`${inputClass} md:w-[150px]`} value={form.recipientPhone3} onChange={e => setForm(s => ({ ...s, recipientPhone3: e.target.value }))} />
                                     </div>
                                 </Field>
                                 <Field label="이메일" required>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-1.5">
-                                            <input type="text" placeholder="이메일" className={`${inputClass} flex-1 min-w-0`} value={form.emailLocal} onChange={e => setForm(s => ({ ...s, emailLocal: e.target.value }))} />
-                                            <span className="text-[var(--color-fg-subtle)]">@</span>
-                                            <input type="text" placeholder="naver.com" className={`${inputClass} flex-1 min-w-0`} value={form.emailDomain} onChange={e => setForm(s => ({ ...s, emailDomain: e.target.value }))} />
-                                        </div>
-                                        <select className={`${selectClass} w-full`} value="" onChange={e => { if (e.target.value) setForm(s => ({ ...s, emailDomain: e.target.value })); }}>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <input type="text" placeholder="이메일" className={`${inputClass} md:w-[212px]`} value={form.emailLocal} onChange={e => setForm(s => ({ ...s, emailLocal: e.target.value }))} />
+                                        <span className="text-[var(--color-fg-subtle)]">@</span>
+                                        <input type="text" placeholder="naver.com" className={`${inputClass} md:w-[212px]`} value={form.emailDomain} onChange={e => setForm(s => ({ ...s, emailDomain: e.target.value }))} />
+                                        <select className={`${selectClass} md:w-[140px]`} value="" onChange={e => { if (e.target.value) setForm(s => ({ ...s, emailDomain: e.target.value })); }}>
                                             <option value="">직접입력</option>
                                             <option value="naver.com">naver.com</option>
                                             <option value="gmail.com">gmail.com</option>
@@ -296,20 +316,29 @@ export default function CheckoutPage() {
                                     </div>
                                 </Field>
                                 <Field label="배송 요청사항" required>
-                                    <select className={selectClass} value={form.memo} onChange={e => setForm(s => ({ ...s, memo: e.target.value }))}>
-                                        <option value="">메시지 선택(선택사항)</option>
-                                        <option value="조심히 와주세요">조심히 와주세요</option>
-                                    </select>
+                                    <div className="relative md:w-[480px]">
+                                        <select className={`${selectClass} w-full pr-10`} value={form.memo} onChange={e => setForm(s => ({ ...s, memo: e.target.value }))}>
+                                            <option value="">메시지 선택(선택사항)</option>
+                                            <option value="조심히 와주세요">조심히 와주세요</option>
+                                        </select>
+                                        <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#767676]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </div>
                                 </Field>
                                 {isGuest && (
                                     <Field label="기본 배송지 저장" required>
-                                        <div className="flex items-center gap-4 text-sm">
+                                        <div className="flex items-center gap-6 text-sm">
                                             <label className="flex items-center gap-1.5 cursor-pointer">
-                                                <input type="radio" name="defaultAddress" checked={form.defaultAddress === "save"} onChange={() => setForm(s => ({ ...s, defaultAddress: "save" }))} className="text-[#3b82f6]"/>
+                                                <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${form.defaultAddress === "save" ? "border-[#0072DD]" : "border-[var(--color-border)]"}`}>
+                                                    {form.defaultAddress === "save" && <span className="w-2 h-2 rounded-full bg-[#0072DD]" />}
+                                                </span>
+                                                <input type="radio" name="defaultAddress" checked={form.defaultAddress === "save"} onChange={() => setForm(s => ({ ...s, defaultAddress: "save" }))} className="sr-only"/>
                                                 <span className="text-[var(--color-fg)]">저장함</span>
                                             </label>
                                             <label className="flex items-center gap-1.5 cursor-pointer">
-                                                <input type="radio" name="defaultAddress" checked={form.defaultAddress === "skip"} onChange={() => setForm(s => ({ ...s, defaultAddress: "skip" }))} className="text-[#3b82f6]"/>
+                                                <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${form.defaultAddress === "skip" ? "border-[#0072DD]" : "border-[var(--color-border)]"}`}>
+                                                    {form.defaultAddress === "skip" && <span className="w-2 h-2 rounded-full bg-[#0072DD]" />}
+                                                </span>
+                                                <input type="radio" name="defaultAddress" checked={form.defaultAddress === "skip"} onChange={() => setForm(s => ({ ...s, defaultAddress: "skip" }))} className="sr-only"/>
                                                 <span className="text-[var(--color-fg-muted)]">저장안함</span>
                                             </label>
                                         </div>
@@ -317,126 +346,157 @@ export default function CheckoutPage() {
                                 )}
                             </dl>
                         )}
+                        </div>
                     </section>
 
                     {/* 비회원 비밀번호 */}
                     {isGuest && (
                         <section>
-                            <h2 className="text-base md:text-lg font-bold text-[var(--color-fg)] pb-3 border-b-2 border-[var(--color-fg)] mb-5">비회원 주문조회 비밀번호</h2>
-                            <dl className="space-y-3 text-sm">
-                                <Field label="비밀번호" required>
-                                    <input type="password" className={inputClass} value={form.guestPassword} onChange={e => setForm(s => ({ ...s, guestPassword: e.target.value }))} />
-                                    <p className="mt-1 text-xs text-[var(--color-danger)]">영문 16자리(영문/숫자/특수문자 중 2가지 이상 조합, 4자리 ~ 16자리)</p>
-                                </Field>
-                                <Field label="비밀번호 확인">
-                                    <input type="password" className={inputClass} value={form.guestPasswordConfirm} onChange={e => setForm(s => ({ ...s, guestPasswordConfirm: e.target.value }))} />
-                                </Field>
-                            </dl>
+                            <h2 className="text-[24px] font-medium text-[#000]">비회원 주문조회 비밀번호</h2>
+                            <div className="border-t border-[#222]">
+                                <dl className="flex flex-col gap-8 pt-10 pb-10 text-sm">
+                                    <Field label="비밀번호" required>
+                                        <input type="password" className={`${inputClass} md:w-[480px]`} value={form.guestPassword} onChange={e => setForm(s => ({ ...s, guestPassword: e.target.value }))} />
+                                        <p className="mt-2 text-[14px] font-light text-[#DC0000]">(영문 대소문자/숫자/특수문자 중 2가지 이상 조합, 10자 ~ 16자)</p>
+                                    </Field>
+                                    <Field label="비밀번호 확인">
+                                        <input type="password" className={`${inputClass} md:w-[480px]`} value={form.guestPasswordConfirm} onChange={e => setForm(s => ({ ...s, guestPasswordConfirm: e.target.value }))} />
+                                    </Field>
+                                </dl>
+                            </div>
                         </section>
                     )}
 
                     {/* 회원 — 할인/부가결제 (쿠폰/적립금) */}
                     {user && (
                         <section>
-                            <h2 className="text-base md:text-lg font-bold text-[var(--color-fg)] pb-3 border-b-2 border-[var(--color-fg)] mb-5">할인/부가결제</h2>
-                            <dl className="space-y-3 text-sm">
-                                <Field label="쿠폰적용" required>
-                                    <select className={selectClass} value={form.memberCouponId ?? ""} onChange={e => setForm(s => ({ ...s, memberCouponId: e.target.value ? Number(e.target.value) : null }))}>
-                                        <option value="">사용 가능한 쿠폰 없음</option>
-                                        {coupons.map(c => (
-                                            <option key={c.memberCouponId} value={c.memberCouponId}>
-                                                {c.name} ({c.discountType === "AMOUNT" ? formatPrice(c.discountValue) : `${c.discountValue}%`})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </Field>
-                                <Field label="적립금" required>
-                                    <input type="number" min={0} max={Math.min(balance, productAmount)} className={inputClass} placeholder="최소 5,000원 이상 보유 시 사용 가능" value={form.pointUsed || ""} onChange={e => setForm(s => ({ ...s, pointUsed: Math.max(0, Math.min(Number(e.target.value) || 0, balance, productAmount)) }))} />
-                                    <div className="mt-1 flex items-center justify-between text-xs">
-                                        <span className="text-[var(--color-fg-muted)]">보유적립금 <span className="font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(balance)}</span></span>
-                                        <span className="text-[var(--color-fg-subtle)]">* 한 결제건 당 쿠폰 등 적립금 중복 사용이 제한됩니다.</span>
+                            <h2 className="text-[24px] font-medium text-[#000]">할인/부가결제</h2>
+                            <div className="border-t border-[#222]">
+                                <dl className="flex flex-col gap-8 pt-10 pb-10">
+                                    {/* 쿠폰적용 */}
+                                    <div className="flex flex-col md:flex-row md:items-start gap-1.5 md:gap-3">
+                                        <dt className="w-[120px] text-[16px] font-medium text-[#222] md:pt-4 flex-shrink-0">쿠폰적용<span className="text-[#0072DD] ml-0.5">*</span></dt>
+                                        <dd>
+                                            <select className={`${selectClass} md:w-[480px]`} value={form.memberCouponId ?? ""} onChange={e => setForm(s => ({ ...s, memberCouponId: e.target.value ? Number(e.target.value) : null }))}>
+                                                <option value="">사용 가능한 쿠폰 없음</option>
+                                                {coupons.map(c => (
+                                                    <option key={c.memberCouponId} value={c.memberCouponId}>
+                                                        {c.name} ({c.discountType === "AMOUNT" ? formatPrice(c.discountValue) : `${c.discountValue}%`})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </dd>
                                     </div>
-                                </Field>
-                            </dl>
+                                    {/* 적립금 */}
+                                    <div className="flex flex-col md:flex-row md:items-start gap-1.5 md:gap-3">
+                                        <dt className="w-[120px] text-[16px] font-medium text-[#222] md:pt-4 flex-shrink-0">적립금<span className="text-[#0072DD] ml-0.5">*</span></dt>
+                                        <dd>
+                                            <div className="flex flex-col md:flex-row md:items-center gap-3">
+                                                {balance < 5000 ? (
+                                                    <input type="text" disabled className="w-full md:w-[480px] p-4 rounded-[4px] border border-[#BEBEBE] bg-[#F6F7FB] text-[14px] text-[#505050] placeholder:text-[#505050]" placeholder="최소 5,000원 이상 보유 시 사용 가능" />
+                                                ) : (
+                                                    <input type="number" min={0} max={Math.min(balance, productAmount)} className={`${inputClass} md:w-[480px]`} placeholder="사용할 적립금을 입력해주세요" value={form.pointUsed || ""} onChange={e => setForm(s => ({ ...s, pointUsed: Math.max(0, Math.min(Number(e.target.value) || 0, balance, productAmount)) }))} />
+                                                )}
+                                                <span className="text-[14px] text-[#767676]">*본 혜택은 쿠폰 및 적립금 중복 적용이 제한됩니다.</span>
+                                            </div>
+                                            <p className="mt-2 text-[14px] text-[#767676]">보유적립금 <span className="font-medium text-[#0072DD] tabular-nums">{formatPrice(balance)}</span></p>
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
                         </section>
                     )}
 
                     {/* 결제수단 */}
                     <section>
-                        <h2 className="text-base md:text-lg font-bold text-[var(--color-fg)] pb-3 border-b-2 border-[var(--color-fg)] mb-5">결제수단 선택</h2>
-                        <dl className="space-y-3 text-sm">
-                            <Field label="결제수단" required>
-                                <div className="flex items-center gap-4">
+                        <h2 className="text-[24px] font-medium text-[#000]">결제수단 선택</h2>
+                        <div className="border-t border-[#222]">
+                            <div className="pt-6 pb-10">
+                                {/* 결제수단 라디오 row */}
+                                <div className="flex items-center gap-6 text-sm border-b border-[#E5E5EC] pb-6">
                                     {([
                                         { key: "CARD", label: "계좌 간편결제" },
                                         { key: "EASY", label: "카드간편결제" },
                                         { key: "BANK", label: "일반결제" },
                                     ] as const).map(m => (
                                         <label key={m.key} className="flex items-center gap-1.5 cursor-pointer">
-                                            <input type="radio" name="payment" checked={form.paymentMethod === m.key} onChange={() => setForm(s => ({ ...s, paymentMethod: m.key }))} className="text-[#3b82f6]" />
+                                            <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${form.paymentMethod === m.key ? "border-[#0072DD]" : "border-[var(--color-border)]"}`}>
+                                                {form.paymentMethod === m.key && <span className="w-2 h-2 rounded-full bg-[#0072DD]" />}
+                                            </span>
+                                            <input type="radio" name="payment" checked={form.paymentMethod === m.key} onChange={() => setForm(s => ({ ...s, paymentMethod: m.key }))} className="sr-only" />
                                             <span className={form.paymentMethod === m.key ? "text-[var(--color-fg)] font-medium" : "text-[var(--color-fg-muted)]"}>{m.label}</span>
                                         </label>
                                     ))}
                                 </div>
-                            </Field>
-                            <Field label="카드선택" required>
-                                <select className={selectClass} value={form.cardSelect} onChange={e => setForm(s => ({ ...s, cardSelect: e.target.value }))}>
-                                    <option value="">카드를 선택해주세요.</option>
-                                    <option>신한카드</option><option>현대카드</option><option>국민카드</option>
-                                </select>
-                            </Field>
-                            <Field label="할부기간" required>
-                                <select className={selectClass} value={form.installment} onChange={e => setForm(s => ({ ...s, installment: e.target.value }))}>
-                                    <option>일시불</option><option>2개월</option><option>3개월</option>
-                                </select>
-                            </Field>
-                            {user && (
-                                <label className="flex items-center gap-2 cursor-pointer text-sm pt-2">
-                                    <input type="checkbox" className="w-4 h-4" />
-                                    <span className="text-[var(--color-fg-muted)]">결제수단과 입력정보를 다음에도 사용</span>
-                                </label>
-                            )}
-                        </dl>
+
+                                {/* 카드결제 block */}
+                                <div className="flex flex-col gap-8 w-full md:w-[600px] pt-8">
+                                    <div className="relative md:w-[480px]">
+                                        <select className={`${selectClass} w-full pr-10`} value={form.cardSelect} onChange={e => setForm(s => ({ ...s, cardSelect: e.target.value }))}>
+                                            <option value="">카드를 선택해주세요.</option>
+                                            <option>신한카드</option><option>현대카드</option><option>국민카드</option>
+                                        </select>
+                                        <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#767676]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </div>
+                                    <div className="relative md:w-[480px]">
+                                        <select className={`${selectClass} w-full pr-10`} value={form.installment} onChange={e => setForm(s => ({ ...s, installment: e.target.value }))}>
+                                            <option>일시불</option><option>2개월</option><option>3개월</option>
+                                        </select>
+                                        <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#767676]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </div>
+                                    {user && (
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" className="w-[22px] h-[22px]" />
+                                            <span className="text-[14px] text-[#767676]">결제수단과 입력정보를 다음에도 사용</span>
+                                        </label>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </section>
                 </div>
 
                 {/* ===== 우: 결제정보 sticky ===== */}
-                <aside className="lg:sticky lg:top-4 lg:self-start">
-                    <div className="rounded-[18px] bg-[var(--color-bg-subtle)] p-5 md:p-6">
-                        <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)] mb-4 pb-3 border-b border-[var(--color-border)]">결제정보</h3>
-                        <dl className="space-y-2.5 text-sm">
-                            <div className="flex justify-between"><dt className="text-[var(--color-fg-muted)]">주문금액</dt><dd className="text-[var(--color-fg)] tabular-nums">{formatPrice(productAmount)}</dd></div>
-                            {couponDiscount > 0 && <div className="flex justify-between"><dt className="text-[var(--color-fg-muted)]">할인 혜택</dt><dd className="text-[var(--color-fg)] tabular-nums">- {formatPrice(couponDiscount)}</dd></div>}
-                            <div className="flex justify-between"><dt className="text-[var(--color-fg-muted)]">배송비</dt><dd className="text-[var(--color-fg)] tabular-nums">{shippingFee === 0 ? "0원" : formatPrice(shippingFee)}</dd></div>
-                        </dl>
-                        <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex items-center justify-between">
-                            <span className="text-sm text-[var(--color-fg-muted)]">결제 예정 금액</span>
-                            <span className="text-lg font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(paid)}</span>
+                <aside className="lg:sticky lg:top-4 lg:self-start w-full lg:w-[464px] flex-shrink-0">
+                    <div className="rounded-[10px] bg-[#F6F7FB] p-6 md:p-9 flex flex-col gap-8">
+                        <div>
+                            <h3 className="text-[24px] font-medium text-[var(--color-fg)] border-b border-[#222] pb-4">결제정보</h3>
+                            <dl className="flex flex-col gap-2.5 pt-4">
+                                <div className="flex justify-between"><dt className="text-[18px] font-light text-[#767676]">주문금액</dt><dd className="text-[18px] font-medium text-[#000] tabular-nums">{formatPrice(productAmount)}</dd></div>
+                                {(couponDiscount + (form.pointUsed || 0)) > 0 && <div className="flex justify-between"><dt className="text-[18px] font-light text-[#767676]">할인 혜택</dt><dd className="text-[18px] font-medium text-[#000] tabular-nums">- {formatPrice(couponDiscount + (form.pointUsed || 0))}</dd></div>}
+                                <div className="flex justify-between"><dt className="text-[18px] font-light text-[#767676]">배송비</dt><dd className="text-[18px] font-medium text-[#000] tabular-nums">{shippingFee === 0 ? "0원" : formatPrice(shippingFee)}</dd></div>
+                            </dl>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-[16px] text-[#767676]">결제 예정 금액</span>
+                            <span className="text-[26px] font-medium text-[#222] tabular-nums">{formatPrice(paid)}</span>
                         </div>
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="mt-4 w-full inline-flex items-center justify-center rounded-[8px] bg-[#3b82f6] text-white py-3.5 text-sm font-bold disabled:opacity-50 hover:opacity-90 transition tabular-nums"
+                            className="w-full inline-flex items-center justify-center h-[60px] rounded-[4px] bg-[#0072DD] text-white text-[16px] font-medium disabled:opacity-50 hover:opacity-90 transition tabular-nums"
                         >
                             {formatPrice(paid)} 결제하기
                         </button>
-                        <div className="mt-4 space-y-2 text-xs">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <span className="text-[var(--color-fg)]">전체약관 동의</span>
+                        <div className="flex flex-col gap-3">
+                            <label className="flex items-center gap-2 cursor-pointer border-b border-[#DDD] pb-3">
+                                <input type="checkbox" className="w-7 h-7" />
+                                <span className="text-[18px] font-medium text-[var(--color-fg)]">전체약관 동의</span>
                             </label>
-                            <details className="border-t border-[var(--color-border)] pt-2">
-                                <summary className="flex items-center justify-between cursor-pointer">
-                                    <span className="text-[var(--color-fg-muted)]">이용약관 동의 <span className="text-[var(--color-danger)]">[필수]</span></span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-                                </summary>
-                            </details>
-                            <details className="border-t border-[var(--color-border)] pt-2">
-                                <summary className="flex items-center justify-between cursor-pointer">
-                                    <span className="text-[var(--color-fg-muted)]">비회원 개인정보 수집 이용동의</span>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-                                </summary>
-                            </details>
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" className="w-[22px] h-[22px]" />
+                                    <span className="text-[14px] font-medium text-[#767676]">이용약관 동의 <span className="text-[#0072DD]">[필수]</span></span>
+                                </label>
+                                <svg className="text-[#767676]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 6 15 12 9 18"/></svg>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" className="w-[22px] h-[22px]" />
+                                    <span className="text-[14px] font-medium text-[#767676]">{isGuest ? "비회원 " : ""}개인정보 수집 이용동의</span>
+                                </label>
+                                <svg className="text-[#767676]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 6 15 12 9 18"/></svg>
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -449,9 +509,9 @@ export default function CheckoutPage() {
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-1.5 md:gap-3 md:items-start">
-            <dt className="text-[var(--color-fg-muted)] md:pt-2.5">
+            <dt className="text-[14px] font-medium text-[#000] md:pt-4">
                 {label}
-                {required && <span className="text-[var(--color-danger)] ml-0.5">*</span>}
+                {required && <span className="text-[#0072DD] ml-0.5">*</span>}
             </dt>
             <dd>{children}</dd>
         </div>

@@ -23,7 +23,7 @@ const NAV: NavItem[] = [
             { href: "/faq",     label: "자주묻는질문" },
         ],
     },
-    { href: "/reviews/best", label: "구매후기" },
+    { href: "/reviews", label: "구매후기" },
 ];
 
 export function Header({ transparent = false }: { transparent?: boolean }) {
@@ -64,7 +64,8 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
     return (
         <>
             <header className={headerCls}>
-                <div className="mx-auto max-w-screen-2xl flex items-center gap-3 md:gap-4 px-4 h-16">
+                {/* 시안 CSS: width 1580 · padding 24px 0(상하24·좌우0) · space-between · center */}
+                <div className="mx-auto max-w-[1920px] flex items-center gap-3 md:gap-4 px-4 xl:px-[170px] py-6">
                     {/* 햄버거 */}
                     <button
                         type="button"
@@ -86,7 +87,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                         <img
                             src="/images/logo-elfbar-color.png"
                             alt="ELFBAR"
-                            className={`h-7 md:h-8 w-auto ${transparent ? "brightness-0 invert" : ""}`}
+                            className={`h-7 md:h-[38px] w-auto ${transparent ? "brightness-0 invert" : ""}`}
                         />
                     </Link>
 

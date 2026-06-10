@@ -7,10 +7,12 @@ import { displayPrice, formatPrice } from "@/lib/format";
 import { hoverImageUrl, safeImageUrl } from "@/lib/url";
 
 /**
- * "엘프바의 추천 아이템" (Best Item) 캐러셀 — 시안 매칭.
- *  - 헤더: 라벨 + 타이틀 + 우측 ‹ › 화살표(가로 스크롤)
- *  - 카드: Best N 배지 · 배경 이미지(cover) · 이름 · 한 줄 설명 · 정가취소선+할인%+판매가 · ★평점 | N건
- *  - 데스크탑 4-up, 모바일은 가로 스크롤(다음 카드 peek)
+ * "엘프바의 추천 아이템" (Best Item) 캐러셀 — Figma 402:11091 1:1.
+ *  헤더: eyebrow 18/#767676 + 타이틀 36/700/#000 + 우측 48×48 화살표(gap 12)
+ *  카드(374w, gap 28): 이미지 374×448 r12 + 좌상단 뱃지(흰배경 파란#0072DD r4) ·
+ *                      이름 16/500 · 설명 14/#767676 · 구분선 · 정가 16/#999 취소선 ·
+ *                      할인% 16/#0073DD + 판매가 20/#222 · ★평점 | N건(14/#767676)
+ *  하단: 더 알아보기 버튼 160×52 r4 (카드와 60px 간격, 가운데)
  */
 export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -26,7 +28,7 @@ export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
             <section>
                 <Header onPrev={() => scroll(-1)} onNext={() => scroll(1)} />
                 <p className="text-sm text-[var(--color-fg-subtle)] py-8 text-center">
-                    추천 아이템이 설정되지 않았습니다. 어드민에서 추천 슬롯(1~4)에 상품을 배치해주세요.
+                    추천 아이템이 설정되지 않았습니다. 어드민에서 추천 슬롯에 상품을 배치해주세요.
                 </p>
             </section>
         );
@@ -36,21 +38,23 @@ export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
         <section>
             <Header onPrev={() => scroll(-1)} onNext={() => scroll(1)} />
 
+            {/* 카드 행 — 시안 gap 28(lg:gap-7), 4-up */}
             <div
                 ref={scrollRef}
-                className="flex gap-4 md:gap-6 overflow-x-auto snap-x scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="flex gap-4 lg:gap-7 overflow-x-auto snap-x scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-                {items.map((p, i) => (
-                    <div key={p.id} className="snap-start shrink-0 w-[72%] sm:w-[46%] lg:w-[calc((100%-72px)/4)]">
-                        <FeaturedCard p={p} rank={i + 1} />
+                {items.map((p) => (
+                    <div key={p.id} className="snap-start shrink-0 w-[78%] sm:w-[46%] lg:w-[calc((100%-84px)/4)]">
+                        <FeaturedCard p={p} />
                     </div>
                 ))}
             </div>
 
-            <div className="mt-6 flex justify-center">
+            {/* 더 알아보기 — 시안: 카드와 60px, 가운데, 160×52 r4 아웃라인 */}
+            <div className="mt-[60px] flex justify-center">
                 <Link
                     href="/products"
-                    className="inline-flex items-center justify-center rounded-lg border border-[var(--color-border)] px-8 py-2.5 text-sm text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
+                    className="inline-flex items-center justify-center w-[160px] h-[52px] rounded-[4px] border border-[#DDD] bg-white text-sm font-medium text-[#000] hover:bg-[var(--color-bg-subtle)] transition"
                 >
                     더 알아보기
                 </Link>
@@ -61,12 +65,12 @@ export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
 
 function Header({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
     return (
-        <div className="flex items-end justify-between mb-4">
-            <div>
-                <p className="text-xs text-[var(--color-fg-muted)] mb-4">Best Item</p>
-                <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">엘프바의 추천 아이템</h2>
+        <div className="flex items-end justify-between mb-8">
+            <div className="flex flex-col gap-2">
+                <p className="text-[18px] leading-none text-[#767676]">Best Item</p>
+                <h2 className="text-[26px] md:text-[36px] font-bold leading-tight text-[#000]">엘프바의 추천 아이템</h2>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3 shrink-0">
                 <Arrow dir="prev" onClick={onPrev} />
                 <Arrow dir="next" onClick={onNext} />
             </div>
@@ -80,16 +84,16 @@ function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) 
             type="button"
             onClick={onClick}
             aria-label={dir === "prev" ? "이전" : "다음"}
-            className="w-10 h-10 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition"
+            className="w-12 h-12 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition"
         >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {dir === "prev" ? <polyline points="15 18 9 12 15 6" /> : <polyline points="9 18 15 12 9 6" />}
             </svg>
         </button>
     );
 }
 
-function FeaturedCard({ p, rank }: { p: ProductSummary; rank: number }) {
+function FeaturedCard({ p }: { p: ProductSummary }) {
     const thumb = safeImageUrl(p.thumbnailUrl);
     const bg = hoverImageUrl(thumb);
     const img = bg || thumb;
@@ -100,45 +104,75 @@ function FeaturedCard({ p, rank }: { p: ProductSummary; rank: number }) {
 
     return (
         <Link href={`/p/${p.id}`} className="group block">
-            <div className="relative aspect-square rounded-[16px] overflow-hidden bg-[var(--color-bg-subtle)]">
+            {/* 이미지 374×448 r12 + 좌상단 뱃지 */}
+            <div className="relative aspect-[374/448] rounded-[12px] overflow-hidden bg-[var(--color-bg-subtle)]">
                 {img ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                         src={img}
                         alt={p.name}
                         loading="lazy"
-                        className={`w-full h-full ${bg ? "object-cover" : "object-contain p-3"}`}
+                        className="w-full h-full object-cover transition group-hover:scale-[1.02]"
                     />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-[var(--color-fg-subtle)] text-xs">no image</div>
                 )}
-                <span className="absolute top-3 left-3 rounded-md bg-gradient-to-br from-[#4f7cf7] to-[#7b61ff] text-white text-[11px] font-semibold px-2 py-0.5 shadow-sm">
-                    Best {rank}
-                </span>
+                {/* 장바구니 · 하트 — 우하단 세로 스택 (Best 뱃지 삭제) */}
+                <div className="absolute bottom-3 right-3 flex flex-col gap-2">
+                    <button
+                        type="button"
+                        aria-label="장바구니 담기"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[var(--color-fg-muted)] shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-[var(--color-fg)]"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <circle cx="9" cy="20" r="1.4" /><circle cx="18" cy="20" r="1.4" /><path d="M2 3h3l2.2 11.2a1.6 1.6 0 0 0 1.6 1.3h8.4a1.6 1.6 0 0 0 1.6-1.3L22 7H6" />
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
+                        aria-label="위시리스트"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[var(--color-fg-muted)] shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-[#ff4d6d]"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z" />
+                        </svg>
+                    </button>
+                </div>
                 {isSoldOut && (
-                    <span className="absolute top-3 right-3 rounded-md bg-[var(--color-fg)]/80 px-2 py-0.5 text-[11px] font-medium text-[var(--color-fg-inverse)]">품절</span>
+                    <span className="absolute top-3 right-3 rounded-md bg-[var(--color-fg)]/80 px-2 py-1 text-[11px] font-medium text-[var(--color-fg-inverse)]">품절</span>
                 )}
             </div>
 
-            <div className="pt-3 space-y-1">
-                <h3 className="text-sm font-semibold text-[var(--color-fg)] line-clamp-1">{p.name}</h3>
-                {p.description && (
-                    <p className="text-xs text-[var(--color-fg-muted)] line-clamp-1 leading-relaxed">{p.description}</p>
-                )}
-                <div className="flex items-baseline gap-1.5 pt-0.5">
-                    {hasDiscount && (
-                        <span className="text-xs text-[var(--color-fg-subtle)] line-through tabular-nums">{formatPrice(p.price)}</span>
+            {/* 정보 블록 — 이미지와 16px(pt-4), 내부 gap 12 */}
+            <div className="pt-4 flex flex-col gap-3">
+                {/* 이름 + 설명 gap 4 */}
+                <div className="flex flex-col gap-1">
+                    <h3 className="text-[16px] font-medium text-[#000] line-clamp-1">{p.name}</h3>
+                    {p.description && (
+                        <p className="text-[14px] text-[#767676] line-clamp-1">{p.description}</p>
                     )}
-                    {hasDiscount && (
-                        <span className="text-sm font-bold text-[#16b1c4] tabular-nums">{pct}%</span>
-                    )}
-                    <span className="text-base font-bold text-[var(--color-fg)] tabular-nums">{formatPrice(final)}</span>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] text-[var(--color-fg-subtle)] pt-0.5">
-                    <span className="text-yellow-400">★</span>
-                    <span className="text-[var(--color-fg)] font-medium">{(p.ratingAvg ?? 0).toFixed(1)}</span>
-                    <span className="text-[var(--color-border-strong)]">|</span>
-                    <span>{p.reviewCount}건</span>
+                {/* 구분선 */}
+                <div className="h-px bg-[var(--color-border)]" />
+                {/* 가격 + 별점 gap 4 */}
+                <div className="flex flex-col gap-1">
+                    {hasDiscount && (
+                        <span className="text-[16px] text-[#999999] line-through tabular-nums">{formatPrice(p.price)}</span>
+                    )}
+                    <div className="flex items-baseline gap-2">
+                        {hasDiscount && <span className="text-[16px] font-medium text-[#0073DD] tabular-nums">{pct}%</span>}
+                        <span className="text-[20px] font-medium text-[#222222] tabular-nums">{formatPrice(final)}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[14px]">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="#F3C836" aria-hidden="true" className="shrink-0">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                        <span className="font-medium text-[#000]">{(p.ratingAvg ?? 0).toFixed(1)}</span>
+                        <span className="mx-0.5 text-[var(--color-border-strong)]">|</span>
+                        <span className="text-[#767676]">{p.reviewCount}건</span>
+                    </div>
                 </div>
             </div>
         </Link>

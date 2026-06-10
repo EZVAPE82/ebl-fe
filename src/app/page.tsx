@@ -4,13 +4,14 @@ import { TrustBadges } from "@/components/TrustBadges";
 import { BestReviewsCarousel } from "@/components/BestReviewsCarousel";
 import { ProductCard } from "@/components/ProductCard";
 import { FeaturedCarousel } from "@/components/FeaturedCarousel";
+import { CarouselShell } from "@/components/CarouselShell";
 import { GatedMedia } from "@/components/GatedMedia";
-import { EventPopup } from "@/components/EventPopup";
 import { formatDate, formatPrice } from "@/lib/format";
 import type { Banner, Category, Page, ProductSummary } from "@/types/api";
 import Link from "next/link";
 
 type Notice = { id: number; title: string; createdAt: string; pinned: boolean };
+type EventLite = { id: number; title: string; bannerUrl: string | null };
 type ReviewView = {
     id: number; productId: number; memberId: number; rating: number; content: string | null;
     hasPhoto: boolean; photoUrls: string[]; createdAt: string;
@@ -25,10 +26,11 @@ async function safeFetch<T>(path: string, fallback: T): Promise<T> {
     }
 }
 
+
 export default async function Home() {
     const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 8, first: true, last: true, empty: true };
 
-    const [bannersHero, featured, bestItems, categoriesRaw, notices, bestReviews] = await Promise.all([
+    const [bannersHero, featured, bestItems, categoriesRaw, notices, bestReviews, eventsPage] = await Promise.all([
         safeFetch<Banner[]>("/api/v1/public/banners?placement=MAIN_HERO", []),
         safeFetch<ProductSummary[]>("/api/v1/public/products/featured", []),
         // 베스트(핫한 아이템 순위) — best_mode 정책(판매량/조회수/직접지정)에 따라 산정
@@ -36,7 +38,19 @@ export default async function Home() {
         safeFetch<Category[]>("/api/v1/public/categories", []),
         safeFetch<Page<Notice>>("/api/v1/public/notices?size=4", { ...emptyPage, content: [] } as unknown as Page<Notice>),
         safeFetch<Page<ReviewView>>("/api/v1/public/reviews/best?page=0&size=4", { ...emptyPage, content: [] } as unknown as Page<ReviewView>),
+        safeFetch<Page<EventLite>>("/api/v1/public/events?size=12", { ...emptyPage, content: [] } as unknown as Page<EventLite>),
     ]);
+
+    // "엘프바의 이벤트" 디자인 카드 2종 — 배경 위 텍스트·버튼을 HTML 로 얹고, 실제 이벤트 글(제목 키워드)로 라우팅.
+    const eventHref = (kw: string) => {
+        const e = eventsPage.content.find(ev => ev.title.includes(kw));
+        return e ? `/events/${e.id}` : "/events";
+    };
+    // 완성 배경 1장씩 → 이미지 전체 클릭 시 이벤트 상세로 이동 (버튼·오버레이 없음)
+    const EVENT_CARDS = [
+        { bg: "/images/main-event1.png", href: eventHref("할인"), alt: "신제품 출시 기념 최대 20% 할인" },
+        { bg: "/images/main-event2.png", href: eventHref("리뷰"), alt: "포토 리뷰 쓰고 적립금 받자" },
+    ];
 
     const categories = categoriesRaw.length > 0 ? categoriesRaw : DEFAULT_CATEGORIES;
     const heroSlides = bannersHero.length > 0 ? bannersHero : DESIGN_FALLBACK_MAIN_HERO;
@@ -58,65 +72,77 @@ export default async function Home() {
             {/* ===== 1. Hero 캐러셀 (MAIN_HERO 다중 슬라이드) =====
                 헤더가 홈에서 fixed 투명 오버레이라 Hero 위 spacer 불필요 — Hero 가 헤더 위로 침범. */}
             {/* TrustBadges (혜택 안내 5카드): 데스크탑만 Hero 안 absolute. 모바일은 사용자 요청으로 완전 제거. */}
-            <GatedMedia>
-                <HeroCarousel
-                    banners={heroSlides}
-                    fallbackImage="/images/hero.png"
-                    fallbackMobileImage="/images/hero-mobile-1.png"
-                >
-                    <div className="hidden md:block">
-                        <TrustBadges />
-                    </div>
-                </HeroCarousel>
-            </GatedMedia>
+            {/* 히어로 — 1920×840 고정. 양옆 남는 영역은 흰색, 1920보다 좁은 화면은 가운데 크롭. */}
+            <div className="w-full overflow-hidden flex justify-center bg-white">
+                <GatedMedia className="w-[1920px] h-[840px] flex-shrink-0">
+                    <HeroCarousel
+                        banners={heroSlides}
+                        fallbackImage="/images/main-hero1.png"
+                        fallbackMobileImage="/images/main-hero1.png"
+                        showOverlay={false}
+                        heightClass="h-full"
+                    >
+                        <div className="hidden md:block">
+                            <TrustBadges />
+                        </div>
+                    </HeroCarousel>
+                </GatedMedia>
+            </div>
 
             {/* ===== 카테고리 아이콘 ===== */}
             <GatedMedia>
                 <CategoryIcons categories={categories} />
             </GatedMedia>
 
-            <div className="mx-auto max-w-screen-2xl px-4 space-y-16 pb-16">
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-20 md:space-y-40">
                 {/* ===== 3. 엘프바의 추천 아이템 — 어드민 설정 (featured_order 1~4) · 시안 캐러셀 ===== */}
                 <FeaturedCarousel items={featured} />
 
-                {/* ===== 5. 우리의 이벤트 (2 banner card 그리드) ===== */}
-                <Section title="우리의 이벤트" href="/events">
-                    <GatedMedia><EventCards /></GatedMedia>
-                </Section>
+                {/* ===== 5. 엘프바의 이벤트 (디자인 카드 2종 — 배경+오버레이 텍스트+버튼, 이벤트 상세로 라우팅) ===== */}
+                <CarouselShell eyebrow="Event" title="엘프바의 이벤트">
+                    {EVENT_CARDS.map(c => (
+                        <div key={c.alt} className="snap-start shrink-0 w-[88%] sm:w-[70%] lg:w-[calc((100%-28px)/2)]">
+                            {/* 시안: 776×340 r16 · 이미지 전체 클릭 → 이벤트 상세 */}
+                            <Link href={c.href} className="group block aspect-[776/340] rounded-[16px] overflow-hidden">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={c.bg} alt={c.alt} className="w-full h-full object-cover transition group-hover:opacity-95" />
+                            </Link>
+                        </div>
+                    ))}
+                </CarouselShell>
 
-                {/* ===== 6. 핫한 아이템 순위 (라이프스타일 photo + 진짜 product 9 → 3 그룹) ===== */}
-                <Section title="핫한 아이템 순위" href="/c/best">
-                    <GatedMedia><Ranking items={bestItems.slice(0, 9)} /></GatedMedia>
-                </Section>
+                {/* ===== 6. 제품별 순위 (캐러셀 — 화살표로 페이징) ===== */}
+                <CarouselShell eyebrow="Ranking" title="제품별 베스트 순위">
+                    <Ranking items={bestItems.slice(0, 9)} />
+                </CarouselShell>
+            </div>
 
-                {/* ===== 7. 시리즈 배너 (시안 — 테두리 X, 간격 X, 꽉 채움) ===== */}
-                <GatedMedia className="grid grid-cols-1 md:grid-cols-2 gap-0">
-                    <Link href="/products?series=iceking" className="block overflow-hidden hover:opacity-95 transition">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/series-ice.png" alt="ICE COOL AS YOU WANT" className="w-full block" />
-                    </Link>
-                    <Link href="/products?series=icekingpro" className="block overflow-hidden hover:opacity-95 transition">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/series-shimmer.png" alt="SHIMMERING IN YOUR HAND" className="w-full block" />
-                    </Link>
-                </GatedMedia>
+            {/* ===== 7. 시리즈 배너 — 각 960×680 고정(비율 960/680). 2개=1920 상한, 그 이상 화면은 흰 여백 ===== */}
+            <GatedMedia className="my-20 md:my-40 mx-auto max-w-[1920px] grid grid-cols-1 md:grid-cols-2 gap-0">
+                <Link href="/products?series=iceking" className="block aspect-[960/680] overflow-hidden hover:opacity-95 transition">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/images/series-ice.png" alt="ICE COOL AS YOU WANT" className="w-full h-full object-cover" />
+                </Link>
+                <Link href="/products?series=icekingpro" className="block aspect-[960/680] overflow-hidden hover:opacity-95 transition">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/images/series-shimmer.png" alt="SHIMMERING IN YOUR HAND" className="w-full h-full object-cover" />
+                </Link>
+            </GatedMedia>
 
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-20 md:space-y-40">
                 {/* ===== 공지사항 + FAQ 2컬럼 ===== */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
                     <NoticeBox notices={notices.content} />
                     <FaqBox />
                 </div>
 
                 {/* ===== 베스트 제품 후기 — Lightbox 연결 client component ===== */}
-                {/* 실제 V23/V30 시드 리뷰 — 없으면 섹션 자체 hide */}
-                {realReviews.length > 0 && <BestReviewsCarousel reviews={realReviews} />}
+                {/* 실제 후기 있으면 그걸로, 없으면 REVIEW_MOCKS 폴백 → 섹션 항상 노출(시안) */}
+                <BestReviewsCarousel reviews={realReviews.length > 0 ? realReviews : REVIEW_MOCKS} />
             </div>
 
             {/* ===== CTA 풀폭 배너 ===== */}
             <ContactCTA />
-
-            {/* ===== 이벤트 팝업 (홈 진입 시 1회) ===== */}
-            <EventPopup />
         </div>
     );
 }
@@ -140,9 +166,9 @@ const DEFAULT_CATEGORIES: Category[] = [
  * 각 자산은 1920x800 (2.4:1) hero 비율, Figma 노드 41:8762/41:8761/41:8763.
  */
 const DESIGN_FALLBACK_MAIN_HERO: Banner[] = [
-    { id: -1, placement: "MAIN_HERO", imageUrl: "/images/hero-bg.png", mobileImageUrl: "/images/hero-mobile-1.png", linkUrl: "/c/best",       altText: "엘프바 BC10000 — NEW ARRIVAL", sortOrder: 1 },
-    { id: -2, placement: "MAIN_HERO", imageUrl: "/images/hero-2.png",  mobileImageUrl: "/images/hero-mobile-1.png", linkUrl: "/c/disposable", altText: "엘프바 시그니처 라인업",          sortOrder: 2 },
-    { id: -3, placement: "MAIN_HERO", imageUrl: "/images/hero-3.png",  mobileImageUrl: "/images/hero-mobile-1.png", linkUrl: "/c/disposable", altText: "엘프바 프리미엄 컬렉션",          sortOrder: 3 },
+    { id: -1, placement: "MAIN_HERO", imageUrl: "/images/main-hero1.png", mobileImageUrl: "/images/main-hero1.png", linkUrl: "/c/best",       altText: "새로워진 엘프바를 가장 먼저 만나보세요", sortOrder: 1 },
+    { id: -2, placement: "MAIN_HERO", imageUrl: "/images/main-hero2.png", mobileImageUrl: "/images/main-hero2.png", linkUrl: "/c/disposable", altText: "엘프바 라인업",          sortOrder: 2 },
+    { id: -3, placement: "MAIN_HERO", imageUrl: "/images/main-hero3.png", mobileImageUrl: "/images/main-hero3.png", linkUrl: "/products",     altText: "엘프바 프리미엄 컬렉션",          sortOrder: 3 },
 ];
 
 /**
@@ -162,20 +188,21 @@ function CategoryIcons({ categories: _categories }: { categories: Category[] }) 
         { label: "이벤트",   href: "/events",       src: "/images/cat-event.png" },
         { label: "일회용",   href: "/c/disposable", src: "/images/cat-disposable.png" },
         { label: "공지사항", href: "/notices",      src: "/images/cat-notice.png" },
-        { label: "구매후기", href: "/reviews/best", src: "/images/cat-review.png" },
+        { label: "구매후기", href: "/reviews", src: "/images/cat-review.png" },
     ];
     return (
-        <section className="mx-auto max-w-screen-2xl px-4 py-8 md:py-12">
-            {/* 시안: 풀폭 분산이 아니라 가운데 클러스터(아이콘 간 일정 간격) */}
-            <ul className="flex flex-wrap justify-center gap-x-8 sm:gap-x-12 lg:gap-x-16 gap-y-6">
+        <section className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-16 md:pt-[100px] pb-24 md:pb-[160px]">
+            {/* 시안 CSS: 컨테이너 inline-flex · gap 48 / 타일 148×148 · padding 26 · radius 20 · border 1px · 아이콘 96×96 / 타일↔라벨 16 */}
+            <ul className="flex flex-wrap justify-center items-start gap-x-6 md:gap-x-12 gap-y-8">
                 {items.map(it => (
                     <li key={it.label}>
                         <Link
                             href={it.href}
                             aria-label={it.label}
-                            className="group flex flex-col items-center gap-2 hover:opacity-90 transition"
+                            className="group flex flex-col items-center gap-4 hover:opacity-90 transition"
                         >
-                            <span className="w-[68px] h-[68px] md:w-[84px] md:h-[84px] group-hover:scale-105 transition-transform">
+                            {/* cat-*.png = 타일 통째(회색 배경+라운드+일러스트). 풀사이즈 148로 원본 그대로 */}
+                            <span className="w-[110px] h-[110px] md:w-[148px] md:h-[148px] flex items-center justify-center group-hover:scale-105 transition-transform">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={it.src} alt={it.label} className="w-full h-full object-contain" />
                             </span>
@@ -221,35 +248,13 @@ function ProductGrid({ items }: { items: ProductSummary[] }) {
 }
 
 /* ============================================================
- * EventCards — "우리의 이벤트" 2개 banner card (시안 매칭)
- *  카드 1: 핑크·바이올렛 그라데이션 + 할인 카피 + 더보기 버튼
- *  카드 2: 블루·네이비 그라데이션 + 카드 결제 카피 + 더보기 버튼
- * ============================================================ */
-function EventCards() {
-    // Figma 13:1522 — 두 카드 (39:6907, 39:6865) 통이미지 그대로 사용
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/events" className="block rounded-[var(--radius-lg)] overflow-hidden hover:opacity-95 transition">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/event-card-1.png" alt="최대 20% 할인" className="w-full block" />
-            </Link>
-            <Link href="/events" className="block rounded-[var(--radius-lg)] overflow-hidden hover:opacity-95 transition">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/event-card-2.png" alt="포토 리뷰 쓰고 적립금 받자" className="w-full block" />
-            </Link>
-        </div>
-    );
-}
-
-/* ============================================================
- * Ranking — 핫 아이템 순위 (3개)
+ * Ranking — 제품별 순위 (3 그룹, 캐러셀 아이템)
  * ============================================================ */
 function Ranking({ items }: { items: ProductSummary[] }) {
     // 시안 11:1819~33:5307 — 3 카드 = 라이프스타일 photo + 진짜 product mini list
     // popular 상위 9개를 3 그룹으로 split. photo 는 통이미지 그대로 + 진짜 product 클릭 가능.
     const PHOTOS = ["/images/rank-1-photo.png", "/images/rank-2-photo.png", "/images/rank-3-photo.png"];
-    const LABELS = ["변치 않는 기본", "단순한 풍미 그 이상", "직관적 강한 힘"];
-    const BRANDS = ["ELFBAR 8000", "ELFLIQ", "ELFBAR BC10000"];
+    const LABELS = ["변치 않는 시원함", "터지는 풍미 그 이상", "그 속에 이루는 한 방울"];
 
     // popular API 응답이 비어있어도 시안에 보이는 mini list (각 카드 3 row) 가 안 빈
     // 줄로 떨어지지 않게 fallback mock 9개 항상 보장.
@@ -270,44 +275,83 @@ function Ranking({ items }: { items: ProductSummary[] }) {
         top.slice(6, 9),
     ];
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <>
             {groups.map((group, gi) => (
-                // 시안 매칭: 사진 + 리스트를 한 박스로 묶지 않고 분리.
-                // 사진은 단독 라운딩, 리스트는 풀폭. 둘 다 좌측 0 으로 선 맞춤.
-                <div key={gi} className="flex flex-col gap-3">
-                    <Link href="/c/best" aria-label={LABELS[gi]} className="relative block group rounded-[var(--radius-lg)] overflow-hidden">
+                <div key={gi} className="snap-start shrink-0 w-[86%] sm:w-[62%] lg:w-[calc((100%-56px)/3)] flex flex-col gap-5">
+                    {/* 라이프스타일 사진 508×320 r12 (라벨 베이크) */}
+                    <Link href="/c/best" aria-label={LABELS[gi]} className="block rounded-[12px] overflow-hidden hover:opacity-95 transition">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={PHOTOS[gi]} alt={LABELS[gi]} className="w-full block aspect-[464/348] object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-                        <div className="absolute left-3 md:left-4 bottom-3 md:bottom-4 text-white">
-                            <p className="text-[10px] uppercase tracking-widest opacity-80">{BRANDS[gi]}</p>
-                            <p className="text-sm md:text-base font-bold mt-0.5">{LABELS[gi]}</p>
-                        </div>
+                        <img src={PHOTOS[gi]} alt={LABELS[gi]} className="w-full block aspect-[508/320] object-cover" />
                     </Link>
-                    {/* 리스트 — 좌측 padding 0 으로 사진과 선 맞춤 */}
-                    <ul className="divide-y divide-[var(--color-border)]">
-                        {group.map((p) => (
-                            <li key={p.id}>
-                                <Link href={`/p/${p.id}`} className="flex items-center gap-3 py-3 pr-3 hover:bg-[var(--color-bg-subtle)]">
-                                    {/* 썸네일 — 사진 박스 좌측 선과 정확히 정렬 (padding 0) */}
-                                    <div className="w-14 h-14 rounded bg-[var(--color-bg-subtle)] flex-shrink-0 overflow-hidden flex items-center justify-center p-1">
-                                        {p.thumbnailUrl && (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={p.thumbnailUrl} alt={p.name} className="max-w-full max-h-full object-contain" />
-                                        )}
+                    {/* 순위 리스트 — 3행 gap 24. 행 = 순위뱃지 + 흰카드(썸네일100 + 이름/설명/가격 + 장바구니·하트 40×40) */}
+                    <ul className="flex flex-col gap-6">
+                        {group.map((p, ri) => {
+                            const rankNo = gi * 3 + ri + 1;
+                            const hasDisc = p.onlinePrice != null && p.onlinePrice < p.price;
+                            const sale = hasDisc ? (p.onlinePrice as number) : p.price;
+                            return (
+                                <li key={p.id} className="relative pt-1.5">
+                                    {/* 순위 뱃지 (펜넌트) */}
+                                    <span
+                                        className="absolute top-0 left-3 z-10 flex h-9 w-7 items-start justify-center pt-1 text-[12px] font-bold text-white"
+                                        style={{ background: "#0073DD", clipPath: "polygon(0 0,100% 0,100% 72%,50% 100%,0 72%)" }}
+                                    >
+                                        {rankNo}
+                                    </span>
+                                    {/* 흰 카드 r8 */}
+                                    <div className="flex items-center justify-between gap-2 rounded-[8px] bg-white p-3 transition hover:shadow-sm">
+                                        <Link href={`/p/${p.id}`} className="flex min-w-0 flex-1 items-center gap-4">
+                                            {/* 썸네일 100×100 (#F6F7FB) */}
+                                            <div className="flex h-[84px] w-[84px] flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#F6F7FB] p-2 lg:h-[100px] lg:w-[100px]">
+                                                {p.thumbnailUrl && (
+                                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                                    <img src={p.thumbnailUrl} alt={p.name} className="max-h-full max-w-full object-contain" />
+                                                )}
+                                            </div>
+                                            {/* 이름 14/500 · 설명 14/#767676 · 가격(취소선 16/#999 + 판매가 16/#222) */}
+                                            <div className="flex min-w-0 flex-col gap-1">
+                                                <p className="line-clamp-1 text-[14px] font-medium text-[#000]">{p.name}</p>
+                                                {p.description && <p className="line-clamp-1 text-[14px] text-[#767676]">{p.description}</p>}
+                                                <div className="flex items-baseline gap-1.5">
+                                                    {hasDisc && <span className="text-[16px] text-[#999999] line-through tabular-nums">{formatPrice(p.price)}</span>}
+                                                    <span className="text-[16px] font-medium text-[#222222] tabular-nums">{formatPrice(sale)}</span>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                        {/* 장바구니 + 하트 40×40 r4 */}
+                                        <div className="flex flex-shrink-0 flex-col gap-2">
+                                            <Link href={`/p/${p.id}`} aria-label="장바구니" className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-[var(--color-border)] text-[var(--color-fg-muted)] transition hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]">
+                                                <CartMiniIcon />
+                                            </Link>
+                                            <Link href={`/p/${p.id}`} aria-label="찜" className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-[var(--color-border)] text-[var(--color-fg-muted)] transition hover:border-[var(--color-border-strong)] hover:text-[#e23744]">
+                                                <HeartMiniIcon />
+                                            </Link>
+                                        </div>
                                     </div>
-                                    {/* 텍스트 (이름 + 가격 세로) */}
-                                    <div className="min-w-0 flex-1 space-y-1">
-                                        <p className="text-xs md:text-sm text-[var(--color-fg)] line-clamp-1 font-medium">{p.name}</p>
-                                        <p className="text-xs text-[var(--color-fg-muted)] tabular-nums">{formatPrice(p.price)}</p>
-                                    </div>
-                                </Link>
-                            </li>
-                        ))}
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
             ))}
-        </div>
+        </>
+    );
+}
+
+function CartMiniIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="9" cy="20" r="1.4" />
+            <circle cx="18" cy="20" r="1.4" />
+            <path d="M2 3h3l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.2a1.5 1.5 0 0 0 1.5-1.2L22 7H6" />
+        </svg>
+    );
+}
+function HeartMiniIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20.8 7.6a5 5 0 0 0-8.8-2.2A5 5 0 0 0 3.2 7.6c0 4.2 5.2 7.9 8.8 10.4 3.6-2.5 8.8-6.2 8.8-10.4z" />
+        </svg>
     );
 }
 
@@ -356,36 +400,30 @@ function WhyChooseUs() {
  * NoticeBox / EventBox — 좌우 분할 위젯
  * ============================================================ */
 function NoticeBox({ notices }: { notices: Notice[] }) {
-    // 시안 매칭: 4건 + 달력 + 하단 "더 알아보기". 실제 DB 공지만 노출 (placeholder 제거).
+    // 시안 402:10620 — 타이틀 28/500 · 항목(제목 18/500 + 날짜 14/#767676, pad 24) · 더알아보기 #F6F7FB r4
     const display = notices.slice(0, 4);
     return (
-        <div>
-            {/* 시안 매칭: 외곽 박스 없음. 헤더 + 굵은 하단 보더 + row list + 회색 button. */}
-            <h3 className="text-xl md:text-2xl font-bold text-[var(--color-fg)] pb-4 border-b-2 border-[var(--color-fg)]">
-                공지사항
-            </h3>
-            <ul className="divide-y divide-[var(--color-border)]">
-                {display.length === 0 && (
-                    <li className="px-1 py-6 text-center text-xs text-[var(--color-fg-subtle)]">등록된 공지가 없습니다.</li>
-                )}
-                {display.map(n => (
-                    <li key={n.id}>
-                        <Link href={`/notices/${n.id}`} className="flex items-center gap-2 px-1 py-4 hover:opacity-70 transition">
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm md:text-base text-[var(--color-fg)] line-clamp-1 font-medium">
-                                    {n.pinned && <span className="text-[10px] mr-1 px-1.5 py-0.5 rounded bg-[var(--color-danger)]/10 text-[var(--color-danger)] font-medium">필독</span>}
+        <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-5">
+                <h3 className="text-[28px] font-medium leading-none text-[#000]">공지사항</h3>
+                <ul className="divide-y divide-[var(--color-border)]">
+                    {display.length === 0 && (
+                        <li className="py-6 text-center text-sm text-[var(--color-fg-subtle)]">등록된 공지가 없습니다.</li>
+                    )}
+                    {display.map(n => (
+                        <li key={n.id}>
+                            <Link href={`/notices/${n.id}`} className="flex flex-col gap-2 py-6 hover:opacity-70 transition">
+                                <p className="text-[18px] font-medium text-[#000] line-clamp-1">
+                                    {n.pinned && <span className="mr-1.5 rounded bg-[var(--color-danger)]/10 px-1.5 py-0.5 text-[12px] font-medium text-[var(--color-danger)]">필독</span>}
                                     {n.title}
                                 </p>
-                                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-[var(--color-fg-subtle)]">
-                                    <CalendarIconMini />
-                                    <span>{formatDate(n.createdAt)}</span>
-                                </p>
-                            </div>
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-            <Link href="/notices" className="mt-4 block py-3.5 text-center text-sm text-[var(--color-fg-muted)] bg-[var(--color-bg-subtle)] hover:text-[var(--color-fg)] transition">
+                                <p className="text-[14px] text-[#767676]">{formatDate(n.createdAt)}</p>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+            <Link href="/notices" className="flex items-center justify-center rounded-[4px] bg-[#F6F7FB] py-6 text-[14px] font-medium text-[#767676] hover:text-[var(--color-fg)] transition">
                 더 알아보기
             </Link>
         </div>
@@ -393,7 +431,7 @@ function NoticeBox({ notices }: { notices: Notice[] }) {
 }
 
 /**
- * FaqBox — 시안 매칭. FAQ 4건 + 답변완료 배지 + "더 알아보기" 푸터.
+ * FaqBox — 시안 402:10620. FAQ 4건(질문 18/500 + 날짜 14 + 답변완료 14/#0072DD) + 더알아보기.
  */
 function FaqBox() {
     const items = [
@@ -403,30 +441,26 @@ function FaqBox() {
         { id: 4, q: "도서·산간 지역도 배송 가능한가요?",     date: "2025.07.01", answered: true },
     ];
     return (
-        <div>
-            {/* 시안 매칭: 외곽 박스 없음. 헤더 + 굵은 하단 보더 + row list + 회색 button. */}
-            <h3 className="text-xl md:text-2xl font-bold text-[var(--color-fg)] pb-4 border-b-2 border-[var(--color-fg)]">
-                FAQ
-            </h3>
-            <ul className="divide-y divide-[var(--color-border)]">
-                {items.map(f => (
-                    <li key={f.id}>
-                        <Link href="/faq" className="flex items-center gap-3 px-1 py-4 hover:opacity-70 transition">
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm md:text-base text-[var(--color-fg)] line-clamp-1 font-medium">{f.q}</p>
-                                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-[var(--color-fg-subtle)]">
-                                    <CalendarIconMini />
-                                    <span>{f.date}</span>
-                                </p>
-                            </div>
-                            {f.answered && (
-                                <span className="text-[11px] px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 font-medium flex-shrink-0">답변완료</span>
-                            )}
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-            <Link href="/faq" className="mt-4 block py-3.5 text-center text-sm text-[var(--color-fg-muted)] bg-[var(--color-bg-subtle)] hover:text-[var(--color-fg)] transition">
+        <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-5">
+                <h3 className="text-[28px] font-medium leading-none text-[#000]">FAQ</h3>
+                <ul className="divide-y divide-[var(--color-border)]">
+                    {items.map(f => (
+                        <li key={f.id}>
+                            <Link href="/faq" className="flex items-center justify-between gap-4 py-6 hover:opacity-70 transition">
+                                <div className="flex min-w-0 flex-col gap-2">
+                                    <p className="text-[18px] font-medium text-[#000] line-clamp-1">{f.q}</p>
+                                    <p className="text-[14px] text-[#767676]">{f.date}</p>
+                                </div>
+                                {f.answered && (
+                                    <span className="flex-shrink-0 text-[14px] font-medium text-[#0072DD]">답변완료</span>
+                                )}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+            <Link href="/faq" className="flex items-center justify-center rounded-[4px] bg-[#F6F7FB] py-6 text-[14px] font-medium text-[#767676] hover:text-[var(--color-fg)] transition">
                 더 알아보기
             </Link>
         </div>
@@ -684,7 +718,7 @@ function InstagramFeed() {
     // cell 268px 고정, viewport 보다 wide 한 flex row → 사용자가 좌우 스크롤/swipe 로 이동.
     return (
         <section className="mt-16">
-            <div className="mx-auto max-w-screen-2xl px-4 mb-4">
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] mb-4">
                 <p className="text-xs text-[var(--color-fg-muted)]">@elfbar</p>
                 <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">Instagram</h2>
             </div>
@@ -737,94 +771,22 @@ function InstagramFeed() {
  * ============================================================ */
 function ContactCTA() {
     return (
-        <>
-            {/* 데스크탑(md+) — 시안 41:10474 통이미지 + 좌/우 일러스트 floating + 우측 form overlay.
-                좌측 일러스트(노란 바구니+선물박스), 우측 일러스트(보라 구름)는 카드 위로 튀어나오게 absolute. */}
-            <section className="mt-24 relative w-full hidden md:block">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/cta-purple-clean.png" alt="엘프바에게 문의해주세요" className="w-full block" />
-
-                {/* 좌측 floating 일러스트 (노란 바구니 + 보라 선물) — 카드 좌측 약 30% 지점, 위로 튀어나옴 */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src="/images/cta-illust-left.png"
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute pointer-events-none z-[5]"
-                    style={{ left: "30.8%", top: "-26%", width: "5.4%" }}
-                />
-
-                {/* 우측 floating 일러스트 (보라 구름) — 카드 우측 끝쪽, 위로 튀어나옴 */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src="/images/cta-illust-right.png"
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute pointer-events-none z-[5]"
-                    style={{ left: "86%", top: "-18%", width: "7%" }}
-                />
-
-                <form
-                    action="/contact"
-                    method="get"
-                    aria-label="1:1 문의하기"
-                    className="absolute z-10 flex items-stretch gap-2 h-12"
-                    style={{ left: "55%", right: "5%", top: "50%", transform: "translateY(-50%)" }}
-                >
-                    <input
-                        type="text"
-                        placeholder="문의사항을 입력해주세요"
-                        className="flex-1 min-w-0 rounded-[18px] bg-white px-5 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-white/40 shadow-sm"
-                    />
-                    <button
-                        type="submit"
-                        className="rounded-[18px] bg-[var(--color-fg)] text-white text-sm font-semibold px-8 hover:opacity-90 transition whitespace-nowrap"
-                    >
-                        문의하기
-                    </button>
-                </form>
-            </section>
-
-            {/* 모바일(<md) — 시안 276:10403 매칭 세로 카드. 보라 그라데이션 + 일러스트 + 라벨 + 타이틀 + 서브 + full-width input/button. */}
-            <section className="mt-20 md:hidden px-4 relative">
-                {/* 우측 상단 보라 구름 일러스트 — 카드 위로 튀어나옴 */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src="/images/cta-illust-right.png"
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute pointer-events-none right-3 -top-10 w-24 z-10"
-                />
-                <div
-                    className="relative overflow-visible rounded-2xl px-5 py-8"
-                    style={{
-                        background: "linear-gradient(135deg, #b6a3e8 0%, #d1bff0 50%, #c5a9eb 100%)",
-                    }}
-                >
-                    {/* 별빛 일러스트 (왼쪽 위) */}
-                    <span aria-hidden="true" className="absolute top-3 left-3 text-white/80 text-lg">✦</span>
-                    <span aria-hidden="true" className="absolute top-8 left-7 text-white/60 text-sm">✦</span>
-
-                    <p className="relative text-xs text-white/80 mb-1">1:1 문의</p>
-                    <h2 className="relative text-xl font-bold text-white leading-tight mb-1">엘프바에게 문의해주세요</h2>
-                    <p className="relative text-xs text-white/70 mb-6">궁금하신 부분들이 있으시면 언제든지 연락주세요</p>
-
-                    <form action="/contact" method="get" aria-label="1:1 문의하기" className="relative flex flex-col gap-3">
-                        <input
-                            type="text"
-                            name="q"
-                            placeholder="문의사항을 입력해주세요"
-                            className="w-full h-12 rounded-xl bg-white px-4 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-2 focus:ring-white/60 shadow-sm"
-                        />
-                        <button
-                            type="submit"
-                            className="w-full h-12 rounded-xl bg-[#1a1a1a] text-white text-sm font-semibold hover:opacity-90 transition"
-                        >
-                            문의하기
-                        </button>
-                    </form>
-                </div>
-            </section>
-        </>
+        <section className="mt-16 md:mt-40 relative mx-auto w-full max-w-[1920px]">
+            {/* 푸터 위 1:1 문의 배너 — 1920 상한(히어로·시리즈와 동일). 넓은 화면에선 양옆 여백. 후기와 160. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+                src="/images/inquiry-banner-before-footer.png"
+                alt="엘프바에게 문의해주세요 — 궁금하신 부분이 있으시면 언제든지 연락주세요"
+                className="w-full block"
+            />
+            {/* 시안 402:10842: 인풋 제거, 문의하기 버튼만 — 우측(170 from right) · 세로 중앙(배너 280 기준) · 160×60 검정 */}
+            <Link
+                href="/contact"
+                aria-label="1:1 문의하기"
+                className="absolute right-[17%] top-[58%] -translate-y-1/2 inline-flex items-center justify-center w-[110px] h-10 md:w-[160px] md:h-[56px] rounded-[8px] bg-black text-white text-sm md:text-base font-medium shadow-sm hover:opacity-90 transition"
+            >
+                문의하기
+            </Link>
+        </section>
     );
 }

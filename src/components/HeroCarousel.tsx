@@ -162,9 +162,9 @@ export function HeroCarousel({
                     </div>
                 )}
 
-                {/* 풀이미지 모드(showOverlay=false): 페이지네이션을 우하단 유지 */}
+                {/* 풀이미지 모드 인디케이터 — 시안: 좌하단(베이크된 텍스트 아래). TrustBadges(z-20) 위로 z-30. */}
                 {!showOverlay && total > 1 && (
-                    <div className="absolute right-4 md:right-8 lg:right-12 bottom-3 md:bottom-5 z-10">
+                    <div className="absolute left-4 md:left-8 lg:left-12 bottom-[28%] md:bottom-[30%] z-30">
                         <SlideIndicator
                             index={index}
                             total={total}

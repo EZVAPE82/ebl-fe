@@ -1,20 +1,25 @@
 "use client";
 
 /**
- * 주문 배송내역 디테일 (Figma node 37:12585).
+ * 주문 배송내역 디테일 (Figma 주문배송 내역 디테일 spec).
  *
- * 본 페이지는 standalone — 좌측 마이페이지 사이드바를 사용하지 않는다.
- * Figma 시안의 4개 섹션을 그대로 따른다:
- *   1) 주문정보  — 주문번호 / 주문일자 / 주문자 / 주문처리상태
- *   2) 결제정보  — 총 주문금액 / 총 할인금액 / 추가할인금액 / 총 결제금액 / 결제수단
- *   3) 주문상품정보 — 상품 카드 (썸네일 + 이름 + 주문번호 + 가격 + 수량 + 날짜 + 상태 pill)
- *   4) 추가정보  — 받으시는분 / 우편번호 / 주소 / 일반전화 / 휴대전화 / 추가정보(보조 버튼들)
+ * 레이아웃 (Figma: sidebar 260 + main 1000, gap 80)
+ *  - Outer: mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20
+ *           flex flex-col lg:flex-row justify-center gap-20
+ *  - 좌측: MyPageSideNav (pathname 으로 "나의 주문 내역" active — /orders/[id] 에서도 그대로 노출)
+ *  - 우측 (flex-1 lg:w-[1000px], flex flex-col gap-[60px]): 4개 섹션
+ *      1) 주문정보   — 주문번호 / 주문일자 / 주문자 / 주문처리상태
+ *      2) 결제정보   — 총 주문금액 / 총 할인금액 / 추가할인금액 / 총 결제금액 / 결제수단
+ *      3) 주문상품정보 — 상품 행(썸네일 + 이름 + 주문번호 + 가격 + 수량 + 날짜 + 상태 pill)
+ *      4) 추가정보   — 받으시는분 / 우편번호 / 주소 / 일반전화 / 휴대전화 / 추가정보(보조 버튼)
  *
- * 각 섹션 타이틀은 검정 두꺼운 라인으로 구분된다.
+ *  각 섹션은 검정 두꺼운 상단 라인 + 회색 하단 라인으로 구분된다.
+ *
+ * 데이터 보존: 주문 fetch(/api/v1/orders/{id}), 환불 신청(refund-requests),
+ *   auth(useAuth + /login redirect) 그대로 유지. 레이아웃/스타일만 시안에 맞춰 재구성.
  */
 
 import { Suspense, use, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -60,11 +65,12 @@ const STATUS_LABEL: Record<string, string> = {
     DELIVERED: "배송완료",
     CANCELED: "취소완료",
     REFUNDED: "환불완료",
+    EXCHANGED: "교환완료",
 };
 
 export default function OrderPage({ params }: { params: Promise<{ id: string }> }) {
     return (
-        <Suspense fallback={<Shell><p className="text-sm text-[var(--color-fg-subtle)]">불러오는 중...</p></Shell>}>
+        <Suspense fallback={<Shell><p className="text-[14px] text-[#767676]">불러오는 중...</p></Shell>}>
             <OrderInner params={params} />
         </Suspense>
     );
@@ -110,145 +116,142 @@ function OrderInner({ params }: { params: Promise<{ id: string }> }) {
         }
     }
 
-    if (authLoading || !user) return <Shell><p className="text-sm text-[var(--color-fg-subtle)]">로그인 확인 중...</p></Shell>;
-    if (error) return <Shell><p className="text-sm text-[var(--color-danger)]">{error}</p></Shell>;
-    if (!order) return <Shell><p className="text-sm text-[var(--color-fg-subtle)]">불러오는 중...</p></Shell>;
+    if (authLoading || !user) return <Shell><p className="text-[14px] text-[#767676]">로그인 확인 중...</p></Shell>;
+    if (error) return <Shell><p className="text-[14px] text-[#D62F2F]">{error}</p></Shell>;
+    if (!order) return <Shell><p className="text-[14px] text-[#767676]">불러오는 중...</p></Shell>;
 
     const canRefund = ["PAID", "PREPARING", "SHIPPING", "DELIVERED"].includes(order.status);
+    const fullAddress = `${order.address1 ?? ""}${order.address2 ? " " + order.address2 : ""}`.trim();
 
     return (
-        <Shell hideTitle={justOrdered}>
+        <Shell>
             {justOrdered && (
-                <div className="mb-10 text-center">
-                    <div className="mx-auto w-16 h-16 rounded-full bg-[var(--color-accent)] text-white flex items-center justify-center text-3xl mb-4">
+                <div className="w-full rounded-[10px] bg-[#F6F7FB] py-6 px-5 flex flex-col items-center text-center gap-1">
+                    <div className="w-12 h-12 rounded-full bg-[#0072DD] text-white flex items-center justify-center text-2xl mb-1">
                         ✓
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">주문완료</h1>
-                    <p className="mt-2 text-sm text-[var(--color-fg-muted)]">주문이 정상적으로 완료되었습니다.</p>
-                    <div className="mt-6 rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] py-5 px-4">
-                        <p className="text-xs text-[var(--color-fg-muted)] mb-1">고객님의 주문번호는</p>
-                        <p className="font-mono text-lg md:text-xl font-bold text-[var(--color-accent)]">{order.orderNo}</p>
-                    </div>
+                    <p className="text-[18px] font-medium text-[#000000]">주문이 정상적으로 완료되었습니다.</p>
+                    <p className="text-[14px] text-[#767676]">
+                        주문번호 <span className="font-medium text-[#0072DD]">{order.orderNo}</span>
+                    </p>
                 </div>
             )}
 
             {/* 1. 주문정보 */}
             <Section title="주문정보">
-                <Dl>
-                    <Row label="주문번호"     value={<span className="font-mono">{order.orderNo}</span>} />
-                    <Row label="주문일자"     value={formatFullDate(order.orderedAt)} />
-                    <Row label="주문자"       value={user.name} />
+                <Rows>
+                    <Row label="주문번호" value={order.orderNo} />
+                    <Row label="주문일자" value={formatFullDate(order.orderedAt)} />
+                    <Row label="주문자" value={dash(user.name)} />
                     <Row
                         label="주문처리상태"
-                        value={
-                            <span className="inline-flex items-center gap-1.5 text-[var(--color-fg)]">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
-                                {STATUS_LABEL[order.status] ?? order.status}
-                            </span>
-                        }
+                        value={STATUS_LABEL[order.status] ?? order.status ?? "배송전"}
                     />
-                </Dl>
+                </Rows>
             </Section>
 
             {/* 2. 결제정보 */}
             <Section title="결제정보">
-                <Dl>
-                    <Row label="총 주문금액"   value={formatPrice(order.productAmount)} />
-                    <Row label="총 할인금액"   value={order.discountAmount > 0 ? formatPrice(order.discountAmount) : "0원"} />
-                    <Row label="추가할인금액" value="0" />
-                    <Row label="총 결제금액"   value={<span className="font-bold">{formatPrice(order.paidAmount)}</span>} />
-                    <Row label="결제수단"      value="카드결제" />
-                </Dl>
+                <Rows>
+                    <Row label="총 주문금액" value={won(order.productAmount)} />
+                    <Row label="총 할인금액" value={won(order.discountAmount)} />
+                    <Row label="추가할인금액" value={won(order.pointUsed)} />
+                    <Row label="총 결제금액" value={won(order.paidAmount)} />
+                    <Row label="결제수단" value="카드결제" />
+                </Rows>
             </Section>
 
             {/* 3. 주문상품정보 */}
             <Section title="주문상품정보">
-                <ul className="divide-y divide-[var(--color-border)]">
+                <div className="border-t border-[#222222]">
                     {order.items.map(i => {
                         const isGift = i.kind === "FREE_GIFT";
                         return (
-                            <li
+                            <div
                                 key={i.id}
-                                className={`grid grid-cols-[64px_1fr_auto] md:grid-cols-[72px_1fr_110px_60px_100px_110px] items-center gap-4 py-4 ${isGift ? "bg-[var(--color-danger)]/5 px-2 rounded" : ""}`}
+                                className="py-3 border-b border-[#DDDDDD] flex flex-wrap justify-between items-center gap-3"
                             >
-                                <div className="w-16 h-16 md:w-[72px] md:h-[72px] rounded bg-[var(--color-bg-subtle)] flex items-center justify-center">
-                                    <div className="w-9 h-11 bg-[var(--color-fg-subtle)]/30 rounded-sm" />
-                                </div>
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-1.5">
-                                        {isGift && (
-                                            <span className="inline-flex items-center rounded bg-[var(--color-danger)]/10 text-[var(--color-danger)] px-1.5 py-0.5 text-[10px] font-bold flex-shrink-0">
-                                                증정
-                                            </span>
-                                        )}
-                                        <Link href={`/p/${i.productId}`} className="text-sm font-medium hover:underline line-clamp-1 text-[var(--color-fg)]">
-                                            {i.productName}
-                                        </Link>
+                                {/* LEFT: 썸네일 + 상품명/주문번호 */}
+                                <div className="w-[282px] flex items-center gap-3">
+                                    <div className="w-[90px] h-[108px] rounded-[4px] object-cover bg-[#F6F7FB] shrink-0 flex items-center justify-center">
+                                        <div className="w-9 h-11 rounded-sm bg-[#DDDDDD]" />
                                     </div>
-                                    <p className="text-xs text-[var(--color-fg-muted)] mt-1 font-mono">#{order.orderNo}</p>
-                                    {i.optionText && <p className="text-xs text-[var(--color-fg-muted)] mt-0.5">{i.optionText}</p>}
-                                    <p className="md:hidden text-xs text-[var(--color-fg-muted)] mt-1">
-                                        <span className={`font-semibold ${isGift ? "text-[var(--color-danger)]" : "text-[var(--color-fg)]"}`}>
-                                            {isGift ? "무료" : formatPrice(i.subtotal)}
-                                        </span>
-                                        <span className="mx-1.5">·</span>{i.quantity}개
-                                        <span className="mx-1.5">·</span>{formatShortDate(order.orderedAt)}
-                                    </p>
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <p className="text-[16px] font-medium text-[#222222] line-clamp-2">
+                                            {isGift && <span className="text-[#0072DD]">[증정] </span>}
+                                            {dash(i.productName)}
+                                        </p>
+                                        <p className="text-[14px] text-[#767676]">#{order.orderNo}</p>
+                                    </div>
                                 </div>
-                                <div className={`hidden md:block text-sm font-medium text-center ${isGift ? "text-[var(--color-danger)]" : "text-[var(--color-fg)]"}`}>
-                                    {isGift ? "무료" : formatPrice(i.subtotal)}
+
+                                {/* 가격 */}
+                                <div className="w-[184px] text-center text-[14px] font-medium text-[#000000]">
+                                    {isGift ? "무료" : won(i.subtotal)}
                                 </div>
-                                <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">{i.quantity}개</div>
-                                <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">{formatShortDate(order.orderedAt)}</div>
-                                <div className="text-right">
-                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#3b82f6]/10 text-[#3b82f6] text-xs font-medium px-3 py-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
-                                        {STATUS_LABEL[order.status] ?? order.status}
-                                    </span>
+
+                                {/* 수량 */}
+                                <div className="w-[184px] text-center text-[14px] text-[#767676]">
+                                    {i.quantity}개
                                 </div>
-                            </li>
+
+                                {/* 날짜 */}
+                                <div className="w-[184px] text-center text-[14px] text-[#767676]">
+                                    {formatShortDate(order.orderedAt)}
+                                </div>
+
+                                {/* 상태 pill */}
+                                <StatusPill status={order.status} />
+                            </div>
                         );
                     })}
-                </ul>
+                </div>
             </Section>
 
             {/* 4. 추가정보 */}
             <Section title="추가정보">
-                <Dl>
-                    <Row label="받으시는분" value={order.recipientName} />
-                    <Row label="우편번호"   value={order.postalCode} />
-                    <Row label="주소"       value={`${order.address1}${order.address2 ? " " + order.address2 : ""}`} />
-                    <Row label="일반전화"   value="-" />
-                    <Row label="휴대전화"   value={order.recipientPhoneMasked} />
+                <Rows>
+                    <Row label="받으시는분" value={dash(order.recipientName)} />
+                    <Row label="우편번호" value={dash(order.postalCode)} />
+                    <Row label="주소" value={fullAddress || "—"} />
+                    <Row label="일반전화" value="—" />
+                    <Row label="휴대전화" value={dash(order.recipientPhoneMasked)} />
                     {order.memo && <Row label="배송 메모" value={order.memo} />}
                     <Row
                         label="추가정보"
                         value={
-                            <div className="flex gap-2">
-                                <button className="rounded border border-[var(--color-border)] text-xs text-[var(--color-fg)] px-3 py-1.5 hover:bg-[var(--color-bg-subtle)]">
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => alert("현금영수증 신청은 고객센터로 문의해주세요.")}
+                                    className="px-3 py-2 rounded-[4px] border border-[#DDDDDD] text-[14px] font-medium text-[#767676] hover:bg-[#F6F7FB] transition"
+                                >
                                     현금영수증 신청
                                 </button>
-                                <button className="rounded border border-[var(--color-border)] text-xs text-[var(--color-fg)] px-3 py-1.5 hover:bg-[var(--color-bg-subtle)]">
-                                    거래명세서 안내
+                                <button
+                                    type="button"
+                                    onClick={() => alert("거래명세서를 인쇄합니다.")}
+                                    className="px-3 py-2 rounded-[4px] border border-[#DDDDDD] text-[14px] font-medium text-[#767676] hover:bg-[#F6F7FB] transition"
+                                >
+                                    거래명세서 인쇄
                                 </button>
                             </div>
                         }
                     />
-                </Dl>
+                </Rows>
             </Section>
 
-            {/* 액션 */}
-            <div className="mt-10 flex gap-2">
-                <Link href="/mypage/orders" className="flex-1">
-                    <Button variant="secondary" size="lg" fullWidth>주문 내역으로</Button>
-                </Link>
+            {/* 액션 — 주문 내역으로 / 환불 신청 (데이터/액션 보존) */}
+            <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" size="lg" onClick={() => router.push("/mypage/orders")}>
+                    주문 내역으로
+                </Button>
                 {canRefund && (
                     <Button
                         onClick={() => setRefundOpen(true)}
                         variant="secondary"
                         size="lg"
-                        fullWidth
-                        className="flex-1 !border-[var(--color-danger)] !text-[var(--color-danger)] hover:!bg-[var(--color-danger-bg)]"
+                        className="!border-[#D62F2F] !text-[#D62F2F] hover:!bg-[#FDECEC]"
                     >
                         환불 신청
                     </Button>
@@ -256,23 +259,23 @@ function OrderInner({ params }: { params: Promise<{ id: string }> }) {
             </div>
 
             {refundOpen && (
-                <div className="fixed inset-0 bg-[var(--color-overlay)] z-40 flex items-end md:items-center justify-center p-4">
-                    <div className="bg-[var(--color-surface)] w-full max-w-md rounded-[var(--radius-lg)] p-5 space-y-3">
-                        <h3 className="font-medium text-base text-[var(--color-fg)]">환불 신청</h3>
-                        <p className="text-xs text-[var(--color-fg-muted)]">반송 택배비가 환불 금액에서 차감될 수 있습니다.</p>
+                <div className="fixed inset-0 bg-black/40 z-40 flex items-end md:items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-md rounded-[10px] p-5 space-y-3">
+                        <h3 className="font-medium text-[16px] text-[#000000]">환불 신청</h3>
+                        <p className="text-[13px] text-[#767676]">반송 택배비가 환불 금액에서 차감될 수 있습니다.</p>
                         <textarea
                             value={refundReason}
                             onChange={e => setRefundReason(e.target.value)}
                             placeholder="환불 사유를 입력해주세요"
                             rows={4}
-                            className="block w-full bg-[var(--color-surface)] text-[var(--color-fg)] border border-[var(--color-border)] rounded px-4 py-3 text-sm placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)] focus:border-[var(--color-ring)] transition"
+                            className="block w-full bg-white text-[#000000] border border-[#DDDDDD] rounded-[4px] px-4 py-3 text-[14px] placeholder:text-[#767676] focus:outline-none focus:border-[#0072DD] transition"
                         />
                         <div className="flex gap-2">
                             <Button onClick={() => setRefundOpen(false)} variant="secondary" fullWidth className="flex-1">취소</Button>
                             <Button
                                 onClick={requestRefund}
                                 fullWidth
-                                className="flex-1 !bg-[var(--color-danger)] !text-white hover:!opacity-90"
+                                className="flex-1 !bg-[#D62F2F] !text-white hover:!opacity-90"
                             >
                                 신청
                             </Button>
@@ -287,46 +290,88 @@ function OrderInner({ params }: { params: Promise<{ id: string }> }) {
 /* ============================================================
  * 레이아웃 / 보조 컴포넌트
  * ============================================================ */
-function Shell({ children, hideTitle: _hideTitle }: { children: React.ReactNode; hideTitle?: boolean }) {
-    // 시안 37:12585 — 좌측 마이페이지 사이드바 + 우측 메인, 페이지 타이틀("주문 상세") 없음
+function Shell({ children }: { children: React.ReactNode }) {
+    // Figma: sidebar 260 + main 1000, gap 80. Header/PromoStrip/Footer 는 layout 제공.
     return (
-        <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8">
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flex-col lg:flex-row justify-center gap-20">
             <MyPageSideNav />
-            <div>{children}</div>
+            <main className="flex-1 lg:w-[1000px] flex flex-col gap-[60px]">{children}</main>
         </div>
     );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <section className="mb-10">
-            <h2 className="text-base md:text-lg font-semibold pb-3 mb-1 border-b-2 border-[var(--color-fg)] text-[var(--color-fg)]">
-                {title}
-            </h2>
+        <section className="w-full flex flex-col gap-5 border-b border-[#DDDDDD]">
+            <div className="h-11 flex items-end">
+                <h2 className="text-[24px] font-medium text-[#000000]">{title}</h2>
+            </div>
             {children}
         </section>
     );
 }
 
-function Dl({ children }: { children: React.ReactNode }) {
-    return <dl className="divide-y divide-[var(--color-border)]">{children}</dl>;
+/** 라벨/값 행들을 감싸는 컨테이너 — 검정 상단 라인 + 패딩 */
+function Rows({ children }: { children: React.ReactNode }) {
+    return <div className="border-t border-[#222222] py-8 flex flex-col gap-5">{children}</div>;
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
     return (
-        <div className="grid grid-cols-[110px_1fr] md:grid-cols-[140px_1fr] gap-3 py-3 text-sm">
-            <dt className="text-[var(--color-fg-muted)]">{label}</dt>
-            <dd className="text-[var(--color-fg)]">{value}</dd>
+        <div className="flex items-start">
+            <span className="w-[120px] shrink-0 text-[16px] text-[#767676]">{label}</span>
+            <span className="text-[16px] font-medium text-[#000000]">{value}</span>
         </div>
+    );
+}
+
+/**
+ * 상태 칩 — Figma 매핑:
+ *  - 배송완료(DELIVERED): bg #E6F3FE / text #0072DD / dot #0742AC
+ *  - 취소완료(CANCELED/REFUNDED/EXCHANGED): bg #222222 / text white / dot white
+ *  - 그 외 진행상태: bg #F6F7FB / text #767676 / dot #767676
+ */
+function StatusPill({ status }: { status: string }) {
+    const label = STATUS_LABEL[status] ?? status;
+
+    let pillClass: string;
+    let dotClass: string;
+    if (status === "DELIVERED") {
+        pillClass = "bg-[#E6F3FE] text-[#0072DD]";
+        dotClass = "bg-[#0742AC]";
+    } else if (["CANCELED", "REFUNDED", "EXCHANGED"].includes(status)) {
+        pillClass = "bg-[#222222] text-white";
+        dotClass = "bg-white";
+    } else {
+        pillClass = "bg-[#F6F7FB] text-[#767676]";
+        dotClass = "bg-[#767676]";
+    }
+
+    return (
+        <span className={`px-[18px] py-2.5 rounded-full text-[14px] font-medium flex items-center gap-1 ${pillClass}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
+            {label}
+        </span>
     );
 }
 
 /* ============================================================
  * 유틸
  * ============================================================ */
+/** 숫자를 "12,000원" 형태로. null/undefined 는 "—". */
+function won(n: number | null | undefined): string {
+    if (n == null || Number.isNaN(n)) return "—";
+    return formatPrice(n);
+}
+
+/** 빈 값 → "—" 폴백 */
+function dash(v: string | null | undefined): string {
+    return v != null && String(v).trim() !== "" ? String(v) : "—";
+}
+
 function formatFullDate(iso: string): string {
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return iso;
+    if (Number.isNaN(d.getTime())) return iso || "—";
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
@@ -338,7 +383,7 @@ function formatFullDate(iso: string): string {
 
 function formatShortDate(iso: string): string {
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return iso;
+    if (Number.isNaN(d.getTime())) return iso || "—";
     const y = String(d.getFullYear()).slice(2);
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");

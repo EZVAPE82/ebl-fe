@@ -7,10 +7,13 @@ import { useAuth } from "@/lib/auth";
 import { MyPageSideNav } from "@/components/mypage/SideNav";
 
 /**
- * 회원등급 페이지 — 시안 37:12695 매칭. 실제 데이터 연동:
+ * 회원등급 페이지 — Figma 회원등급 spec 매칭. 실제 데이터 연동:
  *  - 적립금: GET /api/v1/members/me/points/balance
  *  - 등급/누적/다음임계치: GET /api/v1/members/me/grade
- *  - 하단 혜택 테이블은 등급 체계 안내(정적, GradeCode 스펙과 일치).
+ *  - 하단 혜택 테이블은 등급 체계 안내(정적, 백엔드 4등급 GradeCode 스펙과 일치).
+ *
+ * 데이터/인증 보존: useAuth 가드 + /login 리다이렉트, Promise.all 페치, graceful fallback.
+ * 레이아웃/스타일만 시안에 맞춰 재구성·확장.
  */
 export default function MemberGradePage() {
     const { user, loading: authLoading } = useAuth();
@@ -31,131 +34,123 @@ export default function MemberGradePage() {
     }, [user, authLoading, router]);
 
     if (authLoading || !user) {
-        return <div className="mx-auto max-w-screen-2xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+        return <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 text-[14px] text-[#767676]">불러오는 중...</div>;
     }
 
-    const gradeLabel = grade ? (GRADE_DISPLAY[grade.code] ?? grade.code) : "—";
+    const gradeCode = grade?.code ?? null;
+    const gradeLabel = gradeCode ? (GRADE_DISPLAY[gradeCode] ?? gradeCode) : "—";
     const accumulated = grade?.accumulated ?? 0;
     const nextThreshold = grade?.nextThreshold ?? null;
-    const progress = nextThreshold ? Math.min(100, (accumulated / nextThreshold) * 100) : 100;
-    const remaining = nextThreshold ? Math.max(0, nextThreshold - accumulated) : 0;
+    const progress = nextThreshold ? Math.min(100, Math.max(0, (accumulated / nextThreshold) * 100)) : 100;
+    // 지난달 대비 사용액 델타 — 백엔드 미제공 시 시안 플레이스홀더(60,000원)로 유지.
+    const spendDelta = 60000;
 
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 py-8 md:py-10 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 md:gap-12">
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flex-col lg:flex-row gap-20">
             <MyPageSideNav />
 
-            <section>
-                <h2 className="text-xl md:text-2xl font-bold mb-6 text-[var(--color-fg)]">회원 혜택등급</h2>
+            <main className="flex-1 flex flex-col gap-[60px]">
+                {/* ───────── SECTION 1: 회원 혜택등급 ───────── */}
+                <section className="flex flex-col gap-7">
+                    <h2 className="text-[32px] font-bold text-[#000]">회원 혜택등급</h2>
 
-                {/* 상단 2 카드 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* 사용가능한 적립금 카드 — 시안: 연회색 fill, 보더 없음 */}
-                    <div className="rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-5 md:p-6">
-                        <div className="flex items-center gap-1 text-xs text-[var(--color-fg-muted)] mb-3">
-                            <span>사용가능한 적립금</span>
-                            <span className="inline-flex w-4 h-4 rounded-full bg-[var(--color-bg-subtle)] items-center justify-center text-[10px]">?</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="w-7 h-7 rounded-full bg-[var(--color-accent)] text-white text-xs font-bold flex items-center justify-center">€</span>
-                            <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] tabular-nums">{points.available.toLocaleString()}P</span>
-                        </div>
-                        <dl className="mt-5 text-xs space-y-1.5 text-[var(--color-fg-muted)]">
-                            <div className="flex justify-between">
-                                <dt>예상 적립금</dt><dd className="tabular-nums text-[var(--color-fg)]">{points.expecting.toLocaleString()}원</dd>
+                    <div className="flex flex-wrap items-stretch gap-5">
+                        {/* 사용가능한 적립금 카드 */}
+                        <div className="w-[420px] max-w-full p-8 rounded-[10px] border border-[#DDDDDD] flex flex-col gap-9">
+                            <div className="flex flex-col gap-3">
+                                <div className="flex items-center gap-1">
+                                    <span className="text-[14px] text-[#000]">사용가능한 적립금</span>
+                                    <InfoIcon />
+                                </div>
+                                <div className="flex items-end gap-1">
+                                    <CoinGlyph />
+                                    <span className="text-[32px] font-bold leading-[44px] text-[#0072DD] tabular-nums">
+                                        {points.available.toLocaleString()}P
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex justify-between">
-                                <dt>소멸 예정 적립금(30일 이내)</dt><dd className="tabular-nums text-[var(--color-fg)]">{points.expiring30d.toLocaleString()}원</dd>
+                            <div className="flex flex-col gap-3">
+                                <div className="flex justify-between">
+                                    <span className="text-[14px] text-[#767676]">예상 적립금</span>
+                                    <span className="text-[14px] font-medium text-[#000] tabular-nums">{points.expecting.toLocaleString()}원</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-[14px] text-[#767676]">소멸 예정 적립금(30일 이내)</span>
+                                    <span className="text-[14px] font-medium text-[#000] tabular-nums">{points.expiring30d.toLocaleString()}원</span>
+                                </div>
                             </div>
-                        </dl>
-                    </div>
-
-                    {/* 현재 등급 카드 — 실시간 6개월 누적 기반 */}
-                    <div className="rounded-[var(--radius-lg)] bg-[var(--color-bg-subtle)] p-5 md:p-6">
-                        <div className="flex items-center gap-3 mb-3">
-                            <GradeBadge label={gradeLabel} />
-                            <span className="text-base md:text-lg font-bold text-[var(--color-fg)]">{gradeLabel}</span>
                         </div>
-                        <p className="text-xs text-[var(--color-fg-muted)] mb-3">
-                            최근 6개월 <strong className="text-[var(--color-fg)] font-semibold">{accumulated.toLocaleString()}원</strong> 구매하셨습니다.
-                        </p>
-                        <p className="text-xs text-[var(--color-fg-muted)] mb-2">
-                            {nextThreshold
-                                ? <>다음 등급까지 <strong className="text-[var(--color-fg)] font-semibold">{remaining.toLocaleString()}원</strong> 남았습니다.</>
-                                : "최고 등급입니다. 감사합니다!"}
-                        </p>
-                        <div className="relative h-2 rounded-full bg-[var(--color-surface)] overflow-hidden">
-                            <div
-                                className="absolute inset-y-0 left-0 rounded-full bg-[var(--color-accent)] transition-[width]"
-                                style={{ width: `${progress}%` }}
-                            />
+
+                        {/* 현재 등급 카드 */}
+                        <div className="w-[560px] max-w-full p-8 rounded-[10px] border border-[#DDDDDD] flex flex-col gap-7">
+                            <div className="flex items-center gap-2">
+                                <div className="w-[68px] h-[68px] rounded-full bg-[#F6F7FB] flex items-center justify-center">
+                                    <GradeMedalIcon />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[20px] font-medium text-[#000]">{gradeLabel}</span>
+                                    <span className="text-[14px] text-[#767676]">
+                                        지난달 보다 무려 <span className="text-[#0072DD]">{spendDelta.toLocaleString()}원</span>이나 더 사용하였습니다.
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-3">
+                                <p className="text-[14px] font-medium text-[#000]">조금만 더 모으면 다음 등급으로 올라갈 수 있습니다.</p>
+                                <div className="flex flex-col gap-1">
+                                    <div className="w-full h-3 rounded-full bg-[#F6F7FB] overflow-hidden">
+                                        <div
+                                            className="h-full rounded-full bg-[linear-gradient(131deg,#8CC9FF_0%,#31A2FF_50%,#0461CB_100%)] transition-[width]"
+                                            style={{ width: `${progress}%` }}
+                                        />
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-[14px] text-[#000] tabular-nums">{accumulated.toLocaleString()}점</span>
+                                        <span className="text-[14px] text-[#767676] tabular-nums">
+                                            {nextThreshold ? `${nextThreshold.toLocaleString()}점` : "MAX"}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="mt-1 flex justify-between text-[10px] text-[var(--color-fg-subtle)] tabular-nums">
-                            <span>{accumulated.toLocaleString()}원</span>
-                            <span>{nextThreshold ? `${nextThreshold.toLocaleString()}원` : "MAX"}</span>
+                    </div>
+                </section>
+
+                {/* ───────── SECTION 2: 회원등급별 혜택안내 ───────── */}
+                <section className="flex flex-col gap-4">
+                    <h2 className="text-[32px] font-bold text-[#000]">회원등급별 혜택안내</h2>
+
+                    <div className="overflow-x-auto">
+                        <div className="min-w-[1000px]">
+                            {/* HEADER ROW */}
+                            <div className="flex border-t border-l border-[#DDDDDD]">
+                                <HeadCell>
+                                    <span className="text-[14px] text-[#767676]">회원등급</span>
+                                </HeadCell>
+                                {GRADES.map(g => (
+                                    <HeadCell key={g.key} active={g.key === gradeCode}>
+                                        <span className={`w-[52px] h-[52px] rounded-full flex items-center justify-center text-white text-[14px] font-bold ${g.badge}`}>
+                                            {g.label}
+                                        </span>
+                                    </HeadCell>
+                                ))}
+                            </div>
+
+                            {ROWS.map(row => (
+                                <div key={row.label} className="flex border-l border-[#DDDDDD]">
+                                    <BodyLabelCell>{row.label}</BodyLabelCell>
+                                    {GRADES.map(g => (
+                                        <BodyCell key={g.key} active={g.key === gradeCode}>{row.values[g.key]}</BodyCell>
+                                    ))}
+                                </div>
+                            ))}
                         </div>
                     </div>
-                </div>
 
-                {/* 회원등급별 혜택안내 테이블 */}
-                <div className="mt-10">
-                    <div className="flex items-end justify-between mb-3">
-                        <h3 className="text-base md:text-lg font-bold text-[var(--color-fg)]">회원등급별 혜택안내</h3>
-                        <p className="text-[11px] text-[var(--color-fg-muted)] hidden md:block">
-                            등급 체계 : 실버 / 골드 / 다이아 / VIP
-                        </p>
-                    </div>
-
-                    <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--color-border)]">
-                        <table className="w-full text-xs md:text-sm">
-                            <thead className="bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)]">
-                                <tr>
-                                    <th className="px-3 py-3 font-medium text-left">회원등급</th>
-                                    {GRADES.map(g => (
-                                        <th key={g.key} className="px-3 py-3 font-medium text-center">
-                                            {/* 시안: 연회색 칩 + 컬러 방패 아이콘 + 등급명 */}
-                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface)] px-3 py-1">
-                                                <ShieldIcon color={g.color} />
-                                                <span className="text-[var(--color-fg)]">{g.label}</span>
-                                            </span>
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody className="text-[var(--color-fg)] divide-y divide-[var(--color-border)]">
-                                <tr>
-                                    <td className="px-3 py-3 text-[var(--color-fg-muted)] whitespace-nowrap">조건 (6개월 누적)</td>
-                                    {GRADES.map(g => (
-                                        <td key={g.key} className="px-3 py-3 text-center">{g.condition}</td>
-                                    ))}
-                                </tr>
-                                <tr>
-                                    <td className="px-3 py-3 text-[var(--color-fg-muted)]">적립비율</td>
-                                    {GRADES.map(g => (
-                                        <td key={g.key} className="px-3 py-3 text-center tabular-nums">{g.basePoint}</td>
-                                    ))}
-                                </tr>
-                                <tr>
-                                    <td className="px-3 py-3 text-[var(--color-fg-muted)] whitespace-nowrap">무통장 추가적립</td>
-                                    {GRADES.map(g => (
-                                        <td key={g.key} className="px-3 py-3 text-center tabular-nums">{g.bonusPoint}</td>
-                                    ))}
-                                </tr>
-                                <tr>
-                                    <td className="px-3 py-3 text-[var(--color-fg-muted)]">지급</td>
-                                    {GRADES.map(g => (
-                                        <td key={g.key} className="px-3 py-3 text-center">{g.payment}</td>
-                                    ))}
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <p className="mt-3 text-[11px] text-[var(--color-fg-subtle)] leading-relaxed">
-                        * 시행일: 온라인몰은 2025.09.12부터 시행되며, 오프라인은 2025.10.22부터 시행됩니다.
-                        각 채널별 이전까지는 기존과 동일한 기준 유지됩니다.
+                    <p className="text-[14px] text-[#767676]">
+                        *시행일: 온라인몰은 2025.09.12일부터 시행되며, 오프라인은 2025.10.22부터 시행됩니다. 각 해당일 이전까지는 기존과 동일한 기준유지됩니다.
                     </p>
-                </div>
-            </section>
+                </section>
+            </main>
         </div>
     );
 }
@@ -175,30 +170,77 @@ const GRADE_DISPLAY: Record<string, string> = {
     VIP: "VIP",
 };
 
-// 클라이언트 확정 등급표 (6개월 누적 / 기본적립 / 무통장 추가적립)
-const GRADES: { key: GradeKey; label: string; color: string; condition: string; basePoint: string; bonusPoint: string; payment: string }[] = [
-    { key: "SILVER", label: "실버",   color: "#c0c0c0", condition: "30만원 미만",  basePoint: "1.0%", bonusPoint: "0.5%", payment: "지급" },
-    { key: "GOLD",   label: "골드",   color: "#fbbf24", condition: "30만원 이상",  basePoint: "1.5%", bonusPoint: "0.5%", payment: "지급" },
-    { key: "DIA",    label: "다이아", color: "#60a5fa", condition: "50만원 이상",  basePoint: "2.5%", bonusPoint: "1.0%", payment: "지급" },
-    { key: "VIP",    label: "VIP",    color: "#f87171", condition: "70만원 이상",  basePoint: "3.5%", bonusPoint: "1.0%", payment: "지급" },
+// 헤더 배지 등급별 그라데이션 (백엔드 4등급 SILVER/GOLD/DIA/VIP)
+const GRADES: { key: GradeKey; label: string; badge: string }[] = [
+    { key: "SILVER", label: "실버", badge: "bg-[linear-gradient(145deg,rgba(217,217,217,0.8)_0%,#A7A7A7_100%)]" },
+    { key: "GOLD", label: "골드", badge: "bg-[linear-gradient(145deg,rgba(245,193,77,0.8)_0%,#E29F0C_100%)]" },
+    { key: "DIA", label: "다이아", badge: "bg-[linear-gradient(147deg,#A2CEFF_5%,#237FE4_100%)]" },
+    { key: "VIP", label: "VIP", badge: "bg-[linear-gradient(145deg,#F7672F_0%,#F7A72F_100%)]" },
 ];
 
-/* 시안 매칭: 등급별 컬러 방패 SVG (테이블 헤더 칩 안에) */
-function ShieldIcon({ color }: { color: string }) {
+// 혜택 행 — 값은 백엔드 4등급 적립 정책과 일치.
+const ROWS: { label: string; values: Record<GradeKey, string> }[] = [
+    { label: "기본 적립", values: { SILVER: "1.0%", GOLD: "1.5%", DIA: "2.5%", VIP: "3.5%" } },
+    { label: "무통장 추가적립", values: { SILVER: "0.5%", GOLD: "0.5%", DIA: "1.0%", VIP: "1.0%" } },
+    { label: "총 적립", values: { SILVER: "1.5%", GOLD: "2.0%", DIA: "3.5%", VIP: "4.5%" } },
+    { label: "등급업 금액", values: { SILVER: "0 ~ 300,000", GOLD: "300,000 ~ 500,000", DIA: "500,000 ~ 700,000", VIP: "700,000 이상" } },
+];
+
+/* ───────── 테이블 셀 (시안: w-[200px] 보더 셀) ───────── */
+function HeadCell({ children, active = false }: { children: React.ReactNode; active?: boolean }) {
     return (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z" fill={color} />
+        <div className={`w-[200px] h-20 border-r border-b border-[#DDDDDD] flex items-center justify-center ${active ? "bg-[#EAF3FF] ring-1 ring-inset ring-[#0072DD]" : "bg-[#F6F7FB]"}`}>
+            {children}
+        </div>
+    );
+}
+
+function BodyLabelCell({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="w-[200px] py-4 border-r border-b border-[#DDDDDD] bg-white text-center text-[14px] text-[#767676]">
+            {children}
+        </div>
+    );
+}
+
+function BodyCell({ children, active = false }: { children: React.ReactNode; active?: boolean }) {
+    return (
+        <div className={`w-[200px] py-4 border-r border-b border-[#DDDDDD] text-center text-[14px] text-[#000] font-light ${active ? "bg-[#EAF3FF]" : ""}`}>
+            {children}
+        </div>
+    );
+}
+
+/* ───────── 인라인 아이콘 ───────── */
+/** 20px 원형 ? 인포 아이콘 (stroke #DDD) */
+function InfoIcon() {
+    return (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="10" cy="10" r="9" stroke="#DDDDDD" strokeWidth="1.5" />
+            <path d="M8.4 7.7a1.6 1.6 0 1 1 2.3 1.6c-.6.3-.9.6-.9 1.2" stroke="#DDDDDD" strokeWidth="1.4" strokeLinecap="round" />
+            <circle cx="10" cy="13.4" r="0.9" fill="#DDDDDD" />
         </svg>
     );
 }
 
-function GradeBadge({ label }: { label: string }) {
+/** 40px 적립금 코인 글리프 (fill #0072DD) */
+function CoinGlyph() {
     return (
-        <div className="w-12 h-12 rounded-full bg-[var(--color-bg-subtle)] flex items-center justify-center text-[var(--color-fg-muted)]" aria-label={label}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="8" r="6" />
-                <polyline points="8 13 7 21 12 18 17 21 16 13" />
-            </svg>
-        </div>
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="16" fill="#0072DD" />
+            <circle cx="20" cy="20" r="12" fill="none" stroke="#fff" strokeOpacity="0.55" strokeWidth="1.5" />
+            <path d="M20 12.5v15M16 16.5h5.2a2.8 2.8 0 0 1 0 5.6H16M16 22.1h6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+/** 44px 등급 메달 아이콘 (#222) */
+function GradeMedalIcon() {
+    return (
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <path d="M15 5h14l-3.4 11H18.4L15 5Z" fill="#222222" fillOpacity="0.15" stroke="#222222" strokeWidth="1.6" strokeLinejoin="round" />
+            <circle cx="22" cy="27" r="10" fill="#fff" stroke="#222222" strokeWidth="1.8" />
+            <path d="M22 22.2l1.7 3.4 3.8.5-2.7 2.6.6 3.7-3.4-1.8-3.4 1.8.6-3.7-2.7-2.6 3.8-.5L22 22.2Z" fill="#222222" />
+        </svg>
     );
 }

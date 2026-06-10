@@ -1,5 +1,5 @@
 import { api, ApiError } from "@/lib/api";
-import { ProductCard } from "@/components/ProductCard";
+import { RelatedCarousel } from "@/components/RelatedCarousel";
 import { ProductReviews } from "@/components/ProductReviews";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductQna } from "@/components/ProductQna";
@@ -27,6 +27,18 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
         { content: [], totalElements: 0, totalPages: 0, number: 0, size: 8, first: true, last: true, empty: true }
     );
 
+    // 다른맛 드롭다운 — 같은 시리즈 형제 맛 (slug prefix '<series>-flavor-N')
+    const seriesKey = ((product as { slug?: string }).slug ?? "").replace(/-flavor-\d+$/, "");
+    const siblingsData = seriesKey
+        ? await safeFetch<Page<ProductSummary>>(
+            `/api/v1/public/products?series=${encodeURIComponent(seriesKey)}&size=100`,
+            { content: [], totalElements: 0, totalPages: 0, number: 0, size: 100, first: true, last: true, empty: true }
+        )
+        : null;
+    const siblings = (siblingsData?.content ?? [])
+        .filter((s) => s.id !== product.id)
+        .map((s) => ({ id: s.id, name: s.name, price: displayPrice(s) }));
+
     type PromoBadge = { id: number; name: string; buyQuantity: number; getQuantity: number; label: string };
     const promos = await safeFetch<PromoBadge[]>(
         `/api/v1/public/products/${id}/promotions`,
@@ -40,32 +52,22 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
         ? [product.thumbnailUrl, ...product.images.filter(i => i.type === "THUMBNAIL").map(i => i.url)]
         : product.images.map(i => i.url);
 
+    const hasDiscount = product.onlinePrice != null && product.onlinePrice < product.price;
+    const pct = hasDiscount ? Math.round(((product.price - (product.onlinePrice as number)) / product.price) * 100) : 0;
+
     return (
         <div className="pb-28 md:pb-12">
             {/* ===== 상단: 갤러리 + 정보 ===== */}
-            <div className="mx-auto max-w-screen-2xl px-4 py-6 grid gap-8 md:grid-cols-2">
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] py-6 md:py-10 grid gap-8 md:gap-[60px] md:grid-cols-2">
                 {/* 갤러리 (client island) */}
                 <ProductGallery images={gallery} alt={product.name} />
 
                 {/* 정보 */}
                 <div className="space-y-5">
                     <div>
-                        {/* 프로모션 뱃지 (있을 때만) */}
-                        {promos.length > 0 && (
-                            <div className="mb-3 flex flex-wrap gap-1.5">
-                                {promos.map(p => (
-                                    <span
-                                        key={p.id}
-                                        className="inline-flex items-center rounded-[var(--radius-sm)] bg-[var(--color-danger)]/10 text-[var(--color-danger)] px-2.5 py-1 text-xs font-bold"
-                                        title={p.name}
-                                    >
-                                        🎁 {p.label} 진행 중
-                                    </span>
-                                ))}
-                            </div>
-                        )}
+                        {/* 프로모션 뱃지: 시안에 없어 상세에서 미노출 (프로모션 기능·장바구니 로직은 유지). 복구하려면 promos.map 뱃지 블록 복원 */}
                         <div className="flex items-start justify-between gap-3">
-                            <h1 className="text-xl md:text-2xl font-semibold leading-tight text-[var(--color-fg)]">{product.name}</h1>
+                            <h1 className="text-[28px] md:text-[32px] font-bold leading-[42px] text-[#000]">{product.name}</h1>
                             {/* 시안: 공유 아이콘 (우측 상단) */}
                             <button
                                 type="button"
@@ -81,24 +83,43 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                                 </svg>
                             </button>
                         </div>
-                        <div className="mt-3 flex items-end gap-2">
-                            <span className="text-2xl md:text-3xl font-bold text-[var(--color-fg)]">{formatPrice(displayPrice(product))}</span>
+                        {/* 설명 16/#767676 */}
+                        {product.description && (
+                            <p className="mt-3 text-[16px] leading-relaxed text-[#767676]">{product.description}</p>
+                        )}
+                        {/* 정가 취소선 (할인 시) */}
+                        {hasDiscount && (
+                            <div className="mt-4 text-[16px] text-[#999999] line-through tabular-nums">{formatPrice(product.price)}</div>
+                        )}
+                        {/* 할인% + 판매가 */}
+                        <div className="mt-1 flex items-baseline gap-1">
+                            {hasDiscount && <span className="text-[20px] font-medium text-[#0073DD] tabular-nums">{pct}%</span>}
+                            <span className="text-[24px] font-medium text-[#222222] tabular-nums">{formatPrice(displayPrice(product))}</span>
                         </div>
-                        <div className="mt-2 flex items-center gap-2 text-sm">
-                            <span className="text-[var(--color-warning)]">★ {product.ratingAvg?.toFixed?.(1) ?? "0.0"}</span>
-                            <span className="text-[var(--color-fg-subtle)]">·</span>
-                            <span className="text-[var(--color-fg-muted)]">후기 {product.reviewCount}</span>
+                        {/* 평점 */}
+                        <div className="mt-3 flex items-center gap-2 text-[14px]">
+                            <span className="flex items-center gap-1">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="#F3C836" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                                <span className="font-medium text-[#000]">{product.ratingAvg?.toFixed?.(1) ?? "0.0"}</span>
+                            </span>
+                            <span className="text-[#767676]">{product.reviewCount}건</span>
                         </div>
                     </div>
 
-                    {/* 상품 메타 (배송·혜택 등 정적 placeholder) */}
-                    <dl className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-4 text-xs grid grid-cols-[80px_1fr] gap-y-2">
-                        <dt className="text-[var(--color-fg-muted)]">배송</dt>
-                        <dd className="text-[var(--color-fg)]">평일 13시 이전 주문 시 당일 발송 · 3만원 이상 무료배송</dd>
-                        <dt className="text-[var(--color-fg-muted)]">적립금</dt>
-                        <dd className="text-[var(--color-fg)]">{Math.floor(displayPrice(product) * 0.01).toLocaleString()}원 (구매 1% · 리뷰 추가 적립)</dd>
-                        <dt className="text-[var(--color-fg-muted)]">인증</dt>
-                        <dd className="text-[var(--color-fg)]">만 19세 이상 성인 인증 후 결제 가능</dd>
+                    {/* 배송 정보 — 시안: 상하 #DDD 보더 · py 20 · gap 12 · label 14/#767676 + value 14/500 */}
+                    <dl className="flex flex-col gap-3 border-y border-[#DDDDDD] py-5">
+                        <div className="flex items-center gap-8">
+                            <dt className="w-[68px] text-[14px] text-[#767676]">배송</dt>
+                            <dd className="text-[14px] font-medium text-[#000]">국내배송</dd>
+                        </div>
+                        <div className="flex items-center gap-8">
+                            <dt className="w-[68px] text-[14px] text-[#767676]">택배사</dt>
+                            <dd className="text-[14px] font-medium text-[#000]">우체국택배</dd>
+                        </div>
+                        <div className="flex items-center gap-8">
+                            <dt className="w-[68px] text-[14px] text-[#767676]">배송비</dt>
+                            <dd className="text-[14px] font-medium text-[#000]">3,000원 (5만원 이상 무료배송)</dd>
+                        </div>
                     </dl>
 
                     {/* 호환성 정보 */}
@@ -112,49 +133,41 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                     {/* 구매 영역 — 옵션/수량/총액/장바구니·바로구매·찜 (클라이언트) */}
                     <ProductBuyBox
                         productId={product.id}
+                        productName={product.name}
                         basePrice={displayPrice(product)}
+                        siblings={siblings}
                         productSoldOut={product.soldOut === true || product.status === "SOLD_OUT"}
-                        options={product.options.map((o) => ({
-                            id: o.id, optionGroup: o.optionGroup, optionValue: o.optionValue,
-                            priceDelta: o.priceDelta, stock: o.stock,
-                        }))}
                     />
                 </div>
             </div>
 
-            {/* ===== 이 아이템도 같이 사면 좋아요! — 시안: 상품 정보 바로 아래 ===== */}
-            {related.content.length > 0 && (
-                <section className="mx-auto max-w-screen-2xl px-4 mt-8">
-                    <h2 className="text-base md:text-lg font-bold mb-5 text-[var(--color-fg)]">이 아이템도 같이 사면 좋아요!</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-                        {related.content.slice(0, 4).map(p => <ProductCard key={p.id} p={p} />)}
-                    </div>
-                </section>
-            )}
+            {/* ===== 이 제품도 같이 구매하면 좋아요! — 시안 14:3437 (Best Item + 화살표 캐러셀) ===== */}
+            <RelatedCarousel items={related.content} />
 
             {/* ===== 탭 ===== */}
             <DetailTabs />
 
             {/* ===== 상세 설명 (큰 라이프스타일 이미지 + 텍스트) ===== */}
-            <section id="info" className="mx-auto max-w-screen-2xl px-4 mt-10">
-                <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">상세 정보</h2>
-                <div className="rounded-[var(--radius-lg)] overflow-hidden bg-[var(--color-bg-subtle)] aspect-[16/9] md:aspect-[16/7]">
+            <section id="info" className="mx-auto max-w-[1920px] px-4 xl:px-[170px] mt-16 md:mt-[100px]">
+                <h2 className="text-[26px] md:text-[36px] font-bold leading-tight mb-8 text-[#000]">상세 정보</h2>
+                {/* 성능곡선 상세 이미지 (시안 14:3533) — 중앙 860 */}
+                <div className="mx-auto max-w-[860px]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={`https://placehold.co/1200x520/1e1e1e/c9a87a?text=${encodeURIComponent(product.name)}`}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
+                        src="/images/detail-performance.png"
+                        alt={`${product.name} 상세`}
+                        className="w-full h-auto rounded-[16px]"
                     />
                 </div>
                 {product.description && (
-                    <p className="mt-4 text-sm text-[var(--color-fg)] whitespace-pre-line leading-relaxed">{product.description}</p>
+                    <p className="mt-6 text-center text-sm text-[var(--color-fg-muted)] whitespace-pre-line leading-relaxed">{product.description}</p>
                 )}
             </section>
 
             {/* ===== 상품정보고시 ===== */}
-            <section className="mx-auto max-w-screen-2xl px-4 mt-10">
-                <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">상품정보고시</h2>
-                <dl className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden divide-y divide-[var(--color-border)] text-sm">
+            <section className="mx-auto max-w-[1920px] px-4 xl:px-[170px] mt-16 md:mt-[100px]">
+                <h2 className="mb-6 text-[24px] font-medium text-[#222222]">상품정보고시</h2>
+                <dl className="border-t border-[#222222] text-[14px]">
                     {[
                         ["품명 및 모델명", product.name],
                         ["제조국", "중국"],
@@ -164,17 +177,17 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         ["사용 연령", "만 19세 이상 (성인 인증 필수)"],
                         ["A/S 책임자", "엘프바 라운지 고객센터 010-8662-8575"],
                     ].map(([k, v]) => (
-                        <div key={k} className="grid grid-cols-[140px_1fr] md:grid-cols-[180px_1fr] gap-3 px-4 py-3">
-                            <dt className="text-[var(--color-fg-muted)]">{k}</dt>
-                            <dd className="text-[var(--color-fg)]">{v}</dd>
+                        <div key={k} className="flex border-b border-[#E5E5EC]">
+                            <dt className="w-[140px] shrink-0 bg-[#F6F7FB] px-4 py-4 text-[#767676] md:w-[240px] md:px-6 md:py-5">{k}</dt>
+                            <dd className="flex-1 px-4 py-4 text-[#000] md:px-6">{v}</dd>
                         </div>
                     ))}
                 </dl>
             </section>
 
             {/* ===== 리뷰 통계 ===== */}
-            <section id="reviews" className="mx-auto max-w-screen-2xl px-4 mt-10">
-                <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">상품 리뷰</h2>
+            <section id="reviews" className="mx-auto max-w-[1920px] px-4 xl:px-[170px] mt-16 md:mt-[100px]">
+                <h2 className="mb-6 text-[24px] font-medium text-[#222222]">상품 리뷰</h2>
                 <ReviewStats avg={product.ratingAvg ?? 0} count={product.reviewCount ?? 0} />
                 <div className="mt-6">
                     <ProductReviews productId={product.id} />
@@ -182,9 +195,9 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             </section>
 
             {/* ===== 배송·교환·반품 안내 ===== */}
-            <section id="ship" className="mx-auto max-w-screen-2xl px-4 mt-10">
-                <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">배송·교환·반품 안내</h2>
-                <dl className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] divide-y divide-[var(--color-border)] overflow-hidden text-sm">
+            <section id="ship" className="mx-auto max-w-[1920px] px-4 xl:px-[170px] mt-16 md:mt-[100px]">
+                <h2 className="mb-6 text-[24px] font-medium text-[#222222]">배송·교환·반품 안내</h2>
+                <dl className="border-t border-[#222222] text-[14px]">
                     {[
                         ["배송 방법",      "택배 (CJ대한통운 / 우체국 택배)"],
                         ["배송 지역",      "전국 (제주·도서산간 추가 배송비 3,000원)"],
@@ -194,17 +207,17 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                         ["교환·반품 불가", "사용 흔적 있는 상품, 개봉품, 단순 변심 시 반송 택배비 차감"],
                         ["환불 처리",      "반품 도착·검수 완료 후 영업일 기준 3~5일 내 환급"],
                     ].map(([k, v]) => (
-                        <div key={k} className="grid grid-cols-[120px_1fr] md:grid-cols-[180px_1fr] gap-3 px-4 py-3">
-                            <dt className="text-[var(--color-fg-muted)]">{k}</dt>
-                            <dd className="text-[var(--color-fg)]">{v}</dd>
+                        <div key={k} className="flex border-b border-[#E5E5EC]">
+                            <dt className="w-[140px] shrink-0 bg-[#F6F7FB] px-4 py-4 text-[#767676] md:w-[240px] md:px-6 md:py-5">{k}</dt>
+                            <dd className="flex-1 px-4 py-4 text-[#000] md:px-6">{v}</dd>
                         </div>
                     ))}
                 </dl>
             </section>
 
             {/* ===== Q&A ===== */}
-            <section id="qna" className="mx-auto max-w-screen-2xl px-4 mt-10">
-                <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--color-fg)]">Q&amp;A</h2>
+            <section id="qna" className="mx-auto max-w-[1920px] px-4 xl:px-[170px] mt-16 md:mt-[100px]">
+                <h2 className="mb-6 text-[24px] font-medium text-[#222222]">Q&amp;A</h2>
                 <ProductQna productId={product.id} />
             </section>
 
@@ -220,30 +233,42 @@ function ReviewStats({ avg, count }: { avg: number; count: number }) {
     // 별점 분포는 시드에 없어서 placeholder
     const distribution = [70, 18, 8, 3, 1]; // 5★ ~ 1★ 퍼센트
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center">
-                <div className="text-xs text-[var(--color-fg-muted)] mb-1">나의 만족도는?</div>
-                <div className="text-[var(--color-warning)] text-2xl">{"★".repeat(Math.round(avg))}{"☆".repeat(5 - Math.round(avg))}</div>
-                <div className="mt-2 text-xl font-bold text-[var(--color-fg)]">{avg.toFixed(1)} / 5.0</div>
+        <div className="flex flex-col gap-4 md:flex-row md:gap-7">
+            {/* 평점 — ★★★★★ + 4.9/5.0 */}
+            <div className="flex h-[200px] flex-1 flex-col items-center justify-center gap-4 rounded-[16px] bg-[#F6F7FB] md:h-[240px]">
+                <div className="flex flex-col items-center gap-2">
+                    <p className="text-[16px] font-medium text-[#000]">사용자의 총 평점은?</p>
+                    <div className="flex">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <svg key={i} width="32" height="32" viewBox="0 0 24 24" fill={i < Math.round(avg) ? "#F3C836" : "#DDDDDD"} aria-hidden="true">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                            </svg>
+                        ))}
+                    </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-[32px] font-bold text-[#000]">{avg.toFixed(1)}</span>
+                    <span className="text-[32px] font-bold text-[#999999]">/ 5.0</span>
+                </div>
             </div>
-            <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center">
-                <div className="text-xs text-[var(--color-fg-muted)] mb-1">총 리뷰 수</div>
-                <div className="mt-2 text-2xl font-bold text-[var(--color-accent)]">{count.toLocaleString()}개</div>
-                <div className="mt-2 text-[11px] text-[var(--color-fg-subtle)]">최근 30일 사이 작성된 리뷰 포함</div>
+            {/* 총 리뷰 수 */}
+            <div className="flex h-[200px] flex-1 flex-col items-center justify-center gap-2 rounded-[16px] bg-[#F6F7FB] md:h-[240px]">
+                <p className="text-[16px] font-medium text-[#000]">총 리뷰 수</p>
+                <p className="text-[32px] font-bold text-[#0072DD]">{count.toLocaleString()}개</p>
             </div>
-            <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-                <div className="text-xs text-[var(--color-fg-muted)] mb-2 text-center">별점 분포</div>
-                <ul className="space-y-1.5">
+            {/* 별점 분포 — 세로 막대 */}
+            <div className="flex h-[200px] flex-1 flex-col items-center justify-center gap-3 rounded-[16px] bg-[#F6F7FB] md:h-[240px]">
+                <p className="text-[16px] font-medium text-[#000]">별점 분포</p>
+                <div className="flex items-end gap-3">
                     {distribution.map((pct, i) => (
-                        <li key={i} className="flex items-center gap-2 text-xs">
-                            <span className="text-[var(--color-fg-muted)] w-6">{5 - i}★</span>
-                            <span className="flex-1 h-1.5 rounded-full bg-[var(--color-bg-muted)] overflow-hidden">
-                                <span className="block h-full bg-[var(--color-warning)]" style={{ width: `${pct}%` }} />
+                        <div key={i} className="flex flex-col items-center gap-1">
+                            <span className="flex h-[74px] w-4 items-end rounded-[4px] bg-[#E6F3FE]">
+                                <span className="block w-full rounded-[4px] bg-[#0072DD]" style={{ height: `${Math.max(8, pct)}%` }} />
                             </span>
-                            <span className="text-[var(--color-fg-muted)] w-8 text-right">{pct}%</span>
-                        </li>
+                            <span className="text-[14px] font-medium text-[#222]">{5 - i}점</span>
+                        </div>
                     ))}
-                </ul>
+                </div>
             </div>
         </div>
     );

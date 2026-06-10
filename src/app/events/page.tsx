@@ -6,7 +6,7 @@ import type { Page } from "@/types/api";
 
 export const dynamic = "force-dynamic";
 
-/* 시안 252:10235 — WE ARE EVENT 페이지 (3 cols 그리드 + 진행중/종료 탭) */
+/* Figma 이벤트리스트 — WE ARE EVENT (3 cols 그리드 + 진행중/종료 탭) */
 
 type Event = {
     id: number;
@@ -21,7 +21,7 @@ type Event = {
 
 type Filter = "active" | "ended";
 
-// 목데이터 fallback — 12개 진행중 + 일부 종료
+// 목데이터 fallback — 10개 진행중 + 2개 종료
 const MOCK_EVENTS: Event[] = [
     { id: 9001, title: "포근한 겨울과 함께 찾아온 깜짝선물 이벤트", summary: "겨울 한정 깜짝 선물 증정", content: null, bannerUrl: "/images/page-popup-event.png", startsAt: "2026-05-01", endsAt: "2026-06-30", visible: true },
     { id: 9002, title: "신규 회원 가입 적립금 3,000원 즉시 지급", summary: "가입 즉시 즉시 사용 가능", content: null, bannerUrl: "/images/page-popup-event.png", startsAt: "2026-05-01", endsAt: "2026-12-31", visible: true },
@@ -46,6 +46,25 @@ async function fetchEvents(): Promise<Event[]> {
     }
 }
 
+/** ISO/날짜 문자열 → "YYYY.MM.DD" (없으면 빈 문자열). */
+function fmtDate(iso: string | null | undefined): string {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}.${m}.${day}`;
+}
+
+/** "YYYY.MM.DD ~ YYYY.MM.DD" — 한쪽만 있으면 그쪽만, 둘 다 없으면 빈 문자열. */
+function fmtPeriod(start: string | null | undefined, end: string | null | undefined): string {
+    const s = fmtDate(start);
+    const e = fmtDate(end);
+    if (s && e) return `${s} ~ ${e}`;
+    return s || e || "";
+}
+
 export default async function EventsPage({ searchParams }: { searchParams: Promise<{ filter?: Filter }> }) {
     const sp = await searchParams;
     const filter: Filter = sp.filter === "ended" ? "ended" : "active";
@@ -54,64 +73,61 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
     const isFallback = fetched.length === 0;
     const all = isFallback ? MOCK_EVENTS : fetched;
 
+    // 진행중 vs 종료: endsAt 을 현재 시각과 비교 (endsAt 이 과거면 종료).
     const now = Date.now();
-    const events = all.filter(e => {
-        const ended = e.endsAt && new Date(e.endsAt).getTime() < now;
+    const events = all.filter((e) => {
+        const ended = !!(e.endsAt && new Date(e.endsAt).getTime() < now);
         return filter === "ended" ? ended : !ended;
     });
 
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-8 md:py-12">
-            {/* 큰 타이틀 */}
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-6 md:mb-10 text-[var(--color-fg)] tracking-tight">
-                WE ARE EVENT
-            </h1>
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flex-col items-center gap-[60px]">
+            <div className="w-full flex flex-col gap-7">
+                {/* 헤더 블록 — 타이틀 + 탭 */}
+                <div className="w-full flex flex-col gap-8">
+                    <h1 className="text-[40px] md:text-[56px] font-bold leading-tight text-[#222222]">
+                        WE ARE EVENT
+                    </h1>
 
-            {/* 진행중 / 종료 탭 */}
-            <div className="flex gap-2 mb-6 md:mb-10">
-                <FilterTab href="/events?filter=active" label="진행중인 이벤트" active={filter === "active"} />
-                <FilterTab href="/events?filter=ended"  label="종료된 이벤트"   active={filter === "ended"}  />
+                    {/* 진행중 / 종료 탭 — filter state 로 토글 */}
+                    <div className="flex items-center gap-3">
+                        <FilterTab href="/events?filter=active" label="진행중인 이벤트" active={filter === "active"} />
+                        <FilterTab href="/events?filter=ended" label="종료된 이벤트" active={filter === "ended"} />
+                    </div>
+                </div>
+
+                {/* 이벤트 그리드 / 빈 상태 */}
+                {events.length === 0 ? (
+                    <p className="text-[14px] text-[#767676] text-center py-24">
+                        {filter === "active" ? "진행 중인 이벤트가 없습니다." : "종료된 이벤트가 없습니다."}
+                    </p>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-12">
+                        {events.map((e) => {
+                            const img = e.bannerUrl ? safeImageUrl(e.bannerUrl) : "";
+                            const period = fmtPeriod(e.startsAt, e.endsAt);
+                            return (
+                                <Link key={e.id} href={`/events/${e.id}`} className="group block">
+                                    <GatedMedia className="w-full aspect-[508/248] rounded-[12px] overflow-hidden bg-[#D9D9D9]">
+                                        {img && (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                            <img
+                                                src={img}
+                                                alt={e.title}
+                                                className="w-full h-full object-cover group-hover:scale-[1.02] transition"
+                                            />
+                                        )}
+                                    </GatedMedia>
+                                    <div className="mt-3 flex flex-col gap-1">
+                                        <p className="text-[16px] font-medium text-[#000] line-clamp-1">{e.title}</p>
+                                        {period && <p className="text-[14px] text-[#767676]">{period}</p>}
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
-
-            {events.length === 0 ? (
-                <p className="text-sm text-[var(--color-fg-subtle)] text-center py-16">
-                    {filter === "active" ? "진행 중인 이벤트가 없습니다." : "종료된 이벤트가 없습니다."}
-                </p>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {events.map(e => (
-                        <Link
-                            key={e.id}
-                            href={`/events/${e.id}`}
-                            className="block rounded-[18px] overflow-hidden bg-[var(--color-bg-subtle)] hover:opacity-95 transition group"
-                        >
-                            <GatedMedia className="aspect-[16/9] overflow-hidden">
-                                {e.bannerUrl && safeImageUrl(e.bannerUrl) && (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img
-                                        src={safeImageUrl(e.bannerUrl)}
-                                        alt={e.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                )}
-                            </GatedMedia>
-                        </Link>
-                    ))}
-                </div>
-            )}
-
-            {/* 페이지네이션 (시각 매칭) */}
-            {events.length > 0 && (
-                <div className="mt-10 md:mt-14 flex justify-center items-center gap-1.5 text-sm">
-                    <span className="min-w-9 h-9 inline-flex items-center justify-center bg-[var(--color-accent)] text-white font-medium">1</span>
-                    {[2, 3, 4, 5].map(p => (
-                        <span key={p} className="min-w-9 h-9 inline-flex items-center justify-center text-[var(--color-fg-muted)]">{p}</span>
-                    ))}
-                    <span className="px-2 text-[var(--color-fg-subtle)]">…</span>
-                    <span className="min-w-9 h-9 inline-flex items-center justify-center text-[var(--color-fg-muted)]">30</span>
-                    <span className="min-w-9 h-9 inline-flex items-center justify-center text-[var(--color-fg-muted)]">›</span>
-                </div>
-            )}
         </div>
     );
 }
@@ -120,10 +136,10 @@ function FilterTab({ href, label, active }: { href: string; label: string; activ
     return (
         <Link
             href={href}
-            className={`inline-flex items-center justify-center rounded-[10px] px-5 py-2.5 text-sm font-medium transition ${
+            className={`px-4 py-3 rounded-[4px] text-[14px] font-medium transition ${
                 active
-                    ? "bg-[var(--color-accent)] text-white"
-                    : "bg-[var(--color-surface)] text-[var(--color-fg-muted)] border border-[var(--color-border)] hover:border-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
+                    ? "bg-[#0072DD] text-white"
+                    : "border border-[#DDDDDD] text-[#000] hover:bg-[#F6F7FB]"
             }`}
         >
             {label}

@@ -62,7 +62,8 @@ export function safeImageUrl(raw: string | null | undefined): string {
  * 자산이 없는 상품에 호버 스왑을 걸면 404 + 호버 시 빈칸이 되므로, 존재하는 접두어만 허용한다.
  * (public/images 의 -hover.png 자산 접두어 목록)
  */
-const HOVER_PREFIXES = ["crosamba", "frozen", "iceking", "icekingpro", "joinwon-kit"];
+// 상품 이미지는 이제 풀카드(배경+디바이스 한 장)라 별도 -hover 변형 없음 → 비워둠.
+const HOVER_PREFIXES: string[] = [];
 
 /** 썸네일에 -hover.png 호버 변형 자산이 존재하면 그 URL, 없으면 null. */
 export function hoverImageUrl(thumbnail: string | null | undefined): string | null {

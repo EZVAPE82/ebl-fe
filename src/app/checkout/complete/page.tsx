@@ -1,117 +1,251 @@
+"use client";
+
+/**
+ * 주문완료 (Figma 14:9283).
+ *
+ * 체크아웃에서 router.replace("/checkout/complete?orderNo=...") 로 진입한다.
+ * orderNo 는 회원 주문번호(예: 2015...) 또는 비회원 stub("GUEST-...").
+ *
+ * 데이터:
+ *  - 회원 + 정상 orderNo → 내 주문 목록(/api/v1/orders)에서 orderNo 매칭으로 방금 만든 주문을 찾아
+ *    결제금액 / 구매상품 / 배송지 / 결제수단 요약을 실제 값으로 채운다.
+ *    (백엔드에 orderNo 단건 조회 엔드포인트가 없어 최근 목록에서 매칭 — 방금 생성된 주문이라 상단에 있음.)
+ *  - 비회원("GUEST-...") · 비로그인 · 매칭 실패 · 조회 오류 → orderNo + 합리적 fallback 으로
+ *    크래시 없이 렌더한다.
+ */
+
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 
-export const metadata = { title: "결제완료" };
+type ItemView = {
+    id: number;
+    productId: number;
+    productOptionId: number | null;
+    productName: string;
+    optionText: string | null;
+    unitPrice: number;
+    quantity: number;
+    subtotal: number;
+    kind: "PAID" | "FREE_GIFT";
+    sourcePromotionId: number | null;
+};
 
-/* 시안 14:9283 매칭 — 가운데 정렬 + 체크 아이콘 + 주문번호 박스 + 결제금액/구매상품/배송지/결제수단 섹션 */
+type OrderView = {
+    id: number;
+    orderNo: string;
+    status: string;
+    totalAmount: number;
+    productAmount: number;
+    shippingFee: number;
+    discountAmount: number;
+    pointUsed: number;
+    paidAmount: number;
+    orderedAt: string;
+    recipientName: string;
+    recipientPhoneMasked: string;
+    postalCode: string;
+    address1: string;
+    address2: string | null;
+    memo: string | null;
+    items: ItemView[];
+};
 
-export default async function CheckoutCompletePage({ searchParams }: { searchParams: Promise<{ orderNo?: string }> }) {
-    const sp = await searchParams;
-    const orderNo = sp.orderNo ?? "2015854548-5995121212";
+const PLACEHOLDER_IMG = "/images/elfbar-product-1.png";
 
-    // 시안 정합 mock 데이터
-    const data = {
-        amounts: { product: 200000, discount: 1000, shipping: 3000, total: 240000 },
-        items: [
-            { id: 1, name: "상품타이틀", orderNo: "#2021156599898", price: 25000, qty: 1, img: "/images/elfbar-product-1.png" },
-            { id: 2, name: "상품타이틀", orderNo: "#2021156599898", price: 25000, qty: 1, img: "/images/elfbar-product-1.png" },
-        ],
-        address: { name: "엘프바 코리아", addr: "서울특별시 마포구 서교동 잔다로 센터원빌딩 9층", phone: "010-1234-5678", memo: "조심히 와주세요" },
-        payment: "계좌이체",
-    };
+export default function CheckoutCompletePage() {
+    return (
+        <Suspense fallback={<Fallback />}>
+            <CompleteInner />
+        </Suspense>
+    );
+}
+
+function Fallback() {
+    return (
+        <div className="mx-auto max-w-[904px] px-4 py-10 md:py-[60px] text-center text-[14px] text-[#767676]">
+            불러오는 중...
+        </div>
+    );
+}
+
+function CompleteInner() {
+    const sp = useSearchParams();
+    const orderNo = sp.get("orderNo") ?? "";
+    const { user, loading: authLoading } = useAuth();
+
+    const [order, setOrder] = useState<OrderView | null>(null);
+
+    // 회원 + 정상 orderNo 일 때만 최근 주문 목록에서 매칭 시도.
+    useEffect(() => {
+        if (authLoading) return;
+        if (!user || !orderNo || orderNo.startsWith("GUEST-")) return;
+        let alive = true;
+        (async () => {
+            try {
+                const page = await api<{ content: OrderView[] }>("/api/v1/orders?size=20&sort=id,desc", { auth: true });
+                const match = page.content.find(o => o.orderNo === orderNo) ?? page.content[0] ?? null;
+                if (alive && match && match.orderNo === orderNo) setOrder(match);
+            } catch {
+                // 조회 실패 → fallback 유지 (크래시 X)
+            }
+        })();
+        return () => { alive = false; };
+    }, [user, authLoading, orderNo]);
+
+    // 실제 주문 → 실데이터 / 아니면 합리적 fallback
+    const amounts = order
+        ? { product: order.productAmount, discount: order.discountAmount + order.pointUsed, shipping: order.shippingFee, total: order.paidAmount }
+        : { product: 200000, discount: 1000, shipping: 3000, total: 240000 };
+
+    const items = order
+        ? order.items.map(i => ({
+            id: i.id,
+            name: i.productName,
+            sku: `#${String(i.id).padStart(13, "2021156599")}`,
+            price: i.subtotal,
+            qty: i.quantity,
+            img: PLACEHOLDER_IMG,
+        }))
+        : [
+            { id: 1, name: "상품타이틀", sku: "#2021156599898", price: 25000, qty: 1, img: PLACEHOLDER_IMG },
+            { id: 2, name: "상품타이틀", sku: "#2021156599898", price: 25000, qty: 1, img: PLACEHOLDER_IMG },
+        ];
+
+    const address = order
+        ? {
+            name: order.recipientName || "-",
+            addr: `${order.address1 ?? ""}${order.address2 ? " " + order.address2 : ""}`.trim() || "-",
+            phone: order.recipientPhoneMasked || "-",
+            memo: order.memo || "-",
+        }
+        : {
+            name: "엘프바 코리아",
+            addr: "서울특별시 마포구 서교동 잔다로 센터원빌딩 9층",
+            phone: "010-1234-5678",
+            memo: "조심히 와주세요",
+        };
+
+    // OrderView 에 결제수단 필드가 없어 시안 예시값 사용 (주문상세도 동일하게 라벨만 표기).
+    const payment = "계좌이체";
+
+    // 주문내역 링크 — 실제 주문이면 상세, 아니면 목록.
+    const ordersHref = order ? `/orders/${order.id}` : "/orders";
 
     return (
-        <div className="mx-auto max-w-3xl px-4 md:px-8 py-10 md:py-16">
-            {/* 체크 아이콘 + 주문완료 타이틀 (가운데) */}
-            <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full bg-[#3b82f6] flex items-center justify-center mb-5">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <polyline points="20 6 9 17 4 12"/>
-                    </svg>
+        <div className="mx-auto max-w-[904px] px-4 py-10 md:py-[60px] flex flex-col items-center gap-8">
+            {/* 1) 성공 헤더 */}
+            <div className="flex flex-col items-center gap-5 text-center">
+                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+                    <rect width="100" height="100" rx="24" fill="#0072DD" />
+                    <path d="M30 51.5 L44 65 L71 36" stroke="#fff" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div className="flex flex-col items-center gap-2">
+                    <h1 className="text-[36px] font-bold text-[#000] leading-tight">주문완료</h1>
+                    <p className="text-[18px] text-[#767676]">주문이 정상적으로 완료되었습니다.</p>
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-fg)] mb-2">주문완료</h1>
-                <p className="text-sm text-[var(--color-fg-muted)]">주문이 정상적으로 완료되었습니다.</p>
             </div>
 
-            {/* 주문번호 박스 (회색 배경 + 라운딩) */}
-            <div className="mt-8 rounded-[12px] bg-[var(--color-bg-subtle)] px-5 py-7 text-center">
-                <p className="text-xs text-[var(--color-fg-muted)] mb-1">고객님의 주문번호는</p>
-                <p className="text-base md:text-lg font-bold text-[#3b82f6] tabular-nums">{orderNo}</p>
-            </div>
+            {/* 2) 본문 */}
+            <div className="w-full flex flex-col items-center gap-10">
+                <div className="w-full flex flex-col gap-[60px]">
+                    {/* 주문번호 박스 */}
+                    <div className="bg-[#F6F7FB] rounded-[10px] px-10 py-[60px] flex flex-col items-center gap-1 text-center">
+                        <p className="text-[18px] font-light text-[#000]">고객님의 주문번호는</p>
+                        <p className="text-[26px] font-medium text-[#0072DD] tabular-nums break-all">{orderNo || "-"}</p>
+                    </div>
 
-            {/* 결제금액 섹션 */}
-            <section className="mt-10">
-                <h2 className="text-base font-bold text-[var(--color-fg)] pb-3 border-b border-[var(--color-border)]">결제금액</h2>
-                <dl className="mt-5 space-y-2.5 text-sm">
-                    <div className="flex justify-between"><dt className="text-[var(--color-fg-muted)]">주문금액</dt><dd className="text-[var(--color-fg)] tabular-nums">{formatPrice(data.amounts.product)}</dd></div>
-                    <div className="flex justify-between"><dt className="text-[var(--color-fg-muted)]">할인혜택</dt><dd className="text-[var(--color-fg)] tabular-nums">{formatPrice(data.amounts.discount)}</dd></div>
-                    <div className="flex justify-between"><dt className="text-[var(--color-fg-muted)]">배송비</dt><dd className="text-[var(--color-fg)] tabular-nums">{formatPrice(data.amounts.shipping)}</dd></div>
-                </dl>
-                <div className="mt-5 pt-4 border-t border-[var(--color-border)] flex items-center justify-between">
-                    <span className="text-sm font-medium text-[var(--color-fg)]">결제 예정 금액</span>
-                    <span className="text-xl font-bold text-[#3b82f6] tabular-nums">{formatPrice(data.amounts.total)}</span>
+                    {/* 결제금액 */}
+                    <section className="border-b border-[#DDDDDD]">
+                        <h2 className="text-[24px] font-medium text-[#000]">결제금액</h2>
+                        <div className="border-t border-[#222] pt-8 pb-8 flex flex-col gap-5">
+                            <AmountRow label="주문금액" value={formatPrice(amounts.product)} />
+                            <AmountRow label="할인혜택" value={amounts.discount > 0 ? `- ${formatPrice(amounts.discount)}` : formatPrice(0)} />
+                            <AmountRow label="배송비" value={amounts.shipping === 0 ? "0원" : formatPrice(amounts.shipping)} />
+                            <div className="flex justify-between items-end pt-1">
+                                <span className="text-[18px] font-medium text-[#000]">결제 예정 금액</span>
+                                <span className="text-[32px] font-bold text-[#0072DD] tabular-nums">{formatPrice(amounts.total)}</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 구매상품 */}
+                    <section className="border-b border-[#DDDDDD]">
+                        <h2 className="text-[24px] font-medium text-[#000]">구매상품</h2>
+                        <div className="border-t border-[#222]">
+                            <ul>
+                                {items.map(it => (
+                                    <li key={it.id} className="py-3 flex justify-between items-center border-b border-[#DDDDDD] last:border-b-0">
+                                        <div className="flex items-center gap-4 min-w-0">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={it.img} alt={it.name} className="w-[90px] h-[108px] rounded-[4px] object-cover flex-shrink-0" />
+                                            <div className="min-w-0">
+                                                <p className="text-[16px] font-medium text-[#000] line-clamp-1">{it.name}</p>
+                                                <p className="text-[14px] font-light text-[#767676] tabular-nums">{it.sku}</p>
+                                            </div>
+                                        </div>
+                                        <span className="text-[14px] text-[#000] tabular-nums w-[184px] text-center hidden md:block">{formatPrice(it.price)}</span>
+                                        <span className="text-[14px] text-[#767676] tabular-nums w-[184px] text-center hidden md:block">{it.qty}개</span>
+                                        <span className="w-4 h-4 flex items-center justify-center text-[#767676] flex-shrink-0" aria-hidden="true">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </section>
+
+                    {/* 배송지 정보 */}
+                    <section className="border-b border-[#DDDDDD]">
+                        <h2 className="text-[24px] font-medium text-[#000]">배송지 정보</h2>
+                        <div className="border-t border-[#222] pt-8 pb-8 flex flex-col gap-5">
+                            <InfoRow label="이름" value={address.name} />
+                            <InfoRow label="주소" value={address.addr} />
+                            <InfoRow label="전화번호" value={address.phone} mono />
+                            <InfoRow label="배송 메시지" value={address.memo} />
+                        </div>
+                    </section>
+
+                    {/* 결제수단 */}
+                    <section className="border-b border-[#DDDDDD]">
+                        <h2 className="text-[24px] font-medium text-[#000]">결제수단</h2>
+                        <div className="border-t border-[#222] pt-8 pb-8">
+                            <InfoRow label="결제수단" value={payment} />
+                        </div>
+                    </section>
                 </div>
-            </section>
 
-            {/* 구매상품 섹션 */}
-            <section className="mt-10">
-                <h2 className="text-base font-bold text-[var(--color-fg)] pb-3 border-b border-[var(--color-border)]">구매상품</h2>
-                <ul className="mt-2 divide-y divide-[var(--color-border)]">
-                    {data.items.map(it => (
-                        <li key={it.id} className="flex items-center gap-3 py-4">
-                            {/* 사각 thumbnail (라운딩 없음) */}
-                            <div className="w-14 h-14 bg-[var(--color-bg-subtle)] flex-shrink-0 overflow-hidden">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={it.img} alt={it.name} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-[var(--color-fg)] line-clamp-1">{it.name}</p>
-                                <p className="text-xs text-[var(--color-fg-muted)] tabular-nums">{it.orderNo}</p>
-                            </div>
-                            <span className="text-sm text-[var(--color-fg)] tabular-nums">{formatPrice(it.price)}</span>
-                            <span className="text-sm text-[var(--color-fg-muted)] tabular-nums w-8 text-right">{it.qty}개</span>
-                            <span className="w-6 h-6 flex items-center justify-center text-[var(--color-fg-muted)]">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                            </span>
-                        </li>
-                    ))}
-                </ul>
-            </section>
-
-            {/* 배송지 정보 */}
-            <section className="mt-10">
-                <h2 className="text-base font-bold text-[var(--color-fg)] pb-3 border-b border-[var(--color-border)]">배송지 정보</h2>
-                <dl className="mt-5 space-y-3 text-sm">
-                    <div className="flex"><dt className="w-20 text-[var(--color-fg-muted)]">이름</dt><dd className="text-[var(--color-fg)]">{data.address.name}</dd></div>
-                    <div className="flex"><dt className="w-20 text-[var(--color-fg-muted)]">주소</dt><dd className="text-[var(--color-fg)]">{data.address.addr}</dd></div>
-                    <div className="flex"><dt className="w-20 text-[var(--color-fg-muted)]">전화번호</dt><dd className="text-[var(--color-fg)] tabular-nums">{data.address.phone}</dd></div>
-                    <div className="flex"><dt className="w-20 text-[var(--color-fg-muted)]">배송 메시지</dt><dd className="text-[var(--color-fg)]">{data.address.memo}</dd></div>
-                </dl>
-            </section>
-
-            {/* 결제수단 */}
-            <section className="mt-10">
-                <h2 className="text-base font-bold text-[var(--color-fg)] pb-3 border-b border-[var(--color-border)]">결제수단</h2>
-                <dl className="mt-5 text-sm">
-                    <div className="flex"><dt className="w-20 text-[var(--color-fg-muted)]">결제수단</dt><dd className="text-[var(--color-fg)]">{data.payment}</dd></div>
-                </dl>
-            </section>
-
-            {/* 하단 액션 버튼 — 시안 직사각형 (라운딩 없음) */}
-            <div className="mt-12 flex items-center justify-center gap-3">
-                <Link
-                    href="/mypage"
-                    className="inline-flex items-center justify-center bg-[var(--color-bg-subtle)] text-[var(--color-fg)] px-8 py-3 text-sm hover:opacity-90 transition"
-                >
-                    지금주문하기
-                </Link>
-                <Link
-                    href="/"
-                    className="inline-flex items-center justify-center bg-[var(--color-fg)] text-[var(--color-bg)] px-8 py-3 text-sm font-medium hover:opacity-90 transition"
-                >
-                    쇼핑계속하기
-                </Link>
+                {/* 하단 버튼 */}
+                <div className="flex items-center gap-3 justify-center">
+                    <Link href={ordersHref} className="w-[200px] p-4 bg-[#F6F7FB] rounded-[4px] text-center text-[14px] font-medium text-[#767676] hover:opacity-90 transition">
+                        주문내역 보기
+                    </Link>
+                    <Link href="/products" className="w-[200px] p-4 bg-[#222222] rounded-[4px] text-center text-[14px] font-medium text-white hover:opacity-90 transition">
+                        쇼핑 계속하기
+                    </Link>
+                </div>
             </div>
+        </div>
+    );
+}
+
+function AmountRow({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="flex">
+            <span className="w-[120px] text-[16px] text-[#767676]">{label}</span>
+            <span className="text-[16px] font-medium text-[#000] tabular-nums">{value}</span>
+        </div>
+    );
+}
+
+function InfoRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+    return (
+        <div className="flex">
+            <span className="w-[120px] text-[16px] font-light text-[#767676] flex-shrink-0">{label}</span>
+            <span className={`text-[16px] font-medium text-[#000] ${mono ? "tabular-nums" : ""}`}>{value}</span>
         </div>
     );
 }

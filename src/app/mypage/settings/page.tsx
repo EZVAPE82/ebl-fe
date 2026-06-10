@@ -1,15 +1,27 @@
 "use client";
 
 /**
- * 회원정보 수정 (Figma node 37:12499).
+ * 회원정보 수정 (Figma node 37:12499) — 풀 레이아웃 재구성.
  *
- * 디자인 노트 — 라운딩:
- * - 헤더 하단: 검정색 굵은 보더 라인
- * - 모든 입력 필드: rounded-sm (~4px), 옅은 회색 배경(읽기 전용처럼 보임)
- * - 우편번호 찾기 버튼: 파랑(#3b82f6), rounded-sm
- * - 라디오 버튼: 파랑 채움 + 흰색 점
- * - 하단 버튼(회원탈퇴/취소/확인): rounded-sm
- * - 섹션 구분: 굵은 검정 보더 헤더 + 옅은 보더 구분선
+ * 레이아웃 (sidebar 260 + main 1000, gap 80):
+ * - 외곽: mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex col→row gap-20
+ * - 좌측: 공유 <MyPageSideNav /> (현재 경로로 "회원정보 수정" 자동 active)
+ * - 메인: flex-1 lg:w-[1000px] — Form(섹션 A 필수 / 섹션 B 선택) + 하단 액션
+ *
+ * 데이터/로직 보존(절대 변경 금지):
+ * - useAuth 로 현재 회원 조회, 비로그인 시 /login?redirect 로 리다이렉트
+ * - 아이디(email-local)/이름/이메일/휴대전화 prefill (graceful fallback)
+ * - saveProfile() PUT /api/v1/members/me (마케팅 동의)
+ * - changePassword() POST /api/v1/members/me/password (현재+신규, validatePassword)
+ * - withdraw() DELETE /api/v1/members/me (확인 후 익명화)
+ * - 확인 버튼: 비밀번호 둘 다 입력 시 changePassword, 아니면 saveProfile (기존 동작 유지)
+ *
+ * 디자인 노트:
+ * - 섹션 헤더: 32px 굵게 + 우측 안내문구, 하단 옅은 보더 + 굵은 검정 상단 보더
+ * - 일반 입력: rounded-[4px] border #E5E5EC, focus #222
+ * - 비활성 입력(아이디/이름/우편/기본주소): bg #F7F7FB + border #BEBEBE + text #767676
+ * - 우편번호 찾기 버튼: #0072DD, 확인: #222, 취소: #F3F3F3, 회원탈퇴: 흰 배경 보더
+ * - 라디오 pill: 22px round, 선택 시 #0072DD + 흰 점
  */
 
 import { useEffect, useState } from "react";
@@ -98,7 +110,7 @@ export default function MyPageSettings() {
     }
 
     async function withdraw() {
-        if (!confirm("정말 탈퇴하시겠습니까? 개인정보가 즉시 익명화됩니다.")) return;
+        if (!confirm("정말 탈퇴하시겠어요? 개인정보가 즉시 익명화됩니다.")) return;
         try {
             await api("/api/v1/members/me", { method: "DELETE", auth: true });
             await logout();
@@ -109,308 +121,362 @@ export default function MyPageSettings() {
         }
     }
 
+    async function handleConfirm() {
+        if (currentPassword && newPassword) {
+            await changePassword();
+        } else {
+            await saveProfile();
+        }
+    }
+
     if (authLoading || !user) {
         return (
-            <div className="mx-auto max-w-screen-2xl px-4 py-10 text-[var(--color-fg-subtle)]">
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 text-[#767676]">
                 불러오는 중...
             </div>
         );
     }
 
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 py-8 grid gap-8 md:grid-cols-[220px_1fr]">
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flex-col lg:flex-row gap-20">
+            {/* 좌측: 공유 사이드바 — 현재 경로(/mypage/settings)로 "회원정보 수정" 자동 강조 */}
             <MyPageSideNav />
 
-            <main className="max-w-3xl">
-                {/* ===== 헤더 ===== */}
-                <header className="flex items-end justify-between pb-3 border-b-2 border-[var(--color-fg)]">
-                    <h2 className="text-xl md:text-2xl font-bold text-[var(--color-fg)]">
-                        회원정보 수정
-                    </h2>
-                    <span className="text-xs text-[#3b82f6]">*필수입력사항</span>
-                </header>
+            {/* 메인 */}
+            <main className="flex-1 lg:w-[1000px] flex flex-col gap-10">
+                <form
+                    className="flex flex-col gap-[60px]"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        void handleConfirm();
+                    }}
+                >
+                    {/* ===== 섹션 A — 회원정보 수정 (필수) ===== */}
+                    <section className="flex flex-col">
+                        <header className="flex justify-between items-end pb-5 border-b border-[#E5E5EC]">
+                            <h2 className="text-[32px] font-bold text-[#000000] leading-tight">
+                                회원정보 수정
+                            </h2>
+                            <span className="text-[14px] font-light text-[#0072DD]">
+                                *필수입력사항
+                            </span>
+                        </header>
 
-                {/* ===== 회원정보 폼 (필수) ===== */}
-                <section className="py-6 space-y-4">
-                    <FormRow label="아이디" required>
-                        <ReadOnly value={user.email.split("@")[0] || "signaldecode02"} />
-                    </FormRow>
+                        <div className="border-t border-[#222222] py-10 flex flex-col gap-8">
+                            <FormRow label="아이디" required>
+                                <ReadOnlyInput
+                                    value={user.email.split("@")[0] || "—"}
+                                    className="w-full max-w-[480px]"
+                                />
+                            </FormRow>
 
-                    <FormRow label="비밀번호" required>
-                        <FormInput
-                            type="password"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                        />
-                    </FormRow>
+                            <FormRow label="비밀번호" required>
+                                <FormInput
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    placeholder="비밀번호를 입력해주세요"
+                                    autoComplete="current-password"
+                                    className="w-full max-w-[480px]"
+                                />
+                            </FormRow>
 
-                    <FormRow label="신규 비밀번호" required>
-                        <FormInput
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="10자 이상, 영문·숫자·특수문자 포함"
-                        />
-                    </FormRow>
+                            <FormRow label="신규 비밀번호" required>
+                                <FormInput
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="비밀번호를 입력해주세요"
+                                    autoComplete="new-password"
+                                    className="w-full max-w-[480px]"
+                                />
+                            </FormRow>
 
-                    <FormRow label="이름" required>
-                        <ReadOnly value={user.name} />
-                    </FormRow>
+                            <FormRow label="이름" required>
+                                <ReadOnlyInput
+                                    value={user.name || "—"}
+                                    className="w-full max-w-[480px]"
+                                />
+                            </FormRow>
 
-                    <FormRow label="일반전화" required>
-                        <div className="grid grid-cols-3 gap-2 items-center">
-                            <FormSelect
-                                value={phoneHome.a}
-                                onChange={(e) =>
-                                    setPhoneHome({ ...phoneHome, a: e.target.value })
+                            <FormRow label="일반전화" required>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <FormSelect
+                                        value={phoneHome.a}
+                                        onChange={(e) =>
+                                            setPhoneHome({ ...phoneHome, a: e.target.value })
+                                        }
+                                        options={["02", "031", "032", "051", "053", "062"]}
+                                        className="w-full max-w-[150px]"
+                                    />
+                                    <Dash />
+                                    <FormInput
+                                        value={phoneHome.b}
+                                        onChange={(e) =>
+                                            setPhoneHome({ ...phoneHome, b: e.target.value })
+                                        }
+                                        inputMode="numeric"
+                                        className="w-full max-w-[150px]"
+                                    />
+                                    <Dash />
+                                    <FormInput
+                                        value={phoneHome.c}
+                                        onChange={(e) =>
+                                            setPhoneHome({ ...phoneHome, c: e.target.value })
+                                        }
+                                        inputMode="numeric"
+                                        className="w-full max-w-[150px]"
+                                    />
+                                </div>
+                            </FormRow>
+
+                            <FormRow label="휴대전화" required>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <FormSelect
+                                        value={phoneMobile.a}
+                                        onChange={(e) =>
+                                            setPhoneMobile({ ...phoneMobile, a: e.target.value })
+                                        }
+                                        options={["010", "011", "016", "017", "018", "019"]}
+                                        className="w-full max-w-[150px]"
+                                    />
+                                    <Dash />
+                                    <FormInput
+                                        value={phoneMobile.b}
+                                        onChange={(e) =>
+                                            setPhoneMobile({ ...phoneMobile, b: e.target.value })
+                                        }
+                                        inputMode="numeric"
+                                        className="w-full max-w-[150px]"
+                                    />
+                                    <Dash />
+                                    <FormInput
+                                        value={phoneMobile.c}
+                                        onChange={(e) =>
+                                            setPhoneMobile({ ...phoneMobile, c: e.target.value })
+                                        }
+                                        inputMode="numeric"
+                                        className="w-full max-w-[150px]"
+                                    />
+                                </div>
+                            </FormRow>
+
+                            <FormRow label="이메일" required>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <FormInput
+                                        value={emailLocal}
+                                        onChange={(e) => setEmailLocal(e.target.value)}
+                                        className="w-full max-w-[212px]"
+                                    />
+                                    <span className="text-[14px] text-[#222222]">@</span>
+                                    <FormInput
+                                        value={emailDomain}
+                                        onChange={(e) => setEmailDomain(e.target.value)}
+                                        className="w-full max-w-[212px]"
+                                    />
+                                    <FormSelect
+                                        value={emailDomainMode}
+                                        onChange={(e) => {
+                                            const v = e.target.value;
+                                            setEmailDomainMode(v);
+                                            if (v !== "직접입력") setEmailDomain(v);
+                                        }}
+                                        options={[
+                                            "직접입력",
+                                            "naver.com",
+                                            "gmail.com",
+                                            "daum.net",
+                                            "kakao.com",
+                                        ]}
+                                        className="w-full max-w-[140px]"
+                                    />
+                                </div>
+                            </FormRow>
+
+                            <FormRow label="생년월일" required>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <FormSelect
+                                        value={birth.y}
+                                        onChange={(e) => setBirth({ ...birth, y: e.target.value })}
+                                        options={Array.from({ length: 80 }, (_, i) =>
+                                            String(2026 - i)
+                                        )}
+                                        className="w-full max-w-[150px]"
+                                    />
+                                    <FormSelect
+                                        value={birth.m}
+                                        onChange={(e) => setBirth({ ...birth, m: e.target.value })}
+                                        options={Array.from({ length: 12 }, (_, i) =>
+                                            String(i + 1).padStart(2, "0")
+                                        )}
+                                        className="w-full max-w-[150px]"
+                                    />
+                                    <FormSelect
+                                        value={birth.d}
+                                        onChange={(e) => setBirth({ ...birth, d: e.target.value })}
+                                        options={Array.from({ length: 31 }, (_, i) =>
+                                            String(i + 1).padStart(2, "0")
+                                        )}
+                                        className="w-full max-w-[150px]"
+                                    />
+                                </div>
+                            </FormRow>
+
+                            <FormRow label="주소" required>
+                                <div className="flex flex-col gap-2 w-full max-w-[600px]">
+                                    <div className="flex gap-2 flex-wrap">
+                                        <ReadOnlyInput
+                                            value={zip}
+                                            placeholder="우편번호"
+                                            className="w-full max-w-[260px]"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="w-full max-w-[140px] p-4 bg-[#0072DD] rounded-[4px] text-white text-[14px] font-medium hover:bg-[#0061bb]"
+                                            onClick={() => {
+                                                // 우편번호 검색 연동 자리 — 임시 수동 입력 fallback
+                                                const z = prompt("우편번호를 입력해주세요");
+                                                if (z) setZip(z);
+                                            }}
+                                        >
+                                            우편번호 찾기
+                                        </button>
+                                    </div>
+                                    <ReadOnlyInput
+                                        value={addr1}
+                                        placeholder="기본주소 (우편번호 검색 시 자동 입력)"
+                                        className="w-full max-w-[600px]"
+                                    />
+                                    <FormInput
+                                        value={addr2}
+                                        onChange={(e) => setAddr2(e.target.value)}
+                                        placeholder="상세주소를 입력해주세요"
+                                        className="w-full max-w-[600px]"
+                                    />
+                                </div>
+                            </FormRow>
+
+                            <FormRow
+                                label={
+                                    <>
+                                        마케팅 및<br />광고 활용 동의
+                                    </>
                                 }
-                                options={["02", "031", "032", "051", "053", "062"]}
-                            />
-                            <div className="flex items-center gap-2">
-                                <span className="text-[var(--color-fg-muted)]">-</span>
+                                required
+                            >
+                                {/* 시안: 이메일수신 / SMS 수신 — 둘 다 체크 가능 (multi-select toggle) */}
+                                <div className="flex items-center gap-6 pt-3 flex-wrap">
+                                    <PillRadio
+                                        checked={marketingEmail}
+                                        onChange={() => setMarketingEmail((v) => !v)}
+                                        label="이메일수신"
+                                    />
+                                    <PillRadio
+                                        checked={marketingSms}
+                                        onChange={() => setMarketingSms((v) => !v)}
+                                        label="SMS 수신"
+                                    />
+                                </div>
+                            </FormRow>
+                        </div>
+                    </section>
+
+                    {/* ===== 섹션 B — 회원정보 (선택) ===== */}
+                    <section className="flex flex-col">
+                        <header className="flex justify-between items-end pb-5 border-b border-[#E5E5EC]">
+                            <h2 className="text-[32px] font-bold text-[#000000] leading-tight">
+                                회원정보
+                            </h2>
+                            <span className="text-[14px] font-light text-[#0072DD]">
+                                *선택사항
+                            </span>
+                        </header>
+
+                        <div className="border-t border-[#222222] py-10 flex flex-col gap-8">
+                            <FormRow label="성별" required>
+                                <div className="flex items-center gap-6 pt-3 flex-wrap">
+                                    <PillRadio
+                                        checked={gender === "M"}
+                                        onChange={() => setGender("M")}
+                                        label="남자"
+                                    />
+                                    <PillRadio
+                                        checked={gender === "F"}
+                                        onChange={() => setGender("F")}
+                                        label="여자"
+                                    />
+                                </div>
+                            </FormRow>
+
+                            <FormRow label="가입경로" required>
                                 <FormInput
-                                    value={phoneHome.b}
-                                    onChange={(e) =>
-                                        setPhoneHome({ ...phoneHome, b: e.target.value })
-                                    }
-                                    placeholder="123"
+                                    value={joinPath}
+                                    onChange={(e) => setJoinPath(e.target.value)}
+                                    placeholder="온라인마케팅을 통한 경로"
+                                    className="w-full max-w-[480px]"
                                 />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[var(--color-fg-muted)]">-</span>
-                                <FormInput
-                                    value={phoneHome.c}
-                                    onChange={(e) =>
-                                        setPhoneHome({ ...phoneHome, c: e.target.value })
-                                    }
-                                    placeholder="597"
-                                />
-                            </div>
+                            </FormRow>
                         </div>
-                    </FormRow>
+                    </section>
 
-                    <FormRow label="휴대전화" required>
-                        <div className="grid grid-cols-3 gap-2 items-center">
-                            <FormSelect
-                                value={phoneMobile.a}
-                                onChange={(e) =>
-                                    setPhoneMobile({ ...phoneMobile, a: e.target.value })
-                                }
-                                options={["010", "011", "016", "017", "018", "019"]}
-                            />
-                            <div className="flex items-center gap-2">
-                                <span className="text-[var(--color-fg-muted)]">-</span>
-                                <FormInput
-                                    value={phoneMobile.b}
-                                    onChange={(e) =>
-                                        setPhoneMobile({ ...phoneMobile, b: e.target.value })
-                                    }
-                                    placeholder="1234"
-                                />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[var(--color-fg-muted)]">-</span>
-                                <FormInput
-                                    value={phoneMobile.c}
-                                    onChange={(e) =>
-                                        setPhoneMobile({ ...phoneMobile, c: e.target.value })
-                                    }
-                                    placeholder="5678"
-                                />
-                            </div>
-                        </div>
-                    </FormRow>
-
-                    <FormRow label="이메일" required>
-                        <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-2 items-center">
-                            <FormInput
-                                value={emailLocal}
-                                onChange={(e) => setEmailLocal(e.target.value)}
-                            />
-                            <span className="text-[var(--color-fg-muted)]">@</span>
-                            <FormInput
-                                value={emailDomain}
-                                onChange={(e) => setEmailDomain(e.target.value)}
-                            />
-                            <span />
-                            <FormSelect
-                                value={emailDomainMode}
-                                onChange={(e) => setEmailDomainMode(e.target.value)}
-                                options={[
-                                    "직접입력",
-                                    "naver.com",
-                                    "gmail.com",
-                                    "daum.net",
-                                    "kakao.com",
-                                ]}
-                            />
-                        </div>
-                    </FormRow>
-
-                    <FormRow label="생년월일" required>
-                        <div className="grid grid-cols-3 gap-2">
-                            <FormSelect
-                                value={birth.y}
-                                onChange={(e) => setBirth({ ...birth, y: e.target.value })}
-                                options={Array.from({ length: 80 }, (_, i) =>
-                                    String(2026 - i)
-                                )}
-                            />
-                            <FormSelect
-                                value={birth.m}
-                                onChange={(e) => setBirth({ ...birth, m: e.target.value })}
-                                options={Array.from({ length: 12 }, (_, i) =>
-                                    String(i + 1).padStart(2, "0")
-                                )}
-                            />
-                            <FormSelect
-                                value={birth.d}
-                                onChange={(e) => setBirth({ ...birth, d: e.target.value })}
-                                options={Array.from({ length: 31 }, (_, i) =>
-                                    String(i + 1).padStart(2, "0")
-                                )}
-                            />
-                        </div>
-                    </FormRow>
-
-                    <FormRow label="주소" required>
-                        <div className="space-y-2">
-                            <div className="flex gap-2">
-                                <FormInput
-                                    value={zip}
-                                    onChange={(e) => setZip(e.target.value)}
-                                    placeholder="08533"
-                                    className="!w-40"
-                                />
-                                <button
-                                    type="button"
-                                    className="rounded-sm bg-[#3b82f6] text-white px-4 py-2.5 text-sm font-medium hover:bg-[#2563eb]"
-                                >
-                                    우편번호 찾기
-                                </button>
-                            </div>
-                            <FormInput
-                                value={addr1}
-                                onChange={(e) => setAddr1(e.target.value)}
-                                placeholder="서울특별시 마포구 잔다리로 44"
-                            />
-                            <FormInput
-                                value={addr2}
-                                onChange={(e) => setAddr2(e.target.value)}
-                                placeholder="상세주소"
-                            />
-                        </div>
-                    </FormRow>
-
-                    <FormRow label="마케팅 및 광고 활용 동의" required>
-                        {/* 시안: 이메일수신 / SMS 수신 — 둘 다 체크 가능 (multi-select toggle) */}
-                        <div className="flex items-center gap-6 pt-2">
-                            <RadioOption
-                                checked={marketingEmail}
-                                onChange={() => setMarketingEmail(v => !v)}
-                                label="이메일 수신"
-                            />
-                            <RadioOption
-                                checked={marketingSms}
-                                onChange={() => setMarketingSms(v => !v)}
-                                label="SMS 수신"
-                            />
-                        </div>
-                    </FormRow>
-                </section>
-
-                {/* ===== 회원정보 (선택) ===== */}
-                <header className="flex items-end justify-between pb-3 border-b-2 border-[var(--color-fg)] mt-8">
-                    <h2 className="text-xl md:text-2xl font-bold text-[var(--color-fg)]">
-                        회원정보
-                    </h2>
-                    <span className="text-xs text-[#3b82f6]">*선택사항</span>
-                </header>
-
-                <section className="py-6 space-y-4">
-                    <FormRow label="성별" required>
-                        <div className="flex items-center gap-6 pt-2">
-                            <RadioOption
-                                checked={gender === "M"}
-                                onChange={() => setGender("M")}
-                                label="남자"
-                            />
-                            <RadioOption
-                                checked={gender === "F"}
-                                onChange={() => setGender("F")}
-                                label="여자"
-                            />
-                        </div>
-                    </FormRow>
-
-                    <FormRow label="가입경로" required>
-                        <FormInput
-                            value={joinPath}
-                            onChange={(e) => setJoinPath(e.target.value)}
-                            placeholder="온라인마케팅을 통한 경로"
-                        />
-                    </FormRow>
-                </section>
-
-                {/* ===== 하단 버튼 영역 ===== */}
-                <div className="mt-6 pt-6 border-t border-[var(--color-border)] flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                    <button
-                        type="button"
-                        onClick={withdraw}
-                        className="rounded-sm border border-[var(--color-border)] bg-white text-[var(--color-fg)] px-6 py-2.5 text-sm font-medium hover:bg-[var(--color-bg-subtle)] md:w-32"
-                    >
-                        회원탈퇴
-                    </button>
-                    <div className="flex gap-2">
+                    {/* ===== 하단 액션 ===== */}
+                    <div className="flex flex-wrap justify-between items-center gap-3">
                         <button
                             type="button"
-                            onClick={() => router.replace("/mypage")}
-                            className="rounded-sm bg-[var(--color-bg-subtle)] text-[var(--color-fg)] px-6 py-2.5 text-sm font-medium hover:bg-[var(--color-bg-muted)] md:w-32"
+                            onClick={withdraw}
+                            className="w-full max-w-[140px] p-4 rounded-[4px] border border-[#222222] bg-white text-center text-[14px] font-medium text-[#222222] hover:bg-[#F7F7FB]"
                         >
-                            취소
+                            회원탈퇴
                         </button>
-                        <button
-                            type="button"
-                            onClick={async () => {
-                                if (currentPassword && newPassword) {
-                                    await changePassword();
-                                } else {
-                                    await saveProfile();
-                                }
-                            }}
-                            className="rounded-sm bg-[var(--color-fg)] text-white px-6 py-2.5 text-sm font-medium hover:opacity-90 md:w-32"
-                        >
-                            확인
-                        </button>
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <button
+                                type="button"
+                                onClick={() => router.back()}
+                                className="w-full max-w-[200px] p-4 bg-[#F3F3F3] rounded-[4px] text-center text-[14px] font-medium text-[#505050] hover:bg-[#e9e9e9]"
+                            >
+                                취소
+                            </button>
+                            <button
+                                type="submit"
+                                className="w-full max-w-[200px] p-4 bg-[#222222] rounded-[4px] text-center text-white text-[14px] font-medium hover:opacity-90"
+                            >
+                                확인
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </main>
         </div>
     );
 }
 
 /* ============================================================
- * 폼 보조 컴포넌트 — Figma 시안: 라벨 좌측 고정폭, 입력 우측
+ * 폼 보조 컴포넌트 — Figma 시안: 라벨 좌측 고정폭(120) + 필드 우측
  * ============================================================ */
 function FormRow({
     label,
     required,
     children,
 }: {
-    label: string;
+    label: React.ReactNode;
     required?: boolean;
     children: React.ReactNode;
 }) {
     return (
-        <div className="grid grid-cols-[100px_1fr] md:grid-cols-[120px_1fr] gap-4 items-start">
-            <label className="pt-3 text-sm text-[var(--color-fg)]">
-                {label}
-                {required && <span className="text-[#3b82f6] ml-0.5">*</span>}
-            </label>
-            <div className="min-w-0">{children}</div>
+        <div className="flex items-start flex-col sm:flex-row gap-2 sm:gap-0">
+            <div className="w-[120px] shrink-0 flex pt-4">
+                <span className="text-[14px] font-medium text-[#222222]">{label}</span>
+                {required && (
+                    <span className="text-[14px] font-medium text-[#0072DD]">*</span>
+                )}
+            </div>
+            <div className="min-w-0 flex-1">{children}</div>
         </div>
     );
 }
+
+const INPUT_BASE =
+    "block p-4 rounded-[4px] text-[14px] outline-none";
 
 function FormInput({
     className = "",
@@ -419,22 +485,38 @@ function FormInput({
     return (
         <input
             {...rest}
-            className={`block w-full rounded-sm bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-3 py-2.5 text-sm text-[var(--color-fg)] placeholder:text-[var(--color-fg-subtle)] focus:outline-none focus:border-[var(--color-fg-muted)] ${className}`}
+            className={`${INPUT_BASE} border border-[#E5E5EC] text-[#222222] placeholder:text-[#767676] focus:border-[#222222] ${className}`}
+        />
+    );
+}
+
+/** 비활성(읽기 전용) 입력 — 시안: 연회색 배경 + 진한 보더 + 회색 텍스트 */
+function ReadOnlyInput({
+    className = "",
+    ...rest
+}: React.InputHTMLAttributes<HTMLInputElement>) {
+    return (
+        <input
+            {...rest}
+            readOnly
+            disabled
+            className={`${INPUT_BASE} bg-[#F7F7FB] border border-[#BEBEBE] text-[#767676] placeholder:text-[#767676] cursor-not-allowed ${className}`}
         />
     );
 }
 
 function FormSelect({
     options,
+    className = "",
     ...rest
 }: React.SelectHTMLAttributes<HTMLSelectElement> & { options: string[] }) {
     return (
         <select
             {...rest}
-            className="block w-full rounded-sm bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-3 py-2.5 text-sm text-[var(--color-fg)] focus:outline-none focus:border-[var(--color-fg-muted)] appearance-none bg-no-repeat bg-[right_0.5rem_center] bg-[length:1rem] pr-7"
+            className={`${INPUT_BASE} border border-[#E5E5EC] text-[#222222] focus:border-[#222222] appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[length:1rem] pr-9 ${className}`}
             style={{
                 backgroundImage:
-                    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23999'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E\")",
+                    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E\")",
             }}
         >
             {options.map((o) => (
@@ -446,15 +528,13 @@ function FormSelect({
     );
 }
 
-function ReadOnly({ value }: { value: string }) {
-    return (
-        <div className="block w-full rounded-sm bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-3 py-2.5 text-sm text-[var(--color-fg)]">
-            {value}
-        </div>
-    );
+/** 전화/입력 사이 대시 구분선 */
+function Dash() {
+    return <span className="w-[7px] h-px bg-[#222222] shrink-0" aria-hidden="true" />;
 }
 
-function RadioOption({
+/** 22px pill 라디오 — 선택 시 파랑 채움 + 흰 점 */
+function PillRadio({
     checked,
     onChange,
     label,
@@ -467,14 +547,14 @@ function RadioOption({
         <label className="inline-flex items-center gap-2 cursor-pointer">
             <span
                 onClick={onChange}
-                className={`relative w-4 h-4 rounded-full border ${
-                    checked ? "border-[#3b82f6] bg-[#3b82f6]" : "border-[var(--color-border-strong)] bg-white"
-                } flex items-center justify-center`}
+                className={`relative w-[22px] h-[22px] rounded-full flex items-center justify-center ${
+                    checked ? "bg-[#0072DD]" : "bg-[#E5E5EC]"
+                }`}
             >
-                {checked && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                {checked && <span className="w-2 h-2 rounded-full bg-white" />}
             </span>
-            <input type="radio" checked={checked} onChange={onChange} className="hidden" />
-            <span className="text-sm text-[var(--color-fg)]">{label}</span>
+            <input type="checkbox" checked={checked} onChange={onChange} className="hidden" />
+            <span className="text-[14px] font-medium text-[#505050]">{label}</span>
         </label>
     );
 }

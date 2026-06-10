@@ -1,16 +1,18 @@
 "use client";
 
 /**
- * 마이페이지 메인 (Figma node 37:12411).
+ * 마이페이지 메인 — Figma 마이페이지 spec.
  *
- * 디자인 노트 — 라운딩:
- * - 환영 카드:        rounded-lg (~12px)
- * - "정보수정" 버튼:  rounded-sm (~4px) — 검정 채움
- * - 3분할 통계 카드:  rounded-md (~8px) — 옅은 회색 배경, 보더 없음
- * - 주문처리 현황 박스: 보더만, rounded 없음(0) — sharp
- * - 최근 주문 카드:   rounded 없음 — 라인 구분만
- * - 상태 pill:        rounded-full + 좌측 컬러 dot
- * - 상품 썸네일:      rounded-sm
+ * 레이아웃 (Header/PromoStrip/Footer 는 layout 제공 → 여기서 추가 안 함):
+ * - Outer: max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flcol lg:row gap-20
+ * - SIDEBAR: MyPageSideNav (w-full lg:w-[260px])
+ * - MAIN: flex-1 lg:w-[1000px] flex flcol gap-[100px]
+ *     1) 프로필 카드 + 3 통계 카드
+ *     2) 주문처리 현황 (4단계 흐름 + 취소/교환/환불)
+ *     3) 최근 주문내역 (썸네일/가격/수량/일자/상태 pill)
+ *
+ * 데이터 보존: auth 가드, /members/me, /orders, points/balance, coupons, referrals.
+ * 추가: /members/me/grade 로 실제 등급 라벨 매핑(graceful fallback).
  */
 
 import { useEffect, useState } from "react";
@@ -49,35 +51,35 @@ const STATUS_LABEL: Record<string, string> = {
     REFUNDED: "환불완료",
 };
 
-// 상태 dot 색상 — Figma: 파랑/검정 위주
-const STATUS_DOT: Record<string, string> = {
-    PENDING_PAYMENT: "#3b82f6",
-    PAID: "#3b82f6",
-    PREPARING: "#3b82f6",
-    SHIPPING: "#3b82f6",
-    DELIVERED: "#3b82f6",
-    CANCELED: "#ffffff",
-    REFUNDED: "#ffffff",
+// 백엔드 GradeCode → 표시 라벨 (회원등급 페이지와 일치)
+const GRADE_DISPLAY: Record<string, string> = {
+    SILVER: "실버",
+    GOLD: "골드",
+    DIA: "다이아",
+    VIP: "VIP",
 };
 
-const STATUS_CONTAINER: Record<string, string> = {
-    PENDING_PAYMENT: "bg-[var(--color-bg-subtle)] text-[var(--color-fg)]",
-    PAID: "bg-[var(--color-bg-subtle)] text-[var(--color-fg)]",
-    PREPARING: "bg-[var(--color-bg-subtle)] text-[var(--color-fg)]",
-    SHIPPING: "bg-[var(--color-bg-subtle)] text-[var(--color-fg)]",
-    DELIVERED: "bg-[var(--color-bg-subtle)] text-[var(--color-fg)]",
-    CANCELED: "bg-[var(--color-fg)] text-white",
-    REFUNDED: "bg-[var(--color-fg)] text-white",
+// 상태 pill — Figma: 배송완료(파랑) / 진행(회색) / 취소완료(검정)
+type PillStyle = { container: string; dot: string };
+const STATUS_PILL: Record<string, PillStyle> = {
+    PENDING_PAYMENT: { container: "bg-[#F6F7FB] text-[#767676]", dot: "#767676" },
+    PAID: { container: "bg-[#F6F7FB] text-[#767676]", dot: "#767676" },
+    PREPARING: { container: "bg-[#F6F7FB] text-[#767676]", dot: "#767676" },
+    SHIPPING: { container: "bg-[#F6F7FB] text-[#767676]", dot: "#767676" },
+    DELIVERED: { container: "bg-[#E6F3FE] text-[#0072DD]", dot: "#0742AC" },
+    CANCELED: { container: "bg-[#222222] text-white", dot: "#ffffff" },
+    REFUNDED: { container: "bg-[#222222] text-white", dot: "#ffffff" },
 };
+const DEFAULT_PILL: PillStyle = { container: "bg-[#F6F7FB] text-[#767676]", dot: "#767676" };
 
 export default function MyPage() {
-    const { user, loading: authLoading, logout } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     const [orders, setOrders] = useState<Order[]>([]);
     const [balance, setBalance] = useState(0);
     const [coupons, setCoupons] = useState<CouponItem[]>([]);
     const [joinedAt, setJoinedAt] = useState<string>("");
-    const [referral, setReferral] = useState<{ code: string; count: number }>({ code: "", count: 0 });
+    const [gradeCode, setGradeCode] = useState<string>("");
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -87,21 +89,22 @@ export default function MyPage() {
         if (!user) return;
         (async () => {
             try {
-                const [me, o, b, c, r] = await Promise.all([
+                const [me, o, b, c, g] = await Promise.all([
                     api<{ createdAt?: string }>("/api/v1/members/me", { auth: true }).catch(
                         () => ({}) as { createdAt?: string }
                     ),
                     api<{ content: Order[] }>("/api/v1/orders?size=10", { auth: true }),
                     api<{ balance: number }>("/api/v1/members/me/points/balance", { auth: true }),
                     api<{ content: CouponItem[] }>("/api/v1/members/me/coupons?size=50", { auth: true }),
-                    api<{ referralCode: string; referredCount: number }>("/api/v1/members/me/referrals", { auth: true })
-                        .catch(() => ({ referralCode: "", referredCount: 0 })),
+                    api<{ grade: string }>("/api/v1/members/me/grade", { auth: true }).catch(
+                        () => ({ grade: "" })
+                    ),
                 ]);
                 if (me.createdAt) setJoinedAt(me.createdAt);
                 setOrders(o.content);
                 setBalance(b.balance);
                 setCoupons(c.content);
-                setReferral({ code: r.referralCode, count: r.referredCount });
+                setGradeCode(g.grade);
             } catch {
                 /* ignore */
             }
@@ -110,17 +113,19 @@ export default function MyPage() {
 
     if (authLoading || !user) {
         return (
-            <div className="mx-auto max-w-screen-2xl px-4 py-10 text-[var(--color-fg-subtle)]">
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] py-10 text-[#767676]">
                 불러오는 중...
             </div>
         );
     }
 
+    const gradeLabel = gradeCode ? GRADE_DISPLAY[gradeCode] ?? gradeCode : "일반회원";
+
     const usableCoupons = coupons.filter(
         (c) => !c.usedAt && new Date(c.expiresAt) > new Date()
     );
 
-    // 주문 처리 현황 단계별 카운트
+    // 주문 처리 현황 단계별 카운트 (최근 1개월)
     const counts = {
         PENDING_PAYMENT: orders.filter((o) => o.status === "PENDING_PAYMENT").length,
         PREPARING: orders.filter((o) => ["PAID", "PREPARING"].includes(o.status)).length,
@@ -131,215 +136,148 @@ export default function MyPage() {
         REFUNDED: orders.filter((o) => o.status === "REFUNDED").length,
     };
 
+    const recentOrders = orders.slice(0, 5);
+
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 py-8 grid gap-8 md:grid-cols-[220px_1fr]">
-            {/* ===== 좌측 사이드바 (PC) ===== */}
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flex-col lg:flex-row gap-20">
+            {/* ===== 좌측 사이드바 ===== */}
             <MyPageSideNav />
 
-            {/* ===== 모바일 헤더 ===== */}
-            <div className="md:hidden">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-xl font-semibold text-[var(--color-fg)]">마이페이지</h1>
-                    <button
-                        onClick={async () => {
-                            await logout();
-                            router.replace("/");
-                        }}
-                        className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-danger)]"
-                    >
-                        로그아웃
-                    </button>
-                </div>
-            </div>
-
             {/* ===== 우측 메인 ===== */}
-            <main className="space-y-6">
-                {/* 환영 카드 — 시안: 연회색 fill + 보더 없음 + rounded-[12px] */}
-                <div className="rounded-[12px] bg-[var(--color-bg-subtle)] px-6 py-5 flex items-center gap-5">
-                    <div className="w-16 h-16 rounded-full bg-white flex-shrink-0 flex items-center justify-center text-[var(--color-fg-subtle)]">
-                        {/* 시안 매칭: 기본 사용자 실루엣 아이콘 */}
-                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.6"/>
-                            <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-                        </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-base font-semibold text-[var(--color-fg)]">
-                            안녕하세요. 엘프바님!
-                        </p>
-                        <p className="text-xs text-[var(--color-fg-muted)] mt-1">
-                            {user.name}님의 회원등급은 일반회원입니다.
-                        </p>
-                        <p className="text-[11px] text-[var(--color-fg-muted)] mt-2">
-                            가입일 <span className="ml-2 text-[var(--color-fg)]">
-                                {joinedAt ? formatDate(joinedAt).replace(/\./g, ".") : "—"}
-                            </span>
-                        </p>
-                    </div>
-                    <Link
-                        href="/mypage/settings"
-                        className="hidden md:inline-flex items-center justify-center rounded-sm bg-[var(--color-fg)] text-white px-5 py-2.5 text-sm font-medium hover:opacity-90"
-                    >
-                        정보수정
-                    </Link>
-                </div>
-
-                {/* 내 추천 코드 카드 — 어드민이 적립금 설정. 회원이 코드 공유로 친구 가입 시 양쪽 보상 */}
-                {referral.code && (
-                    <div className="rounded-[12px] bg-gradient-to-r from-[#EFF6FF] to-[#DBEAFE] p-5 flex items-center justify-between gap-4">
-                        <div className="min-w-0">
-                            <p className="text-xs text-[var(--color-fg-muted)] mb-1">내 추천 코드</p>
-                            <p className="text-2xl font-bold tabular-nums tracking-wider text-[#3b82f6]">{referral.code}</p>
-                            <p className="text-[11px] text-[var(--color-fg-muted)] mt-1">
-                                친구 가입 시 양쪽 적립금 지급 · 누적 추천 <span className="text-[var(--color-fg)] font-semibold">{referral.count}명</span>
-                            </p>
+            <main className="flex-1 lg:w-[1000px] flex flex-col gap-[100px]">
+                {/* ── 1) 프로필 블록 ── */}
+                <section className="flex flex-col gap-7">
+                    {/* 프로필 카드 */}
+                    <div className="p-9 rounded-[16px] border border-[#DDDDDD] flex flex-wrap gap-4 justify-between items-center">
+                        <div className="flex items-center gap-4">
+                            <div className="w-[88px] h-[88px] rounded-full bg-[#F3F3F3] flex items-center justify-center">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4" stroke="#CCCCCC" strokeWidth="1.6" />
+                                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="#CCCCCC" strokeWidth="1.6" strokeLinecap="round" />
+                                </svg>
+                            </div>
+                            <div className="flex flex-col gap-3">
+                                <div className="flex flex-col">
+                                    <p className="text-[20px] font-medium text-[#000000]">
+                                        안녕하세요. {user.name}님!
+                                    </p>
+                                    <p className="text-[14px] text-[#767676]">
+                                        고객님의 회원등급은 {gradeLabel}입니다.
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[14px] text-[#767676]">가입일</span>
+                                    <span className="w-px h-3 bg-[#E5E5EC]" />
+                                    <span className="text-[14px] text-[#000000]">
+                                        {joinedAt ? formatDate(joinedAt) : "—"}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                navigator.clipboard?.writeText(referral.code);
-                                alert("추천 코드가 복사되었습니다.");
-                            }}
-                            className="shrink-0 rounded-md bg-[#3b82f6] text-white px-4 py-2 text-sm font-medium hover:bg-[#2563eb] transition"
+                        <Link
+                            href="/mypage/settings"
+                            className="w-[108px] p-3 bg-[#222222] rounded-[4px] text-center text-white text-[14px] font-medium"
                         >
-                            코드 복사
-                        </button>
+                            정보수정
+                        </Link>
                     </div>
-                )}
 
-                {/* 3분할 통계 카드 — 옅은 회색 박스, rounded-md, 보더 없음 */}
-                <div className="grid grid-cols-3 gap-2 md:gap-3">
-                    <StatCard
-                        label="현재 고객님의 회원등급"
-                        icon={
-                            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#3b82f6]">
-                                <path d="M12 2l2.39 5.84L20 9l-4.5 3.9L17 19l-5-3-5 3 1.5-6.1L4 9l5.61-1.16z" />
-                            </svg>
-                        }
-                        value="골드"
-                    />
-                    <StatCard
-                        label="사용가능한 쿠폰"
-                        icon={
-                            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#3b82f6]">
-                                <path d="M4 5h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4V5zm5 3v8h2V8H9z" />
-                            </svg>
-                        }
-                        value={`${usableCoupons.length}개`}
-                    />
-                    <StatCard
-                        label="사용가능한 적립금"
-                        icon={
-                            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#3b82f6]">
-                                <circle cx="12" cy="12" r="9" />
-                                <text x="12" y="16" textAnchor="middle" fontSize="11" fill="#fff" fontWeight="700">€</text>
-                            </svg>
-                        }
-                        value={`${balance.toLocaleString()}P`}
-                    />
-                </div>
+                    {/* 3 통계 카드 */}
+                    <div className="flex flex-wrap gap-5">
+                        <StatCard label="현재 고객님의 회원등급" value={gradeLabel} icon="crown" />
+                        <StatCard label="사용가능한 쿠폰" value={`${usableCoupons.length}개`} icon="coupon" />
+                        <StatCard label="사용가능한 적립금" value={`${balance.toLocaleString()}P`} icon="coins" />
+                    </div>
+                </section>
 
-                {/* 주문 처리 현황 */}
-                <div>
-                    <h2 className="text-base font-semibold mb-3 text-[var(--color-fg)]">
-                        나의 주문처리 현황{" "}
-                        <span className="text-xs font-normal text-[var(--color-fg-muted)]">
-                            (최근 1년)
-                        </span>
-                    </h2>
-                    <div className="border-t border-b border-[var(--color-border)] py-6 grid grid-cols-1 md:grid-cols-[1fr_180px] gap-4">
-                        {/* 4단계 흐름 */}
-                        <div className="flex items-center justify-around">
-                            <FlowStep label="입금대기" value={counts.PENDING_PAYMENT} />
-                            <Arrow />
-                            <FlowStep label="배송준비중" value={counts.PREPARING} />
-                            <Arrow />
-                            <FlowStep label="배송중" value={counts.SHIPPING} />
-                            <Arrow />
-                            <FlowStep label="배송완료" value={counts.DELIVERED} />
+                {/* ── 2) 주문처리 현황 ── */}
+                <section className="flex flex-col gap-5">
+                    <div className="flex items-end gap-1">
+                        <h2 className="text-[24px] font-medium text-[#000000]">나의 주문처리 현황</h2>
+                        <span className="text-[14px] font-light text-[#767676]">(최근 1개월)</span>
+                    </div>
+                    <div className="flex flex-wrap justify-between items-start gap-8">
+                        {/* 좌측: 4단계 흐름 */}
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-6">
+                                <FlowBox value={counts.PENDING_PAYMENT} />
+                                <FlowArrow />
+                                <FlowBox value={counts.PREPARING} />
+                                <FlowArrow />
+                                <FlowBox value={counts.SHIPPING} />
+                                <FlowArrow />
+                                <FlowBox value={counts.DELIVERED} />
+                            </div>
+                            <div className="flex justify-between">
+                                {["입금대기", "배송준비중", "배송중", "배송완료"].map((label, i) => (
+                                    <span
+                                        key={label}
+                                        className={`w-[86px] text-center text-[16px] text-[#000000] ${i > 0 ? "ml-6" : ""}`}
+                                    >
+                                        {label}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
-                        {/* 사이드 카운터 — 좌측 보더 */}
-                        <div className="md:border-l md:border-[var(--color-border)] md:pl-6 space-y-2 text-sm flex flex-col justify-center">
+                        {/* 우측: 취소/교환/환불 */}
+                        <div className="w-[196px] flex flex-col">
                             <SideCount label="취소" value={counts.CANCELED} />
                             <SideCount label="교환" value={counts.EXCHANGE} />
                             <SideCount label="환불" value={counts.REFUNDED} />
                         </div>
                     </div>
-                </div>
+                </section>
 
-                {/* 최근 주문 내역 */}
-                <div>
-                    <div className="flex items-end justify-between mb-3">
-                        <h2 className="text-base font-semibold text-[var(--color-fg)]">
-                            최근 나의 주문내역{" "}
-                            <span className="text-xs font-normal text-[var(--color-fg-muted)]">
-                                (최근 1주일)
-                            </span>
-                        </h2>
-                        <Link
-                            href="/mypage/orders"
-                            className="text-xs text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
-                        >
-                            전체보기 →
+                {/* ── 3) 최근 주문내역 ── */}
+                <section className="flex flex-col gap-5">
+                    <div className="flex justify-between items-end">
+                        <div className="flex items-end gap-1">
+                            <h2 className="text-[24px] font-medium text-[#000000]">최근 나의 주문내역</h2>
+                            <span className="text-[14px] font-light text-[#767676]">(최근 1개월)</span>
+                        </div>
+                        <Link href="/mypage/orders" className="text-[14px] font-medium text-[#000000]">
+                            전체보기
                         </Link>
                     </div>
-                    {orders.length === 0 ? (
-                        <p className="border-t border-b border-[var(--color-border)] py-12 text-center text-sm text-[var(--color-fg-subtle)]">
-                            주문 내역이 없습니다.
+
+                    {recentOrders.length === 0 ? (
+                        <p className="border-t border-[#222222] border-b border-b-[#DDDDDD] py-12 text-center text-[14px] text-[#767676]">
+                            최근 주문 내역이 없습니다.
                         </p>
                     ) : (
-                        <ul className="border-t border-[var(--color-border)]">
-                            {orders.slice(0, 5).map((o) => (
-                                <li key={o.id} className="border-b border-[var(--color-border)]">
-                                    <Link
-                                        href={`/orders/${o.id}`}
-                                        className="grid grid-cols-[56px_1fr_auto] md:grid-cols-[80px_1fr_110px_60px_100px_110px] items-center gap-3 px-2 py-4 hover:bg-[var(--color-bg-subtle)]"
-                                    >
-                                        <div className="w-14 h-14 md:w-16 md:h-16 bg-[var(--color-bg-subtle)] rounded-sm flex-shrink-0" />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium text-[var(--color-fg)] line-clamp-1">
+                        <div className="border-t border-[#222222]">
+                            {recentOrders.map((o) => (
+                                <div
+                                    key={o.id}
+                                    className="py-3 border-b border-[#DDDDDD] flex flex-wrap justify-between items-center gap-3"
+                                >
+                                    <Link href={`/orders/${o.id}`} className="flex items-center gap-3 min-w-0">
+                                        <span className="w-[90px] h-[108px] rounded-[4px] object-cover bg-[#F6F7FB] shrink-0" />
+                                        <span className="flex flex-col gap-1 min-w-0">
+                                            <span className="text-[16px] font-medium text-[#000000] line-clamp-1">
                                                 {o.items[0]?.productName ?? "-"}
                                                 {o.items.length > 1 && ` 외 ${o.items.length - 1}건`}
-                                            </p>
-                                            <p className="text-xs text-[var(--color-fg-muted)] mt-0.5 font-mono">
+                                            </span>
+                                            <span className="text-[14px] font-light text-[#767676]">
                                                 #{o.orderNo}
-                                            </p>
-                                            <p className="md:hidden text-xs text-[var(--color-fg-muted)] mt-1">
-                                                <span className="text-[var(--color-fg)] font-semibold">
-                                                    {formatPrice(o.paidAmount)}
-                                                </span>
-                                                <span className="mx-1.5">·</span>
-                                                {formatDate(o.orderedAt)}
-                                            </p>
-                                        </div>
-                                        <div className="hidden md:block text-sm text-[var(--color-fg)] text-center">
-                                            {formatPrice(o.paidAmount)}
-                                        </div>
-                                        <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">
-                                            {o.items[0]?.quantity ?? 1}개
-                                        </div>
-                                        <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">
-                                            {formatDate(o.orderedAt)}
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <StatusPill status={o.status} />
-                                        </div>
+                                            </span>
+                                        </span>
                                     </Link>
-                                </li>
+                                    <span className="w-[184px] text-center text-[14px] font-medium">
+                                        {formatPrice(o.paidAmount)}
+                                    </span>
+                                    <span className="w-[184px] text-center text-[14px] text-[#767676]">
+                                        {o.items[0]?.quantity ?? 1}개
+                                    </span>
+                                    <span className="w-[184px] text-center text-[14px] text-[#767676]">
+                                        {formatDate(o.orderedAt)}
+                                    </span>
+                                    <StatusPill status={o.status} />
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     )}
-                </div>
-
-                {/* 모바일 전용 정보수정 */}
-                <div className="md:hidden">
-                    <Link
-                        href="/mypage/settings"
-                        className="block w-full text-center bg-[var(--color-fg)] text-white py-3 rounded-sm text-sm font-medium"
-                    >
-                        정보수정
-                    </Link>
-                </div>
+                </section>
             </main>
         </div>
     );
@@ -348,79 +286,93 @@ export default function MyPage() {
 /* ============================================================
  * 보조 컴포넌트
  * ============================================================ */
+
+function StatIcon({ name }: { name: "crown" | "coupon" | "coins" }) {
+    const common = { width: 34, height: 34, viewBox: "0 0 24 24", fill: "none" as const, "aria-hidden": true };
+    if (name === "crown") {
+        return (
+            <svg {...common}>
+                <path d="M4 8l3.5 3L12 5l4.5 6L20 8l-1.5 9h-13L4 8Z" stroke="#0072DD" strokeWidth="1.5" strokeLinejoin="round" />
+            </svg>
+        );
+    }
+    if (name === "coupon") {
+        return (
+            <svg {...common}>
+                <path d="M4 6h16v3a2 2 0 0 0 0 4v5H4v-5a2 2 0 0 0 0-4V6Z" stroke="#0072DD" strokeWidth="1.5" strokeLinejoin="round" />
+                <path d="M14 7v2M14 12v2M14 17v0" stroke="#0072DD" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+        );
+    }
+    return (
+        <svg {...common}>
+            <ellipse cx="12" cy="7" rx="6" ry="3" stroke="#0072DD" strokeWidth="1.5" />
+            <path d="M6 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7" stroke="#0072DD" strokeWidth="1.5" />
+            <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" stroke="#0072DD" strokeWidth="1.5" />
+        </svg>
+    );
+}
+
 function StatCard({
     label,
-    icon,
     value,
+    icon,
 }: {
     label: string;
-    icon: React.ReactNode;
     value: string;
+    icon: "crown" | "coupon" | "coins";
 }) {
     return (
-        <div className="rounded-[12px] bg-[var(--color-bg-subtle)] p-4 md:p-5">
-            <div className="flex items-center gap-1 text-xs text-[var(--color-fg-muted)]">
-                <span>{label}</span>
-                <span className="w-3.5 h-3.5 rounded-full border border-[var(--color-fg-subtle)] text-[9px] flex items-center justify-center text-[var(--color-fg-muted)]">
-                    ?
-                </span>
+        <div className="flex-1 min-w-[260px] max-w-[320px] p-6 bg-[#F6F7FB] rounded-[10px] flex flex-col gap-12">
+            <div className="flex items-center gap-1">
+                <span className="text-[14px] font-light text-[#767676]">{label}</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" stroke="#DDDDDD" strokeWidth="1.5" />
+                    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.2 2.4c-.7.2-.7.6-.7 1.1" stroke="#DDDDDD" strokeWidth="1.5" strokeLinecap="round" />
+                    <circle cx="12" cy="16" r="0.6" fill="#DDDDDD" />
+                </svg>
             </div>
-            <div className="mt-4 flex items-center justify-end gap-2 text-base md:text-lg font-bold text-[var(--color-fg)]">
-                <span>{icon}</span>
-                <span>{value}</span>
+            <div className="flex justify-end items-end gap-1">
+                <StatIcon name={icon} />
+                <span className="text-[26px] font-medium text-[#0072DD] leading-none">{value}</span>
             </div>
         </div>
     );
 }
 
-function FlowStep({ label, value }: { label: string; value: number }) {
+function FlowBox({ value }: { value: number }) {
     return (
-        <div className="text-center min-w-[60px]">
-            <div
-                className={`text-3xl md:text-4xl font-light ${
-                    value > 0 ? "text-[var(--color-fg)]" : "text-[var(--color-fg)]"
-                }`}
-            >
-                {value}
-            </div>
-            <div className="text-xs text-[var(--color-fg-muted)] mt-2">{label}</div>
+        <div className="w-[86px] h-[86px] bg-[#F6F7FB] rounded-[10px] flex items-center justify-center text-[26px] font-medium text-[#000000]">
+            {value}
         </div>
     );
 }
 
-function Arrow() {
+function FlowArrow() {
     return (
-        <svg
-            viewBox="0 0 24 24"
-            className="w-4 h-4 stroke-[var(--color-fg-subtle)] fill-none"
-            strokeWidth="1.5"
-        >
-            <path d="M9 6l6 6-6 6" />
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" stroke="#222222" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     );
 }
 
 function SideCount({ label, value }: { label: string; value: number }) {
     return (
-        <div className="flex justify-between items-center">
-            <span className="text-[var(--color-fg-muted)] text-xs">{label}</span>
-            <span className="text-[var(--color-fg)] text-sm">{value}</span>
+        <div className="py-3 border-b border-[#DDDDDD] flex justify-between items-center">
+            <span className="text-[14px] text-[#767676]">{label}</span>
+            <span className="text-[14px] font-medium text-[#000000]">{value}</span>
         </div>
     );
 }
 
 function StatusPill({ status }: { status: string }) {
     const label = STATUS_LABEL[status] ?? status;
-    const container = STATUS_CONTAINER[status] ?? "bg-[var(--color-bg-subtle)] text-[var(--color-fg)]";
-    const dotColor = STATUS_DOT[status] ?? "#3b82f6";
+    const { container, dot } = STATUS_PILL[status] ?? DEFAULT_PILL;
     return (
         <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${container}`}
+            className={`px-[18px] py-2.5 rounded-full text-[14px] font-medium flex items-center gap-1 ${container}`}
         >
-            <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ backgroundColor: dotColor }}
-            />
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dot }} />
             {label}
         </span>
     );

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatDate } from "@/lib/format";
-import { Badge, Button, Checkbox } from "@/components/ui";
+import { Button, Checkbox } from "@/components/ui";
 
 type Qna = {
     id: number;
@@ -68,23 +68,21 @@ export function ProductQna({ productId }: { productId: number }) {
     return (
         <div>
             <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-[var(--color-fg-muted)]">
-                    총 <span className="text-[var(--color-fg)] font-semibold">{total}</span>건의 문의
-                </p>
+                <p className="text-[24px] font-medium text-[#222222]">Q&amp;A ({total})</p>
                 {user ? (
-                    <Button
-                        size="sm"
-                        variant={showForm ? "secondary" : "primary"}
+                    <button
+                        type="button"
                         onClick={() => setShowForm(s => !s)}
+                        className="w-[108px] p-3 rounded-[4px] bg-[#222222] flex justify-center items-center text-white text-[14px] font-medium"
                     >
-                        {showForm ? "취소" : "문의 작성"}
-                    </Button>
+                        {showForm ? "취소" : "문의하기"}
+                    </button>
                 ) : (
                     <Link
                         href={`/login?redirect=/p/${productId}`}
-                        className="text-xs rounded-[var(--radius-sm)] border border-[var(--color-fg)] text-[var(--color-fg)] px-3 py-1.5 hover:bg-[var(--color-fg)] hover:text-[var(--color-fg-inverse)] transition"
+                        className="w-[108px] p-3 rounded-[4px] bg-[#222222] flex justify-center items-center text-white text-[14px] font-medium"
                     >
-                        로그인 후 문의 작성
+                        문의하기
                     </Link>
                 )}
             </div>
@@ -121,44 +119,51 @@ export function ProductQna({ productId }: { productId: number }) {
 
             {/* 리스트 */}
             {loading ? (
-                <p className="rounded-[var(--radius-lg)] px-4 py-10 text-center text-sm text-[var(--color-fg-subtle)]">
+                <p className="border-t border-[#222] px-4 py-10 text-center text-[14px] text-[#767676]">
                     불러오는 중...
                 </p>
             ) : list.length === 0 ? (
-                <p className="rounded-[var(--radius-lg)] px-4 py-10 text-center text-sm text-[var(--color-fg-subtle)]">
+                <p className="border-t border-[#222] px-4 py-10 text-center text-[14px] text-[#767676]">
                     아직 문의가 없습니다. 상품에 대해 궁금한 점을 남겨주세요.
                 </p>
             ) : (
-                <ul className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] divide-y divide-[var(--color-border)] overflow-hidden">
+                <ul className="border-t border-[#222]">
                     {list.map(q => (
-                        <li key={q.id}>
+                        <li key={q.id} className="border-b border-[#E5E5EC]">
                             <details className="group">
-                                <summary className="cursor-pointer list-none px-4 py-3.5 flex items-start gap-3 hover:bg-[var(--color-bg-subtle)]">
-                                    <span className="text-[var(--color-accent)] font-bold flex-shrink-0">Q.</span>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-[var(--color-fg)] line-clamp-2">{q.question}</p>
-                                        <p className="text-[11px] text-[var(--color-fg-muted)] mt-1 flex items-center gap-2">
-                                            <span>{formatDate(q.createdAt)}</span>
-                                            {q.isPrivate && <Badge size="sm" tone="neutral">비공개</Badge>}
-                                            {q.answer ? (
-                                                <Badge size="sm" tone="success">답변완료</Badge>
-                                            ) : (
-                                                <Badge size="sm" tone="warning">미답변</Badge>
+                                <summary className="cursor-pointer list-none py-7 flex justify-between items-center">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <span className="px-4 py-2 rounded-[4px] bg-[#F6F7FB] text-[14px] font-medium text-[#767676] whitespace-nowrap">
+                                            {q.answer ? "답변완료" : "미답변"}
+                                        </span>
+                                        <div className="flex items-center gap-1 min-w-0">
+                                            <span className="text-[16px] font-medium text-[#000] truncate">{q.question}</span>
+                                            {q.isPrivate && (
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="1.6" className="w-6 h-6 flex-shrink-0">
+                                                    <rect x="5" y="11" width="14" height="10" rx="2" />
+                                                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                                                </svg>
                                             )}
-                                        </p>
+                                        </div>
                                     </div>
-                                    <span className="text-[var(--color-fg-subtle)] text-sm group-open:rotate-180 transition flex-shrink-0 mt-0.5">⌃</span>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        <span className="text-[14px] text-[#000]">{maskAuthor(q.memberId)}</span>
+                                        <span className="w-px h-3 bg-[#E5E5EC]" />
+                                        <span className="text-[14px] text-[#767676]">{formatDate(q.createdAt)}</span>
+                                    </div>
                                 </summary>
                                 {q.answer && (
-                                    <div className="px-4 py-3.5 bg-[var(--color-bg-subtle)] flex items-start gap-3 border-l-2 border-[var(--color-accent)]">
-                                        <span className="text-[var(--color-fg-muted)] font-bold flex-shrink-0">A.</span>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm text-[var(--color-fg)] whitespace-pre-line">{q.answer}</p>
-                                            {q.answeredAt && (
-                                                <p className="text-[11px] text-[var(--color-fg-muted)] mt-1">
-                                                    엘프바 운영자 · {formatDate(q.answeredAt)}
-                                                </p>
-                                            )}
+                                    <div className="pb-7 pl-[72px] pr-2">
+                                        <div className="rounded-[4px] bg-[#F6F7FB] px-5 py-4 flex items-start gap-3">
+                                            <span className="text-[#767676] font-bold flex-shrink-0">A.</span>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[14px] text-[#222222] whitespace-pre-line">{q.answer}</p>
+                                                {q.answeredAt && (
+                                                    <p className="text-[12px] text-[#767676] mt-1">
+                                                        엘프바 운영자 · {formatDate(q.answeredAt)}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -169,4 +174,15 @@ export function ProductQna({ productId }: { productId: number }) {
             )}
         </div>
     );
+}
+
+/**
+ * 작성자 마스킹 표기.
+ * 백엔드 QnaView 가 작성자명을 내려주지 않으므로(memberId 만 제공),
+ * 회원 식별자를 노출 최소화하여 "회원##***" 형태로 마스킹한다.
+ */
+function maskAuthor(memberId: number): string {
+    const s = String(memberId);
+    const head = s.length <= 2 ? s : s.slice(0, 2);
+    return `회원${head}***`;
 }

@@ -3,14 +3,17 @@
 /**
  * 나의 주문 내역 (Figma node 37:12558).
  *
- * 레이아웃
- *  - 좌측: MyPageSideNav (PC)
- *  - 우측:
- *      h1 "나의 주문내역"  (최근1달내역)
- *      탭: [주문내역조회 (n)] [취소/반품/교환내역 (n)]
+ * 레이아웃 (Figma: sidebar 260 + main 1000, gap 80)
+ *  - Outer: mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flex-col lg:flex-row gap-20
+ *  - 좌측: MyPageSideNav (pathname 으로 "나의 주문 내역" active)
+ *  - 우측 (flex-1 lg:w-[1000px]):
+ *      Header: h1 "나의 주문내역" (최근1달내역) + 탭 [주문내역조회 (n)] [취소/반품/교환내역 (n)]
  *      필터바: 전체 주문처리상태 ▾ | 1개월 ▾ | 시작일자 | 종료일자
  *      페이지 사이즈 셀렉트 (우측 정렬, 10개씩보기)
- *      목록: 썸네일 | 상품명/주문번호 | 가격 | 수량 | 날짜 | 상태칩(pill, 파란점)
+ *      목록: 썸네일 | 상품명/주문번호 | 가격 | 수량 | 날짜 | 상태칩(pill, 도트)
+ *
+ * 데이터 보존: 주문 fetch(/api/v1/orders), 디테일 링크(/orders/{id}), 상태 매핑(STATUS_LABEL),
+ * auth(useAuth + /login redirect) 그대로 유지. 레이아웃/스타일만 시안에 맞춰 재구성.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -18,7 +21,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import { MyPageSideNav } from "@/components/mypage/SideNav";
 
 type OrderSummary = {
@@ -112,116 +115,177 @@ export default function MypageOrdersPage() {
     const returnTabCount = orders.filter(o => ["CANCELED", "REFUNDED", "EXCHANGED"].includes(o.status)).length;
 
     if (authLoading || !user) {
-        return <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8 text-sm text-[var(--color-fg-subtle)]">불러오는 중...</div>;
+        return (
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 text-[14px] text-[#767676]">
+                불러오는 중...
+            </div>
+        );
     }
 
     return (
-        <div className="mx-auto max-w-screen-xl px-4 md:px-8 py-8 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8">
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20 flex flex-col lg:flex-row gap-20">
+            {/* 사이드바 — pathname 으로 "나의 주문 내역" active */}
             <MyPageSideNav />
 
-            <div>
-                {/* 페이지 타이틀 */}
-                <div className="flex items-baseline gap-2 mb-5">
-                    <h1 className="text-2xl md:text-[26px] font-bold text-[var(--color-fg)]">나의 주문내역</h1>
-                    <span className="text-xs text-[var(--color-fg-muted)]">(최근1달내역)</span>
+            {/* 메인 */}
+            <main className="flex-1 lg:w-[1000px] flex flex-col gap-7">
+                {/* 1) Header */}
+                <header className="flex flex-col gap-5">
+                    <div className="flex items-end gap-1">
+                        <h1 className="text-[32px] font-bold text-[#000000]">나의 주문내역</h1>
+                        <span className="text-[14px] text-[#767676]">(최근1달내역)</span>
+                    </div>
+
+                    {/* 탭 */}
+                    <div className="flex flex-wrap items-center gap-3">
+                        <span className="px-4 py-3 rounded-[4px] bg-[#0072DD] text-white text-[14px] font-medium">
+                            주문내역조회 ({orderTabCount})
+                        </span>
+                        <Link
+                            href="/mypage/returns"
+                            className="px-4 py-3 rounded-[4px] border border-[#DDDDDD] text-[14px] font-medium text-[#000000] hover:bg-[#F6F7FB] transition"
+                        >
+                            취소/반품/교환내역 ({returnTabCount})
+                        </Link>
+                    </div>
+                </header>
+
+                {/* 2) 필터 바 */}
+                <div className="p-6 bg-[#F6F7FB] rounded-[10px] flex flex-wrap justify-center items-center gap-3">
+                    {/* 주문처리상태 드롭다운 */}
+                    <div className="relative w-[260px]">
+                        <select
+                            value={statusFilter}
+                            onChange={e => setStatusFilter(e.target.value)}
+                            className="w-full p-4 bg-white rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#767676] appearance-none cursor-pointer focus:outline-none"
+                        >
+                            <option value="ALL">전체 주문처리상태</option>
+                            <option value="PENDING_PAYMENT">결제대기</option>
+                            <option value="PAID">결제완료</option>
+                            <option value="PREPARING">배송준비중</option>
+                            <option value="SHIPPING">배송중</option>
+                            <option value="DELIVERED">배송완료</option>
+                            <option value="CANCELED">취소완료</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+                    </div>
+
+                    {/* 기간 드롭다운 */}
+                    <div className="relative w-[150px]">
+                        <select
+                            value={periodFilter}
+                            onChange={e => setPeriodFilter(e.target.value)}
+                            className="w-full p-4 bg-white rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#767676] appearance-none cursor-pointer focus:outline-none"
+                        >
+                            <option value="1M">1개월</option>
+                            <option value="3M">3개월</option>
+                            <option value="6M">6개월</option>
+                            <option value="1Y">1년</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+                    </div>
+
+                    {/* 시작 일자 */}
+                    <div className="relative w-[212px]">
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={e => setStartDate(e.target.value)}
+                            placeholder="YYYY-MM-DD"
+                            className="w-full p-4 bg-white rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#767676] focus:outline-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-4 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                        />
+                        <CalendarIcon className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+                    </div>
+
+                    {/* 종료 일자 */}
+                    <div className="relative w-[212px]">
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={e => setEndDate(e.target.value)}
+                            placeholder="YYYY-MM-DD"
+                            className="w-full p-4 bg-white rounded-[4px] border border-[#DDDDDD] text-[14px] text-[#767676] focus:outline-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-4 [&::-webkit-calendar-picker-indicator]:w-5 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                        />
+                        <CalendarIcon className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" />
+                    </div>
                 </div>
 
-                {/* 탭 */}
-                <div className="flex items-center gap-2 mb-5">
-                    <Tab active label={`주문내역조회 (${orderTabCount})`} href="/mypage/orders" />
-                    <Tab label={`취소/반품/교환내역 (${returnTabCount})`} href="/mypage/returns" />
+                {/* 3) 페이지 사이즈 컨트롤 */}
+                <div className="flex justify-end">
+                    <div className="relative flex items-center">
+                        <select
+                            value={pageSize}
+                            onChange={e => setPageSize(Number(e.target.value))}
+                            className="appearance-none bg-transparent pr-5 text-[14px] font-light text-[#505050] cursor-pointer focus:outline-none"
+                        >
+                            <option value={10}>10개씩보기</option>
+                            <option value={20}>20개씩보기</option>
+                            <option value={50}>50개씩보기</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2" />
+                    </div>
                 </div>
 
-                {/* 필터 바 */}
-                <div className="rounded-md bg-[var(--color-bg-subtle)] px-4 py-3 mb-2 flex flex-wrap items-center gap-2">
-                    <Select value={statusFilter} onChange={setStatusFilter} className="min-w-[180px]">
-                        <option value="ALL">전체 주문처리상태</option>
-                        <option value="PENDING_PAYMENT">결제대기</option>
-                        <option value="PAID">결제완료</option>
-                        <option value="PREPARING">배송준비중</option>
-                        <option value="SHIPPING">배송중</option>
-                        <option value="DELIVERED">배송완료</option>
-                    </Select>
-                    <Select value={periodFilter} onChange={setPeriodFilter} className="min-w-[90px]">
-                        <option value="1M">1개월</option>
-                        <option value="3M">3개월</option>
-                        <option value="6M">6개월</option>
-                        <option value="1Y">1년</option>
-                    </Select>
-                    <DateInput value={startDate} onChange={setStartDate} />
-                    <DateInput value={endDate} onChange={setEndDate} />
-                </div>
-
-                {/* 페이지 사이즈 */}
-                <div className="flex justify-end mb-2">
-                    <select
-                        value={pageSize}
-                        onChange={e => setPageSize(Number(e.target.value))}
-                        className="text-xs text-[var(--color-fg-muted)] bg-transparent px-2 py-1 focus:outline-none cursor-pointer"
-                    >
-                        <option value={10}>10개씩보기</option>
-                        <option value={20}>20개씩보기</option>
-                        <option value={50}>50개씩보기</option>
-                    </select>
-                </div>
-
-                {/* 목록 */}
-                <div className="border-t border-[var(--color-fg)]">
+                {/* 4) 주문 목록 */}
+                <div className="border-t border-[#222222] flex flex-col">
                     {loading ? (
-                        <p className="py-16 text-center text-sm text-[var(--color-fg-subtle)]">불러오는 중...</p>
+                        <p className="py-16 text-center text-[14px] text-[#767676]">불러오는 중...</p>
                     ) : filtered.length === 0 ? (
-                        <p className="py-20 text-center text-sm text-[var(--color-fg-subtle)]">주문 내역이 없습니다.</p>
+                        <p className="py-20 text-center text-[14px] text-[#767676]">주문 내역이 없습니다.</p>
                     ) : (
-                        <ul className="divide-y divide-[var(--color-border)]">
-                            {filtered.map(o => (
-                                <li key={o.id}>
-                                    <Link
-                                        href={`/orders/${o.id}`}
-                                        className="grid grid-cols-[64px_1fr_auto] md:grid-cols-[80px_1fr_110px_60px_100px_110px] items-center gap-4 px-2 py-4 hover:bg-[var(--color-bg-subtle)] transition"
-                                    >
-                                        {/* 썸네일 */}
-                                        <div className="w-16 h-16 md:w-20 md:h-20 rounded bg-[var(--color-bg-subtle)] flex items-center justify-center overflow-hidden">
-                                            {o.thumbnailUrl ? (
-                                                /* eslint-disable-next-line @next/next/no-img-element */
-                                                <img src={o.thumbnailUrl} alt="" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-10 h-12 bg-[var(--color-fg-subtle)]/30 rounded-sm" />
+                        filtered.map(o => (
+                            <Link
+                                key={o.id}
+                                href={`/orders/${o.id}`}
+                                className="py-3 border-b border-[#DDDDDD] flex flex-wrap justify-between items-center gap-3 hover:bg-[#F6F7FB] transition"
+                            >
+                                {/* LEFT: 썸네일 + 상품명/주문번호 */}
+                                <div className="flex items-center gap-3">
+                                    {o.thumbnailUrl ? (
+                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                        <img
+                                            src={o.thumbnailUrl}
+                                            alt=""
+                                            className="w-[90px] h-[108px] rounded-[4px] object-cover bg-[#F6F7FB]"
+                                        />
+                                    ) : (
+                                        <div className="w-[90px] h-[108px] rounded-[4px] bg-[#F6F7FB] flex items-center justify-center">
+                                            <div className="w-9 h-11 rounded-sm bg-[#DDDDDD]" />
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <p className="text-[16px] font-medium text-[#000000] line-clamp-1">
+                                            {o.productName ?? "상품아이템"}
+                                            {o.itemCount > 1 && (
+                                                <span className="text-[#767676]"> 외 {o.itemCount - 1}건</span>
                                             )}
-                                        </div>
+                                        </p>
+                                        <p className="text-[14px] font-light text-[#767676]">#{o.orderNo}</p>
+                                    </div>
+                                </div>
 
-                                        {/* 상품명 / 주문번호 */}
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium text-[var(--color-fg)] line-clamp-1">
-                                                {o.productName ?? "상품아이템"}
-                                                {o.itemCount > 1 && <span className="text-[var(--color-fg-muted)]"> 외 {o.itemCount - 1}건</span>}
-                                            </p>
-                                            <p className="text-xs text-[var(--color-fg-muted)] mt-1 font-mono">#{o.orderNo}</p>
-                                            {/* 모바일 인라인 메타 */}
-                                            <p className="md:hidden text-xs text-[var(--color-fg-muted)] mt-1">
-                                                <span className="text-[var(--color-fg)] font-semibold">{formatPrice(o.totalAmount)}</span>
-                                                <span className="mx-1.5">·</span>
-                                                {o.itemCount}개
-                                                <span className="mx-1.5">·</span>
-                                                {formatDate(o.createdAt)}
-                                            </p>
-                                        </div>
+                                {/* 가격 */}
+                                <div className="w-[184px] text-center text-[14px] font-medium text-[#000000]">
+                                    {formatPrice(o.totalAmount)}
+                                </div>
 
-                                        {/* PC 컬럼 */}
-                                        <div className="hidden md:block text-sm font-medium text-[var(--color-fg)] text-center">{formatPrice(o.totalAmount)}</div>
-                                        <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">{o.itemCount}개</div>
-                                        <div className="hidden md:block text-xs text-[var(--color-fg-muted)] text-center">{formatDateShort(o.createdAt)}</div>
+                                {/* 수량 */}
+                                <div className="w-[184px] text-center text-[14px] text-[#767676]">
+                                    {o.itemCount}개
+                                </div>
 
-                                        {/* 상태 pill */}
-                                        <div className="text-right">
-                                            <StatusPill status={o.status} />
-                                        </div>
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
+                                {/* 날짜 */}
+                                <div className="w-[184px] text-center text-[14px] text-[#767676]">
+                                    {formatDateShort(o.createdAt)}
+                                </div>
+
+                                {/* 상태 pill */}
+                                <StatusPill status={o.status} />
+                            </Link>
+                        ))
                     )}
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
@@ -229,56 +293,51 @@ export default function MypageOrdersPage() {
 /* ============================================================
  * 보조 컴포넌트
  * ============================================================ */
-function Tab({ label, href, active }: { label: string; href: string; active?: boolean }) {
+
+/** 16px chevron-down */
+function ChevronDown({ className }: { className?: string }) {
     return (
-        <Link
-            href={href}
-            className={`inline-flex items-center rounded-md px-4 py-2 text-sm font-medium transition ${
-                active
-                    ? "bg-[#DBEAFE] text-[#3b82f6]"
-                    : "bg-[var(--color-bg-subtle)] text-[var(--color-fg-muted)] hover:text-[var(--color-fg)]"
-            }`}
-        >
-            {label}
-        </Link>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+            <path d="M7 10l5 5 5-5" stroke="#767676" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
     );
 }
 
-function Select({
-    value, onChange, children, className,
-}: {
-    value: string;
-    onChange: (v: string) => void;
-    children: React.ReactNode;
-    className?: string;
-}) {
+/** 20px calendar */
+function CalendarIcon({ className }: { className?: string }) {
     return (
-        <select
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)] ${className ?? ""}`}
-        >
-            {children}
-        </select>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+            <rect x="3.5" y="5" width="17" height="16" rx="2" stroke="#767676" strokeWidth="1.5" />
+            <path d="M3.5 9h17M8 3v4M16 3v4" stroke="#767676" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
     );
 }
 
-function DateInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-    return (
-        <input
-            type="date"
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--color-ring)]"
-        />
-    );
-}
-
+/**
+ * 상태 칩 — Figma 매핑:
+ *  - 배송완료(DELIVERED): bg #E6F3FE / text #0072DD / dot #0742AC
+ *  - 주문접수·결제완료·배송준비·배송중(그 외 진행상태): bg #F6F7FB / text #767676 / dot #767676
+ *  - 취소완료·취소(CANCELED/REFUNDED/EXCHANGED): bg #222222 / text white / dot white
+ */
 function StatusPill({ status }: { status: string }) {
     const label = STATUS_LABEL[status] ?? status;
+
+    let pillClass: string;
+    let dotClass: string;
+    if (status === "DELIVERED") {
+        pillClass = "bg-[#E6F3FE] text-[#0072DD]";
+        dotClass = "bg-[#0742AC]";
+    } else if (["CANCELED", "REFUNDED", "EXCHANGED"].includes(status)) {
+        pillClass = "bg-[#222222] text-white";
+        dotClass = "bg-white";
+    } else {
+        pillClass = "bg-[#F6F7FB] text-[#767676]";
+        dotClass = "bg-[#767676]";
+    }
+
     return (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#3b82f6]/10 text-[#3b82f6] text-xs font-medium px-3 py-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
+        <span className={`px-[18px] py-2.5 rounded-full text-[14px] font-medium flex items-center gap-1 ${pillClass}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
             {label}
         </span>
     );

@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
-import { formatDate } from "@/lib/format";
 import { safeImageUrl } from "@/lib/url";
 import { GatedMedia } from "@/components/GatedMedia";
 
 export const dynamic = "force-dynamic";
 
-/* 시안 34:5599 — WE ARE EVENT 상세 페이지 (가운데 정렬 + 이미지 모달 스타일) */
+/* Figma 이벤트 디테일 — WE ARE EVENT (가운데 정렬 본문 + 메타 + 이미지/본문) */
 
 type Event = {
     id: number;
@@ -43,63 +42,96 @@ async function fetchEvent(id: string): Promise<Event> {
     }
 }
 
+/** ISO/날짜 문자열 → "YY.MM.DD" (없으면 빈 문자열). */
+function fmtYYMMDD(iso: string | null | undefined): string {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const y = String(d.getFullYear()).slice(-2);
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}.${m}.${day}`;
+}
+
+/** 본문이 HTML 태그를 포함하는지 (대략) — 태그가 있으면 dangerouslySetInnerHTML 로 렌더. */
+function looksLikeHtml(s: string): boolean {
+    return /<[a-z][\s\S]*>/i.test(s);
+}
+
+function MetaItem({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="flex items-center gap-2">
+            <span className="text-[14px] text-[#000]">{label}</span>
+            <span className="w-px h-3 bg-[#E5E5EC]" />
+            <span className="text-[14px] text-[#767676]">{value}</span>
+        </div>
+    );
+}
+
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const event = await fetchEvent(id);
 
+    const img = event.bannerUrl ? safeImageUrl(event.bannerUrl) : "";
+    const body = event.content?.trim() ?? "";
+    const dateText = fmtYYMMDD(event.createdAt ?? event.startsAt);
+    const views = (event.viewCount ?? 0).toLocaleString();
+
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 md:px-8 py-8 md:py-12">
-            {/* 큰 타이틀 (좌측 정렬) */}
-            <h1 className="text-3xl md:text-5xl font-extrabold mb-6 md:mb-10 text-[var(--color-fg)] tracking-tight">
-                WE ARE EVENT
-            </h1>
+        <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[60px] pb-20">
+            <div className="flex flex-col gap-8">
+                {/* 1) 큰 타이틀 */}
+                <h1 className="text-[40px] md:text-[56px] font-bold leading-tight text-[#222222]">
+                    WE ARE EVENT
+                </h1>
 
-            {/* 굵은 구분선 (전체 가로) */}
-            <hr className="border-t-2 border-[var(--color-fg)] mb-8 md:mb-12" />
+                {/* 2) 본문 컬럼 — 가운데 정렬 */}
+                <div className="flex flex-col items-center gap-[60px]">
+                    {/* a) 메타 + 이미지 그룹 */}
+                    <div className="w-full flex flex-col">
+                        {/* 메타 블록 */}
+                        <div className="border-t border-[#222] pt-6 pb-6 flex flex-col gap-3">
+                            <h2 className="text-[24px] font-medium text-[#222222]">{event.title}</h2>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <MetaItem label="작성자" value="엘프바 코리아" />
+                                <MetaItem label="게시일" value={dateText || "-"} />
+                                <MetaItem label="조회수" value={views} />
+                            </div>
+                        </div>
 
-            {/* 시안 매칭: 타이틀 + 메타 좌측 정렬, 배너 이미지 가운데 */}
-            <article>
-                {/* 제목 (좌측 정렬) */}
-                <h2 className="text-base md:text-xl font-bold text-[var(--color-fg)] mb-3 md:mb-4">
-                    {event.title}
-                </h2>
+                        {/* 이미지 / 본문 블록 */}
+                        <div className="border-y border-[#E5E5EC] py-10 flex justify-center">
+                            {img ? (
+                                <GatedMedia className="w-full max-w-[860px]">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={img}
+                                        alt={event.title}
+                                        className="w-full max-w-[860px] h-auto object-contain"
+                                    />
+                                </GatedMedia>
+                            ) : body ? (
+                                <div className="w-full max-w-[860px] text-[15px] leading-7 text-[#333] whitespace-pre-line">
+                                    {looksLikeHtml(body) ? (
+                                        <div dangerouslySetInnerHTML={{ __html: body }} />
+                                    ) : (
+                                        body
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="w-full max-w-[860px] aspect-[860/480] bg-[#D9D9D9]" />
+                            )}
+                        </div>
+                    </div>
 
-                {/* 메타 — 작성자 / 게시일 / 조회수 (좌측 정렬, 종료 필드 없음) */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--color-fg-muted)] pb-6 border-b border-[var(--color-border)]">
-                    <span><span className="font-medium text-[var(--color-fg)]">작성자</span> <span className="ml-2">엘프바 코리아</span></span>
-                    <span className="text-[var(--color-fg-subtle)]">|</span>
-                    <span><span className="font-medium text-[var(--color-fg)]">게시일</span> <span className="ml-2 tabular-nums">{event.createdAt ? formatDate(event.createdAt) : "-"}</span></span>
-                    {typeof event.viewCount === "number" && (
-                        <>
-                            <span className="text-[var(--color-fg-subtle)]">|</span>
-                            <span><span className="font-medium text-[var(--color-fg)]">조회수</span> <span className="ml-2 tabular-nums">{event.viewCount.toLocaleString()}</span></span>
-                        </>
-                    )}
+                    {/* b) 더 알아보기 버튼 */}
+                    <Link
+                        href="/events"
+                        className="w-[160px] p-4 rounded-[4px] border border-[#DDDDDD] text-center text-[14px] font-medium text-[#000]"
+                    >
+                        더 알아보기
+                    </Link>
                 </div>
-
-                {/* 배너 이미지 — 가운데 정렬, 자세히 보기 버튼은 이미지에 포함 */}
-                <div className="mt-8 md:mt-10 flex justify-center">
-                    {event.bannerUrl && safeImageUrl(event.bannerUrl) && (
-                        <GatedMedia className="max-w-md w-full">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={safeImageUrl(event.bannerUrl)}
-                                alt={event.title}
-                                className="w-full h-auto block rounded-[18px]"
-                            />
-                        </GatedMedia>
-                    )}
-                </div>
-            </article>
-
-            {/* 하단 "더 알아보기" 버튼 (가운데, 라운딩) */}
-            <div className="mt-10 md:mt-14 flex justify-center">
-                <Link
-                    href="/events"
-                    className="inline-flex items-center justify-center rounded-[18px] border border-[var(--color-border)] bg-[var(--color-surface)] px-10 py-3 text-sm md:text-base text-[var(--color-fg)] hover:bg-[var(--color-bg-subtle)] transition"
-                >
-                    더 알아보기
-                </Link>
             </div>
         </div>
     );

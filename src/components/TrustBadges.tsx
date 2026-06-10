@@ -22,10 +22,13 @@ export function TrustBadges() {
     return (
         <section
             aria-label="혜택 안내"
-            className="mx-auto max-w-screen-2xl px-3 md:px-4"
+            className="mx-auto max-w-[1920px] px-4 xl:px-[170px]"
         >
-            {/* 무색 글래스 패널 — 색을 칠하지 않고 투명도+blur만. 뒤 배너 이미지 색이 그대로 비쳐 따라감. */}
-            <div className="rounded-2xl bg-black/20 backdrop-blur-md px-4 md:px-8 py-4 md:py-5 flex md:flex-wrap items-center md:justify-between gap-x-5 md:gap-x-4 gap-y-4 overflow-x-auto md:overflow-visible scrollbar-hide snap-x">
+            {/* 시안 CSS: width 1580 · padding 32px 40px · space-between · center · radius 12/12/0/0 · bg rgba(255,255,255,.20) · blur(10px) */}
+            <div
+                className="rounded-t-[12px] px-5 md:px-10 py-5 md:py-8 flex items-center md:justify-between gap-x-5 md:gap-x-4 gap-y-4 overflow-x-auto md:overflow-visible scrollbar-hide snap-x"
+                style={{ background: "rgba(255,255,255,0.20)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
+            >
                 {items.map(it => (
                     <div key={it.title} className="flex items-center gap-2.5 md:gap-4 flex-shrink-0 md:min-w-0 snap-start">
                         {/* 아이콘 칩 — 무색(흰색 반투명)만. 배너 색 따라감. */}

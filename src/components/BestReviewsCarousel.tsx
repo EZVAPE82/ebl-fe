@@ -46,18 +46,18 @@ export function BestReviewsCarousel({ reviews }: { reviews: ReviewMock[] }) {
     return (
         <>
             <section id="best-reviews" className="scroll-mt-24">
-                <header className="flex items-end justify-between mb-6">
-                    <div>
-                        <p className="text-xs text-[var(--color-fg-muted)] mb-1">Best Review</p>
-                        <h2 className="text-lg md:text-2xl font-bold text-[var(--color-fg)]">베스트 제품 후기</h2>
+                <header className="flex items-end justify-between mb-8">
+                    <div className="flex flex-col gap-2">
+                        <p className="text-[18px] leading-none text-[#767676]">Best Review</p>
+                        <h2 className="text-[26px] md:text-[36px] font-bold leading-tight text-[#000]">베스트 제품 후기</h2>
                     </div>
-                    <nav className="flex gap-2" aria-label="베스트 후기 캐러셀">
+                    <nav className="flex gap-3" aria-label="베스트 후기 캐러셀">
                         <ReviewArrow direction="prev" />
                         <ReviewArrow direction="next" />
                     </nav>
                 </header>
 
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-7">
                     {reviews.map((r, i) => (
                         <ReviewCard key={i} review={r} onPhotoClick={(e) => openLightbox(i, e)} />
                     ))}
@@ -87,11 +87,11 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
                     type="button"
                     aria-label={gated ? "성인인증 후 확인 가능" : `${review.product} 사진 크게 보기`}
                     onClick={gated ? (e) => { e.preventDefault(); e.stopPropagation(); openGate(); } : onPhotoClick}
-                    className="relative w-full block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent,#7c5cff)] rounded-[18px]"
+                    className="relative w-full block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent,#7c5cff)] rounded-[12px]"
                     style={{
-                        aspectRatio: "1 / 1",
+                        aspectRatio: "374 / 372",
                         overflow: "hidden",
-                        borderRadius: 18,
+                        borderRadius: 12,
                         backgroundColor: isColor ? review.photo : undefined,
                         flexShrink: 0,
                         cursor: gated ? "pointer" : "zoom-in",
@@ -115,25 +115,29 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
                     )}
                 </button>
 
-                <div className="mt-4 flex flex-col flex-1 space-y-2">
-                    <div className="flex items-center gap-1 text-xs">
+                <div className="mt-4 flex flex-col flex-1 gap-3">
+                    {/* 평점 — ★ + 5.0 (18/500) */}
+                    <div className="flex items-center gap-2">
                         <RatingStars rating={review.rating} />
-                        <span className="text-[var(--color-fg)] font-medium">{review.rating.toFixed(1)}</span>
+                        <span className="text-[18px] font-medium leading-none text-[#000]">{review.rating.toFixed(1)}</span>
                     </div>
-                    <p className="text-xs text-[var(--color-fg)] leading-relaxed line-clamp-5">{review.review}</p>
-                    <p className="text-[11px] text-[var(--color-fg-muted)] flex items-center gap-1.5">
+                    {/* 후기 텍스트 14/#767676 */}
+                    <p className="text-[14px] leading-relaxed text-[#767676] line-clamp-3">{review.review}</p>
+                    {/* 작성자 | 날짜 14/#767676 */}
+                    <p className="flex items-center gap-1.5 text-[14px] text-[#767676]">
                         <span>{review.author}</span>
-                        <span>|</span>
+                        <span className="text-[var(--color-border-strong)]">|</span>
                         <span>{review.date}</span>
                     </p>
-                    <div className="mt-auto pt-2 border-t border-[var(--color-border)] flex items-center gap-2">
+                    {/* 제품 — 썸네일 + 타이틀 14/500 */}
+                    <div className="mt-auto flex items-center gap-3 pt-2">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={review.productThumb}
                             alt=""
-                            className="w-8 h-8 rounded object-cover bg-[var(--color-bg-subtle)] flex-shrink-0"
+                            className="h-10 w-10 flex-shrink-0 rounded-lg bg-[var(--color-bg-subtle)] object-cover"
                         />
-                        <p className="text-[11px] text-[var(--color-fg)] line-clamp-2 flex-1 min-w-0">{review.product}</p>
+                        <p className="min-w-0 flex-1 text-[14px] font-medium text-[#000] line-clamp-2">{review.product}</p>
                     </div>
                 </div>
             </Link>
