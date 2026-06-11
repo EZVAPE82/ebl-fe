@@ -5,7 +5,6 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { ProductQna } from "@/components/ProductQna";
 import { DetailTabs } from "@/components/DetailTabs";
 import { DetailExpand } from "@/components/DetailExpand";
-import { DukeLanding } from "@/components/DukeLanding";
 import { ProductBuyBox } from "@/components/ProductBuyBox";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice } from "@/lib/format";
@@ -30,8 +29,13 @@ export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
 
     // 다른맛 드롭다운 — 같은 시리즈 형제 맛 (slug prefix '<series>-flavor-N')
     const seriesKey = ((product as { slug?: string }).slug ?? "").replace(/-flavor-\d+$/, "");
-    // DUKE 시리즈는 전용 풀 랜딩(시안 277-12516)을 상세정보로 노출
-    const isDuke = seriesKey === "duke";
+    // 시리즈 전용 통이미지 상세(Figma 시안) — 있으면 그 한 장 + 더알아보기, 없으면 기본 상세이미지.
+    //   dark=true: 검정 배경 시안(DUKE) / 미지정: 밝은 배경(ICEKING PRO 등)
+    const SERIES_DETAIL: Record<string, { src: string; dark?: boolean }> = {
+        duke: { src: "/images/duke-detail-full.jpg", dark: true },
+        "iceking-pro": { src: "/images/iceking-pro-detail-full.jpg" },
+    };
+    const seriesDetail = SERIES_DETAIL[seriesKey];
     const siblingsData = seriesKey
         ? await safeFetch<Page<ProductSummary>>(
             `/api/v1/public/products?series=${encodeURIComponent(seriesKey)}&size=100`,
@@ -150,10 +154,10 @@ export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
             {/* ===== 탭 (상세정보 / 상품구매안내 / 제품리뷰(N) / Q&A) ===== */}
             <DetailTabs reviewCount={product.reviewCount} />
 
-            {/* ===== 상세이미지 (탭 바로 아래, gap 32) — DUKE 통이미지 / 그 외 기본, 둘 다 접기+더알아보기 ===== */}
+            {/* ===== 상세이미지 (탭 바로 아래, gap 32) — 시리즈 통이미지 / 그 외 기본, 둘 다 접기+더알아보기 ===== */}
             <section id="info" className="mx-auto mt-8 max-w-[1920px] px-4 xl:px-[170px]">
-                {isDuke
-                    ? <DukeLanding />
+                {seriesDetail
+                    ? <DetailExpand src={seriesDetail.src} alt={`${product.name} 상세`} dark={seriesDetail.dark} />
                     : <DetailExpand src="/images/detail-performance.png" alt={`${product.name} 상세`} />}
             </section>
 
