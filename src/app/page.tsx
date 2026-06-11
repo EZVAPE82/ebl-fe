@@ -44,6 +44,8 @@ export default async function Home() {
         safeFetch<Page<EventLite>>("/api/v1/public/events?size=12", { ...emptyPage, content: [] } as unknown as Page<EventLite>),
     ]);
     const allRankProducts = rankPages.flatMap(p => p.content);
+    // 추천(featured) 미설정 시 인기순 상위 8개로 폴백 — 운영 DB에 featured 미지정이어도 "추천 아이템" 섹션이 비지 않도록.
+    const featuredItems = featured.length > 0 ? featured : allRankProducts.slice(0, 8);
 
     // "엘프바의 이벤트" 디자인 카드 2종 — 배경 위 텍스트·버튼을 HTML 로 얹고, 실제 이벤트 글(제목 키워드)로 라우팅.
     const eventHref = (kw: string) => {
@@ -100,7 +102,7 @@ export default async function Home() {
 
             <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-20 md:space-y-40">
                 {/* ===== 3. 엘프바의 추천 아이템 — 어드민 설정 (featured_order 1~4) · 시안 캐러셀 ===== */}
-                <FeaturedCarousel items={featured} />
+                <FeaturedCarousel items={featuredItems} />
 
                 {/* ===== 5. 엘프바의 이벤트 (디자인 카드 2종 — 배경+오버레이 텍스트+버튼, 이벤트 상세로 라우팅) ===== */}
                 <CarouselShell eyebrow="Event" title="엘프바의 이벤트">

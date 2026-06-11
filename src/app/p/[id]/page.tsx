@@ -34,6 +34,13 @@ export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
     const SERIES_DETAIL: Record<string, { src: string; dark?: boolean }> = {
         duke: { src: "/images/duke-detail-full.jpg", dark: true },
         "iceking-pro": { src: "/images/iceking-pro-detail-full.jpg" },
+        crosamba: { src: "/images/crosamba-detail-full.jpg", dark: true },
+        iceking: { src: "/images/iceking-detail-full.jpg" },
+        puffbar: { src: "/images/puffbar-detail-full.jpg" },
+        frozen: { src: "/images/frozen-detail-full.jpg", dark: true },
+        "joinwon-pot": { src: "/images/joinwon-pot-detail-full.jpg" },
+        "joinwon-kit": { src: "/images/joinwon-kit-detail-full.jpg" },
+        yangjuyeon: { src: "/images/yangjuyeon-detail-full.jpg" }, // 에디션 시리즈(슬러그=yangjuyeon)
     };
     const seriesDetail = SERIES_DETAIL[seriesKey];
     const siblingsData = seriesKey
