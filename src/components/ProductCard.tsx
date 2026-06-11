@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import type { ProductSummary } from "@/types/api";
-import { displayPrice, formatPrice } from "@/lib/format";
+import { displayPrice, formatPrice, productHref } from "@/lib/format";
 import { hoverImageUrl, safeImageUrl } from "@/lib/url";
 import { useGated, useAdultGate, GateOverlay } from "@/components/AdultGate";
 
@@ -23,7 +23,7 @@ export function ProductCard({ p }: { p: ProductSummary }) {
 
     return (
         <Link
-            href={`/p/${p.id}`}
+            href={productHref(p)}
             onClick={(e) => { if (gated) { e.preventDefault(); openGate(); } }}
             className="group block"
         >

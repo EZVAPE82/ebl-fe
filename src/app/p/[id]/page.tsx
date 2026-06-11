@@ -4,6 +4,8 @@ import { ProductReviews } from "@/components/ProductReviews";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductQna } from "@/components/ProductQna";
 import { DetailTabs } from "@/components/DetailTabs";
+import { DetailExpand } from "@/components/DetailExpand";
+import { DukeLanding } from "@/components/DukeLanding";
 import { ProductBuyBox } from "@/components/ProductBuyBox";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice } from "@/lib/format";
@@ -11,24 +13,25 @@ import { notFound } from "next/navigation";
 
 type Params = Promise<{ id: string }>;
 
-export default async function ProductDetailPage({ params }: { params: Params }) {
-    const { id } = await params;
-
+// 공통 상세 뷰 — id 또는 slug 로 렌더 (백엔드가 id-or-slug 지원). /p/{id} 와 /product/{series}/{n} 양쪽에서 사용.
+export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
     let product: ProductDetail;
     try {
-        product = await api<ProductDetail>(`/api/v1/public/products/${id}`, { cache: "no-store" });
+        product = await api<ProductDetail>(`/api/v1/public/products/${idOrSlug}`, { cache: "no-store" });
     } catch (e) {
         if (e instanceof ApiError && e.status === 404) notFound();
         throw e;
     }
 
     const related = await safeFetch<Page<ProductSummary>>(
-        `/api/v1/public/products/${id}/related?size=8`,
+        `/api/v1/public/products/${product.id}/related?size=8`,
         { content: [], totalElements: 0, totalPages: 0, number: 0, size: 8, first: true, last: true, empty: true }
     );
 
     // 다른맛 드롭다운 — 같은 시리즈 형제 맛 (slug prefix '<series>-flavor-N')
     const seriesKey = ((product as { slug?: string }).slug ?? "").replace(/-flavor-\d+$/, "");
+    // DUKE 시리즈는 전용 풀 랜딩(시안 277-12516)을 상세정보로 노출
+    const isDuke = seriesKey === "duke";
     const siblingsData = seriesKey
         ? await safeFetch<Page<ProductSummary>>(
             `/api/v1/public/products?series=${encodeURIComponent(seriesKey)}&size=100`,
@@ -41,7 +44,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
 
     type PromoBadge = { id: number; name: string; buyQuantity: number; getQuantity: number; label: string };
     const promos = await safeFetch<PromoBadge[]>(
-        `/api/v1/public/products/${id}/promotions`,
+        `/api/v1/public/products/${product.id}/promotions`,
         []
     );
 
@@ -144,24 +147,14 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             {/* ===== 이 제품도 같이 구매하면 좋아요! — 시안 14:3437 (Best Item + 화살표 캐러셀) ===== */}
             <RelatedCarousel items={related.content} />
 
-            {/* ===== 탭 ===== */}
-            <DetailTabs />
+            {/* ===== 탭 (상세정보 / 상품구매안내 / 제품리뷰(N) / Q&A) ===== */}
+            <DetailTabs reviewCount={product.reviewCount} />
 
-            {/* ===== 상세 설명 (큰 라이프스타일 이미지 + 텍스트) ===== */}
-            <section id="info" className="mx-auto max-w-[1920px] px-4 xl:px-[170px] mt-16 md:mt-[100px]">
-                <h2 className="text-[26px] md:text-[36px] font-bold leading-tight mb-8 text-[#000]">상세 정보</h2>
-                {/* 성능곡선 상세 이미지 (시안 14:3533) — 중앙 860 */}
-                <div className="mx-auto max-w-[860px]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src="/images/detail-performance.png"
-                        alt={`${product.name} 상세`}
-                        className="w-full h-auto rounded-[16px]"
-                    />
-                </div>
-                {product.description && (
-                    <p className="mt-6 text-center text-sm text-[var(--color-fg-muted)] whitespace-pre-line leading-relaxed">{product.description}</p>
-                )}
+            {/* ===== 상세이미지 (탭 바로 아래, gap 32) — DUKE 통이미지 / 그 외 기본, 둘 다 접기+더알아보기 ===== */}
+            <section id="info" className="mx-auto mt-8 max-w-[1920px] px-4 xl:px-[170px]">
+                {isDuke
+                    ? <DukeLanding />
+                    : <DetailExpand src="/images/detail-performance.png" alt={`${product.name} 상세`} />}
             </section>
 
             {/* ===== 상품정보고시 ===== */}
@@ -224,6 +217,12 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             {/* 모바일 하단 고정 CTA 는 ProductBuyBox 가 렌더 */}
         </div>
     );
+}
+
+/* /p/{id} — id 기반 라우트(구 URL 호환). 정식 URL 은 /product/{series}/{n}(slug). */
+export default async function ProductByIdPage({ params }: { params: Params }) {
+    const { id } = await params;
+    return <ProductDetailView idOrSlug={id} />;
 }
 
 /* ============================================================

@@ -10,6 +10,15 @@ export function displayPrice(p: { price: number; onlinePrice?: number | null }):
     return p.onlinePrice != null ? p.onlinePrice : p.price;
 }
 
+/**
+ * 상품 상세 URL — flavor 상품은 /products/{series}/{n}(정식·SEO), 슬러그 없거나 그 외 패턴은 /p/{id}(호환).
+ * 예: slug "duke-flavor-19" → /products/duke/19
+ */
+export function productHref(p: { id: number; slug?: string | null }): string {
+    const m = (p.slug ?? "").match(/^(.+)-flavor-(\d+)$/);
+    return m ? `/products/${m[1]}/${m[2]}` : `/p/${p.id}`;
+}
+
 export function formatDate(iso: string | null | undefined): string {
     if (!iso) return "";
     const d = new Date(iso);

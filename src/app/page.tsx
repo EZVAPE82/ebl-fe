@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { CarouselShell } from "@/components/CarouselShell";
 import { GatedMedia } from "@/components/GatedMedia";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatDate, formatPrice, productHref } from "@/lib/format";
 import type { Banner, Category, Page, ProductSummary } from "@/types/api";
 import Link from "next/link";
 
@@ -261,14 +261,14 @@ function ProductGrid({ items }: { items: ProductSummary[] }) {
  * ============================================================ */
 type RankSeries = {
     label: string; tagline: string; banner: string; prefix: string;
-    imgW: number; imgH: number; price: number;
+    price: number;
     fallback: { name: string; desc: string }[];
 };
 const RANK_SERIES: RankSeries[] = [
     {
         label: "아이스킹 프로", tagline: "내 마음대로 즐기는 시원함",
         banner: "/images/rank-1-photo.png", prefix: "iceking-pro-flavor-",
-        imgW: 100, imgH: 120, price: 30000,
+        price: 30000,
         fallback: [
             { name: "Lemon Lime", desc: "입안 가득 퍼지는 레몬과 라임의 상큼하고 깔끔한 리프레시" },
             { name: "Starwbetty Kiwi", desc: "새콤달콤한 딸기와 신선한 키위가 어우러진 조화로운 과일 향" },
@@ -278,7 +278,7 @@ const RANK_SERIES: RankSeries[] = [
     {
         label: "듀크", tagline: "뛰어난 성능 곡선의 아름다움",
         banner: "/images/rank-2-photo.png", prefix: "duke-flavor-",
-        imgW: 120, imgH: 120, price: 25000,
+        price: 25000,
         fallback: [
             { name: "Peach Ice", desc: "잘 익은 복숭아의 달콤함과 시원한 멘솔의 완벽한 조화" },
             { name: "Shine Muscat", desc: "입안 가득 싱그럽게 터지는 고급스러운 샤인머스캣 청량감" },
@@ -288,7 +288,7 @@ const RANK_SERIES: RankSeries[] = [
     {
         label: "조인원 킷", tagline: "그 끝에 머무는 곡선의 완결성",
         banner: "/images/rank-3-photo.png", prefix: "joinwon-kit-flavor-",
-        imgW: 120, imgH: 120, price: 25000,
+        price: 25000,
         fallback: [
             { name: "Blue Razz Ice", desc: "톡 쏘는 블루 라즈베리의 짜릿함에 시원한 아이스를 더한 상쾌함" },
             { name: "Strawberry Kiwi Ice", desc: "새콤달콤 딸기와 신선한 키위가 어우러져 터지는 풍부한 과일 향" },
@@ -307,7 +307,7 @@ function SeriesRanking({ products }: { products: ProductSummary[] }) {
                     const p = real[ri];
                     if (p) {
                         const price = p.onlinePrice != null && p.onlinePrice < p.price ? p.onlinePrice : p.price;
-                        return { id: p.id, href: `/p/${p.id}`, name: p.name, desc: p.description ?? "", price, thumb: p.thumbnailUrl };
+                        return { id: p.id, href: productHref(p), name: p.name, desc: p.description ?? "", price, thumb: p.thumbnailUrl };
                     }
                     const fb = s.fallback[ri];
                     return { id: -(si * 10 + ri + 1), href: "/c/best", name: fb.name, desc: fb.desc, price: s.price, thumb: `/images/${s.prefix}${ri + 1}.png` };
@@ -324,16 +324,18 @@ function SeriesRanking({ products }: { products: ProductSummary[] }) {
                             {rows.map(r => (
                                 <li key={r.id}>
                                     <Link href={r.href} className="flex w-full items-center gap-4 rounded-[8px] bg-white pr-6 transition hover:shadow-sm">
-                                        {/* 썸네일 — 시리즈별 WxH · #F6F7FB · r4 */}
-                                        <div
-                                            className="flex flex-shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-[#F6F7FB]"
-                                            style={{ width: s.imgW, height: s.imgH }}
-                                        >
-                                            {r.thumb && (
-                                                /* eslint-disable-next-line @next/next/no-img-element */
-                                                <img src={r.thumb} alt={r.name} className="max-h-full max-w-full object-contain" />
-                                            )}
-                                        </div>
+                                        {/* 썸네일 — 높이 120 고정, 너비는 이미지 원본 비율대로 자동.
+                                            세로 긴 제품도 크롭/좌우 여백 없이 꽉 차고, 다른 비율 제품으로 바뀌어도 동적 대응. */}
+                                        {r.thumb ? (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                            <img
+                                                src={r.thumb}
+                                                alt={r.name}
+                                                className="block h-[120px] w-auto flex-shrink-0 rounded-[4px] bg-[#F6F7FB] object-contain"
+                                            />
+                                        ) : (
+                                            <div className="h-[120px] w-[100px] flex-shrink-0 rounded-[4px] bg-[#F6F7FB]" />
+                                        )}
                                         {/* 텍스트 — width 177, gap 8 */}
                                         <div className="flex w-[177px] flex-col gap-2">
                                             <div className="flex flex-col gap-1">

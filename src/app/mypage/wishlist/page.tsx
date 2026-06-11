@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { MyPageSideNav } from "@/components/mypage/SideNav";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, productHref } from "@/lib/format";
 import type { Page, ProductSummary } from "@/types/api";
 
 /**
@@ -241,7 +241,7 @@ export default function WishlistPage() {
                                                 <CheckBox checked={selected.has(p.id)} />
                                             </button>
                                             <Link
-                                                href={`/p/${p.id}`}
+                                                href={productHref(p)}
                                                 className="w-[90px] h-[108px] rounded-[4px] overflow-hidden bg-[#F6F7FB] shrink-0"
                                             >
                                                 {p.thumbnailUrl && (
@@ -255,7 +255,7 @@ export default function WishlistPage() {
                                             </Link>
                                             <div className="flex flex-col gap-1 min-w-0">
                                                 <Link
-                                                    href={`/p/${p.id}`}
+                                                    href={productHref(p)}
                                                     className="text-[16px] font-medium text-[#000] line-clamp-1 hover:underline"
                                                 >
                                                     {p.name}

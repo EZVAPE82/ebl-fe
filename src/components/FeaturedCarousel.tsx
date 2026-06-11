@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRef } from "react";
 import type { ProductSummary } from "@/types/api";
-import { displayPrice, formatPrice } from "@/lib/format";
+import { displayPrice, formatPrice, productHref } from "@/lib/format";
 import { hoverImageUrl, safeImageUrl } from "@/lib/url";
 
 /**
@@ -103,7 +103,7 @@ function FeaturedCard({ p }: { p: ProductSummary }) {
     const isSoldOut = p.status === "SOLD_OUT" || p.soldOut === true;
 
     return (
-        <Link href={`/p/${p.id}`} className="group block">
+        <Link href={productHref(p)} className="group block">
             {/* 이미지 374×448 r12 + 좌상단 뱃지 */}
             <div className="relative aspect-[374/448] rounded-[12px] overflow-hidden bg-[var(--color-bg-subtle)]">
                 {img ? (

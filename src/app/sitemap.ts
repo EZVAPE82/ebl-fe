@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 import { api } from "@/lib/api";
+import { productHref } from "@/lib/format";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://elfbarlounge.co.kr";
 
-type ProductSummary = { id: number; updatedAt?: string };
+type ProductSummary = { id: number; slug?: string; updatedAt?: string };
 type Page<T> = { content: T[]; totalPages: number; number: number };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -27,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             const res = await api<Page<ProductSummary>>(`/api/v1/public/products?size=60&page=${page}`, { cache: "no-store" });
             res.content.forEach(p => {
                 productEntries.push({
-                    url: `${SITE_URL}/p/${p.id}`,
+                    url: `${SITE_URL}${productHref(p)}`,
                     lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
                     priority: 0.6,
                     changeFrequency: "weekly",

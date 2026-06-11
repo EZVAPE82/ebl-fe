@@ -16,7 +16,7 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-export function DetailTabs() {
+export function DetailTabs({ reviewCount }: { reviewCount?: number }) {
     const [active, setActive] = useState<TabId>("info");
 
     // 스크롤 위치에 따른 active 자동 변경
@@ -53,6 +53,7 @@ export function DetailTabs() {
             <div className="flex rounded-[8px] bg-[#F6F7FB] p-2">
                 {TABS.map(t => {
                     const isActive = t.id === active;
+                    const label = t.id === "reviews" && reviewCount != null ? `제품리뷰 (${reviewCount})` : t.label;
                     return (
                         <a
                             key={t.id}
@@ -64,7 +65,7 @@ export function DetailTabs() {
                                     : "font-normal text-[#999999] hover:text-[#000]"
                             }`}
                         >
-                            {t.label}
+                            {label}
                         </a>
                     );
                 })}
