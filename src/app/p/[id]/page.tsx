@@ -30,14 +30,14 @@ export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
     // 다른맛 드롭다운 — 같은 시리즈 형제 맛 (slug prefix '<series>-flavor-N')
     const seriesKey = ((product as { slug?: string }).slug ?? "").replace(/-flavor-\d+$/, "");
     // 시리즈 전용 통이미지 상세(Figma 시안) — 있으면 그 한 장 + 더알아보기, 없으면 기본 상세이미지.
-    //   dark=true: 검정 배경 시안(DUKE) / 미지정: 밝은 배경(ICEKING PRO 등)
-    const SERIES_DETAIL: Record<string, { src: string; dark?: boolean }> = {
-        duke: { src: "/images/duke-detail-full.jpg", dark: true },
+    //   하단 페이드는 전부 흰색(페이지 배경)으로 통일 — 어떤 시안이든 흰 페이지로 자연스럽게 녹아듦.
+    const SERIES_DETAIL: Record<string, { src: string }> = {
+        duke: { src: "/images/duke-detail-full.jpg" },
         "iceking-pro": { src: "/images/iceking-pro-detail-full.jpg" },
-        crosamba: { src: "/images/crosamba-detail-full.jpg", dark: true },
+        crosamba: { src: "/images/crosamba-detail-full.jpg" },
         iceking: { src: "/images/iceking-detail-full.jpg" },
         puffbar: { src: "/images/puffbar-detail-full.jpg" },
-        frozen: { src: "/images/frozen-detail-full.jpg", dark: true },
+        frozen: { src: "/images/frozen-detail-full.jpg" },
         "joinwon-pot": { src: "/images/joinwon-pot-detail-full.jpg" },
         "joinwon-kit": { src: "/images/joinwon-kit-detail-full.jpg" },
         yangjuyeon: { src: "/images/yangjuyeon-detail-full.jpg" }, // 에디션 시리즈(슬러그=yangjuyeon)
@@ -164,7 +164,7 @@ export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
             {/* ===== 상세이미지 (탭 바로 아래, gap 32) — 시리즈 통이미지 / 그 외 기본, 둘 다 접기+더알아보기 ===== */}
             <section id="info" className="mx-auto mt-8 max-w-[1920px] px-4 xl:px-[170px]">
                 {seriesDetail
-                    ? <DetailExpand src={seriesDetail.src} alt={`${product.name} 상세`} dark={seriesDetail.dark} />
+                    ? <DetailExpand src={seriesDetail.src} alt={`${product.name} 상세`} />
                     : <DetailExpand src="/images/detail-performance.png" alt={`${product.name} 상세`} />}
             </section>
 

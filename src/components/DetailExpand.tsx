@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from "react";
 /**
  * DetailExpand — 상세이미지 접기/펼치기 (시안: 이미지 + 하단 페이드 + "더 알아보기").
  *   접힘: 960px 까지만 노출 + 하단 페이드. 펼침: 전체(실측 높이) + 버튼 "접기".
- *   dark=true → 검정 배경 상세이미지(DUKE 통이미지)용 검정 페이드.
+ *   하단 페이드는 흰 페이지 배경으로 자연스럽게 사라지게(흰→투명) — 전 시리즈 공통.
  *   버튼 시안: 가운데 · 160 · padding 16 · r4 · #DDD 보더 · 14/500.
  */
-export function DetailExpand({ src, alt, dark = false }: { src: string; alt: string; dark?: boolean }) {
+export function DetailExpand({ src, alt }: { src: string; alt: string }) {
     const [open, setOpen] = useState(false);
     const [fullH, setFullH] = useState(0);
     const innerRef = useRef<HTMLDivElement>(null);
@@ -36,9 +36,9 @@ export function DetailExpand({ src, alt, dark = false }: { src: string; alt: str
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt={alt} className="block h-auto w-full" />
                 </div>
-                {/* 접힘 시 하단 페이드 (시안 흰→투명 / DUKE 검정 이미지는 검정 페이드) */}
+                {/* 접힘 시 하단 페이드 — 흰 페이지 배경으로 자연스럽게 사라짐(흰→투명). 전 시리즈 공통. */}
                 {!open && (
-                    <div className={`pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t to-transparent ${dark ? "from-black via-black/70" : "from-white via-white/70"}`} />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-white via-white/70 to-transparent" />
                 )}
             </div>
 
