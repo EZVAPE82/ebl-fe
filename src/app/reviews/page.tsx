@@ -24,45 +24,45 @@ type ReviewView = {
 // mock fallback 패턴. 사진은 회색 placeholder(시안 bg-[#D9D9D9])로 대체.
 const REVIEW_MOCKS: ReviewVM[] = [
     {
-        id: "mock-1", photo: null, rating: 5,
+        id: "mock-1", photo: "/images/elfbar-product-1.png", rating: 5,
         text: "야외 캠핑 갈 때 챙겨갔는데 진짜 너무 좋아요. 가벼워서 부담 없고 한 번 충전으로 정말 오래 갑니다. 디자인도 깔끔하고 그립감도 편안해서 어디든 가지고 다닐 수 있어요. 강추!",
         author: "김** 님", date: "2026.05.18",
-        productTitle: "ELFBAR BC5000 그린애플", productSubtitle: "일회용 · 5000puff", productThumb: null,
+        productTitle: "ELFBAR BC5000 그린애플", productSubtitle: "일회용 · 5000puff", productThumb: "/images/elfbar-product-1.png",
         sortDate: Date.parse("2026-05-18"), recommend: 42,
     },
     {
-        id: "mock-2", photo: null, rating: 4,
+        id: "mock-2", photo: "/images/elfbar-product-1.png", rating: 4,
         text: "디자인이 너무 깔끔해서 데일리로 쓰기 좋아요. 그립감도 편하고 손에 쥐기 딱 좋은 사이즈입니다. 출장 다닐 때 가방에 쏙 들어가고 한 번 충전으로 오래 가요. 재구매 의사 있음.",
         author: "이** 님", date: "2026.05.15",
-        productTitle: "ELFBAR BC10000 블루라즈", productSubtitle: "일회용 · 10000puff", productThumb: null,
+        productTitle: "ELFBAR BC10000 블루라즈", productSubtitle: "일회용 · 10000puff", productThumb: "/images/elfbar-product-1.png",
         sortDate: Date.parse("2026-05-15"), recommend: 31,
     },
     {
-        id: "mock-3", photo: null, rating: 5,
+        id: "mock-3", photo: "/images/elfbar-product-1.png", rating: 5,
         text: "출장 다닐 때 가방에 쏙 들어가서 너무 편해요. 맛도 깔끔하고 향이 진하면서도 텁텁하지 않아서 마음에 듭니다.",
         author: "박** 님", date: "2026.05.10",
-        productTitle: "ELFBAR DUKE 멘솔", productSubtitle: "기기 · 멘솔", productThumb: null,
+        productTitle: "ELFBAR DUKE 멘솔", productSubtitle: "기기 · 멘솔", productThumb: "/images/elfbar-product-1.png",
         sortDate: Date.parse("2026-05-10"), recommend: 27,
     },
     {
-        id: "mock-4", photo: null, rating: 4,
+        id: "mock-4", photo: "/images/elfbar-product-1.png", rating: 4,
         text: "선물용으로 샀는데 받으신 분이 너무 좋아하셨어요. 포장도 깔끔하고 맛도 좋아서 만족합니다. 강추!",
         author: "최** 님", date: "2026.05.08",
-        productTitle: "ELFLIQ 30ml 워터멜론", productSubtitle: "액상 · 30ml", productThumb: null,
+        productTitle: "ELFLIQ 30ml 워터멜론", productSubtitle: "액상 · 30ml", productThumb: "/images/elfbar-product-1.png",
         sortDate: Date.parse("2026-05-08"), recommend: 19,
     },
     {
-        id: "mock-5", photo: null, rating: 5,
+        id: "mock-5", photo: "/images/elfbar-product-1.png", rating: 5,
         text: "맛이 깔끔하고 후미가 시원합니다. 향이 오래 가고 목넘김도 부드러워서 자주 찾게 되네요. 재구매 100%.",
         author: "정** 님", date: "2026.05.05",
-        productTitle: "ELFBAR BC5000 워터멜론", productSubtitle: "일회용 · 5000puff", productThumb: null,
+        productTitle: "ELFBAR BC5000 워터멜론", productSubtitle: "일회용 · 5000puff", productThumb: "/images/elfbar-product-1.png",
         sortDate: Date.parse("2026-05-05"), recommend: 23,
     },
     {
-        id: "mock-6", photo: null, rating: 3,
+        id: "mock-6", photo: "/images/elfbar-product-1.png", rating: 3,
         text: "무난하게 잘 쓰고 있어요. 가성비 괜찮고 배터리도 적당히 오래 갑니다. 다만 향은 조금 약한 편이에요.",
         author: "강** 님", date: "2026.05.02",
-        productTitle: "ELFBAR BC10000 망고", productSubtitle: "일회용 · 10000puff", productThumb: null,
+        productTitle: "ELFBAR BC10000 망고", productSubtitle: "일회용 · 10000puff", productThumb: "/images/elfbar-product-1.png",
         sortDate: Date.parse("2026-05-02"), recommend: 11,
     },
 ];
@@ -90,7 +90,7 @@ async function fetchReviews(): Promise<ReviewView[]> {
 function toVM(r: ReviewView): ReviewVM {
     return {
         id: r.id,
-        photo: (r.photoUrls && r.photoUrls[0]) || null,
+        photo: (r.photoUrls && r.photoUrls[0]) || r.productThumbnailUrl || null,
         rating: Math.min(5, Math.max(0, r.rating)),
         text: r.content ?? "",
         author: "구매고객 님",
