@@ -30,16 +30,20 @@ async function safeFetch<T>(path: string, fallback: T): Promise<T> {
 export default async function Home() {
     const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 8, first: true, last: true, empty: true };
 
-    const [bannersHero, featured, bestItems, categoriesRaw, notices, bestReviews, eventsPage] = await Promise.all([
+    const [bannersHero, featured, rankPages, categoriesRaw, notices, bestReviews, eventsPage] = await Promise.all([
         safeFetch<Banner[]>("/api/v1/public/banners?placement=MAIN_HERO", []),
         safeFetch<ProductSummary[]>("/api/v1/public/products/featured", []),
-        // 베스트(핫한 아이템 순위) — best_mode 정책(판매량/조회수/직접지정)에 따라 산정
-        safeFetch<ProductSummary[]>("/api/v1/public/products/best?size=9", []),
+        // 제품별 베스트 순위 — 시리즈별 인기 상위 3. iceking-pro 가 popular 상위 60 밖이라
+        // 전체 카탈로그(페이지 0~2, 60개씩 = 최대 180/총 121)를 모아 시리즈 slug 접두사로 그룹핑.
+        Promise.all([0, 1, 2].map(pg =>
+            safeFetch<Page<ProductSummary>>(`/api/v1/public/products?sort=popular&size=60&page=${pg}`, { ...emptyPage, content: [] } as unknown as Page<ProductSummary>)
+        )),
         safeFetch<Category[]>("/api/v1/public/categories", []),
         safeFetch<Page<Notice>>("/api/v1/public/notices?size=4", { ...emptyPage, content: [] } as unknown as Page<Notice>),
         safeFetch<Page<ReviewView>>("/api/v1/public/reviews/best?page=0&size=4", { ...emptyPage, content: [] } as unknown as Page<ReviewView>),
         safeFetch<Page<EventLite>>("/api/v1/public/events?size=12", { ...emptyPage, content: [] } as unknown as Page<EventLite>),
     ]);
+    const allRankProducts = rankPages.flatMap(p => p.content);
 
     // "엘프바의 이벤트" 디자인 카드 2종 — 배경 위 텍스트·버튼을 HTML 로 얹고, 실제 이벤트 글(제목 키워드)로 라우팅.
     const eventHref = (kw: string) => {
@@ -111,9 +115,9 @@ export default async function Home() {
                     ))}
                 </CarouselShell>
 
-                {/* ===== 6. 제품별 순위 (캐러셀 — 화살표로 페이징) ===== */}
+                {/* ===== 6. 제품별 베스트 순위 (시안 402:11236 — 시리즈 배너 + 시리즈별 베스트 3) ===== */}
                 <CarouselShell eyebrow="Ranking" title="제품별 베스트 순위">
-                    <Ranking items={bestItems.slice(0, 9)} />
+                    <SeriesRanking products={allRankProducts} />
                 </CarouselShell>
             </div>
 
@@ -248,110 +252,104 @@ function ProductGrid({ items }: { items: ProductSummary[] }) {
 }
 
 /* ============================================================
- * Ranking — 제품별 순위 (3 그룹, 캐러셀 아이템)
+ * SeriesRanking — 제품별 베스트 순위 (시안 402:11236)
+ *   3 시리즈 컬럼(508, gap 28 → CarouselShell gap-7). 각 컬럼 = 배너(508×320 r12) + 베스트 3 카드.
+ *   배너: rank-1/2/3-photo.png — 시리즈명+태그라인이 이미지에 베이크(시안과 동일) → HTML 오버레이 없음.
+ *   카드: 흰 r8 · paddingRight 24 · [썸네일(시리즈별 WxH, #F6F7FB r4) + gap16 + 텍스트(177)].
+ *         텍스트 = 이름 14/500/검정 + 설명 14/400/#767676 (gap4) ↔(gap8) 가격 16/500/#222.
+ *   데이터: 시리즈 slug 접두사로 인기순 상위 3. 부족 시 시안 예시로 패딩(항상 3행 보장).
  * ============================================================ */
-function Ranking({ items }: { items: ProductSummary[] }) {
-    // 시안 11:1819~33:5307 — 3 카드 = 라이프스타일 photo + 진짜 product mini list
-    // popular 상위 9개를 3 그룹으로 split. photo 는 통이미지 그대로 + 진짜 product 클릭 가능.
-    const PHOTOS = ["/images/rank-1-photo.png", "/images/rank-2-photo.png", "/images/rank-3-photo.png"];
-    const LABELS = ["변치 않는 시원함", "터지는 풍미 그 이상", "그 속에 이루는 한 방울"];
+type RankSeries = {
+    label: string; tagline: string; banner: string; prefix: string;
+    imgW: number; imgH: number; price: number;
+    fallback: { name: string; desc: string }[];
+};
+const RANK_SERIES: RankSeries[] = [
+    {
+        label: "아이스킹 프로", tagline: "내 마음대로 즐기는 시원함",
+        banner: "/images/rank-1-photo.png", prefix: "iceking-pro-flavor-",
+        imgW: 100, imgH: 120, price: 30000,
+        fallback: [
+            { name: "Lemon Lime", desc: "입안 가득 퍼지는 레몬과 라임의 상큼하고 깔끔한 리프레시" },
+            { name: "Starwbetty Kiwi", desc: "새콤달콤한 딸기와 신선한 키위가 어우러진 조화로운 과일 향" },
+            { name: "Blue Razz Ice", desc: "톡 쏘는 블루 라즈베리의 상큼함에 더해진 짜릿한 쿨링감" },
+        ],
+    },
+    {
+        label: "듀크", tagline: "뛰어난 성능 곡선의 아름다움",
+        banner: "/images/rank-2-photo.png", prefix: "duke-flavor-",
+        imgW: 120, imgH: 120, price: 25000,
+        fallback: [
+            { name: "Peach Ice", desc: "잘 익은 복숭아의 달콤함과 시원한 멘솔의 완벽한 조화" },
+            { name: "Shine Muscat", desc: "입안 가득 싱그럽게 터지는 고급스러운 샤인머스캣 청량감" },
+            { name: "Blue Razz Ice", desc: "새콤달콤한 블루베리와 라즈베리에 더해진 짜릿한 쿨링" },
+        ],
+    },
+    {
+        label: "조인원 킷", tagline: "그 끝에 머무는 곡선의 완결성",
+        banner: "/images/rank-3-photo.png", prefix: "joinwon-kit-flavor-",
+        imgW: 120, imgH: 120, price: 25000,
+        fallback: [
+            { name: "Blue Razz Ice", desc: "톡 쏘는 블루 라즈베리의 짜릿함에 시원한 아이스를 더한 상쾌함" },
+            { name: "Strawberry Kiwi Ice", desc: "새콤달콤 딸기와 신선한 키위가 어우러져 터지는 풍부한 과일 향" },
+            { name: "Lemon Lime", desc: "입안을 즉각적으로 깨워주는 레몬과 라임의 쨍하고 상큼한 리프레시" },
+        ],
+    },
+];
 
-    // popular API 응답이 비어있어도 시안에 보이는 mini list (각 카드 3 row) 가 안 빈
-    // 줄로 떨어지지 않게 fallback mock 9개 항상 보장.
-    const FALLBACK_MOCK: ProductSummary[] = Array.from({ length: 9 }, (_, i) => ({
-        id: -(i + 1),
-        name: ["BC5000 그린애플","BC10000 블루라즈","DUKE 멘솔","BC5000 워터멜론","BC10000 망고","DUKE 그레이프","BC5000 피치","BC10000 코코넛","DUKE 라임"][i],
-        thumbnailUrl: `/images/elfbar-product-${(i % 2) + 1}.png`,
-        price: 25000,
-    })) as unknown as ProductSummary[];
-
-    const source = items.length >= 9 ? items : (items.length > 0
-        ? [...items, ...FALLBACK_MOCK].slice(0, 9)
-        : FALLBACK_MOCK);
-    const top = source.slice(0, 9);
-    const groups: ProductSummary[][] = [
-        top.slice(0, 3),
-        top.slice(3, 6),
-        top.slice(6, 9),
-    ];
+function SeriesRanking({ products }: { products: ProductSummary[] }) {
     return (
         <>
-            {groups.map((group, gi) => (
-                <div key={gi} className="snap-start shrink-0 w-[86%] sm:w-[62%] lg:w-[calc((100%-56px)/3)] flex flex-col gap-5">
-                    {/* 라이프스타일 사진 508×320 r12 (라벨 베이크) */}
-                    <Link href="/c/best" aria-label={LABELS[gi]} className="block rounded-[12px] overflow-hidden hover:opacity-95 transition">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={PHOTOS[gi]} alt={LABELS[gi]} className="w-full block aspect-[508/320] object-cover" />
-                    </Link>
-                    {/* 순위 리스트 — 3행 gap 24. 행 = 순위뱃지 + 흰카드(썸네일100 + 이름/설명/가격 + 장바구니·하트 40×40) */}
-                    <ul className="flex flex-col gap-6">
-                        {group.map((p, ri) => {
-                            const rankNo = gi * 3 + ri + 1;
-                            const hasDisc = p.onlinePrice != null && p.onlinePrice < p.price;
-                            const sale = hasDisc ? (p.onlinePrice as number) : p.price;
-                            return (
-                                <li key={p.id} className="relative pt-1.5">
-                                    {/* 순위 뱃지 (펜넌트) */}
-                                    <span
-                                        className="absolute top-0 left-3 z-10 flex h-9 w-7 items-start justify-center pt-1 text-[12px] font-bold text-white"
-                                        style={{ background: "#0073DD", clipPath: "polygon(0 0,100% 0,100% 72%,50% 100%,0 72%)" }}
-                                    >
-                                        {rankNo}
-                                    </span>
-                                    {/* 흰 카드 r8 */}
-                                    <div className="flex items-center justify-between gap-2 rounded-[8px] bg-white p-3 transition hover:shadow-sm">
-                                        <Link href={`/p/${p.id}`} className="flex min-w-0 flex-1 items-center gap-4">
-                                            {/* 썸네일 100×100 (#F6F7FB) */}
-                                            <div className="flex h-[84px] w-[84px] flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#F6F7FB] p-2 lg:h-[100px] lg:w-[100px]">
-                                                {p.thumbnailUrl && (
-                                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                                    <img src={p.thumbnailUrl} alt={p.name} className="max-h-full max-w-full object-contain" />
-                                                )}
-                                            </div>
-                                            {/* 이름 14/500 · 설명 14/#767676 · 가격(취소선 16/#999 + 판매가 16/#222) */}
-                                            <div className="flex min-w-0 flex-col gap-1">
-                                                <p className="line-clamp-1 text-[14px] font-medium text-[#000]">{p.name}</p>
-                                                {p.description && <p className="line-clamp-1 text-[14px] text-[#767676]">{p.description}</p>}
-                                                <div className="flex items-baseline gap-1.5">
-                                                    {hasDisc && <span className="text-[16px] text-[#999999] line-through tabular-nums">{formatPrice(p.price)}</span>}
-                                                    <span className="text-[16px] font-medium text-[#222222] tabular-nums">{formatPrice(sale)}</span>
-                                                </div>
-                                            </div>
-                                        </Link>
-                                        {/* 장바구니 + 하트 40×40 r4 */}
-                                        <div className="flex flex-shrink-0 flex-col gap-2">
-                                            <Link href={`/p/${p.id}`} aria-label="장바구니" className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-[var(--color-border)] text-[var(--color-fg-muted)] transition hover:border-[var(--color-border-strong)] hover:text-[var(--color-fg)]">
-                                                <CartMiniIcon />
-                                            </Link>
-                                            <Link href={`/p/${p.id}`} aria-label="찜" className="flex h-10 w-10 items-center justify-center rounded-[4px] border border-[var(--color-border)] text-[var(--color-fg-muted)] transition hover:border-[var(--color-border-strong)] hover:text-[#e23744]">
-                                                <HeartMiniIcon />
-                                            </Link>
+            {RANK_SERIES.map((s, si) => {
+                const real = products.filter(p => p.slug?.startsWith(s.prefix)).slice(0, 3);
+                // 시안 3행 보장 — 실데이터 우선, 부족분은 시안 예시(시리즈 flavor 이미지)로 패딩.
+                const rows = Array.from({ length: 3 }, (_, ri) => {
+                    const p = real[ri];
+                    if (p) {
+                        const price = p.onlinePrice != null && p.onlinePrice < p.price ? p.onlinePrice : p.price;
+                        return { id: p.id, href: `/p/${p.id}`, name: p.name, desc: p.description ?? "", price, thumb: p.thumbnailUrl };
+                    }
+                    const fb = s.fallback[ri];
+                    return { id: -(si * 10 + ri + 1), href: "/c/best", name: fb.name, desc: fb.desc, price: s.price, thumb: `/images/${s.prefix}${ri + 1}.png` };
+                });
+                return (
+                    <div key={s.prefix} className="snap-start shrink-0 w-[86%] sm:w-[62%] lg:w-[calc((100%-56px)/3)] flex flex-col gap-5">
+                        {/* 배너 508×320 r12 — 시리즈명+태그라인 베이크 (시안 동일) */}
+                        <Link href="/c/best" aria-label={`${s.label} — ${s.tagline}`} className="block rounded-[12px] overflow-hidden hover:opacity-95 transition">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={s.banner} alt={`${s.label} — ${s.tagline}`} className="block w-full aspect-[508/320] object-cover" />
+                        </Link>
+                        {/* 베스트 3 카드 — gap 24 */}
+                        <ul className="flex flex-col gap-6">
+                            {rows.map(r => (
+                                <li key={r.id}>
+                                    <Link href={r.href} className="flex w-full items-center gap-4 rounded-[8px] bg-white pr-6 transition hover:shadow-sm">
+                                        {/* 썸네일 — 시리즈별 WxH · #F6F7FB · r4 */}
+                                        <div
+                                            className="flex flex-shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-[#F6F7FB]"
+                                            style={{ width: s.imgW, height: s.imgH }}
+                                        >
+                                            {r.thumb && (
+                                                /* eslint-disable-next-line @next/next/no-img-element */
+                                                <img src={r.thumb} alt={r.name} className="max-h-full max-w-full object-contain" />
+                                            )}
                                         </div>
-                                    </div>
+                                        {/* 텍스트 — width 177, gap 8 */}
+                                        <div className="flex w-[177px] flex-col gap-2">
+                                            <div className="flex flex-col gap-1">
+                                                <p className="line-clamp-1 text-[14px] font-medium leading-5 text-black">{r.name}</p>
+                                                {r.desc && <p className="line-clamp-2 text-[14px] font-normal leading-5 text-[#767676]">{r.desc}</p>}
+                                            </div>
+                                            <p className="text-[16px] font-medium leading-6 text-[#222222] tabular-nums">{formatPrice(r.price)}</p>
+                                        </div>
+                                    </Link>
                                 </li>
-                            );
-                        })}
-                    </ul>
-                </div>
-            ))}
+                            ))}
+                        </ul>
+                    </div>
+                );
+            })}
         </>
-    );
-}
-
-function CartMiniIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="9" cy="20" r="1.4" />
-            <circle cx="18" cy="20" r="1.4" />
-            <path d="M2 3h3l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.2a1.5 1.5 0 0 0 1.5-1.2L22 7H6" />
-        </svg>
-    );
-}
-function HeartMiniIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M20.8 7.6a5 5 0 0 0-8.8-2.2A5 5 0 0 0 3.2 7.6c0 4.2 5.2 7.9 8.8 10.4 3.6-2.5 8.8-6.2 8.8-10.4z" />
-        </svg>
     );
 }
 
