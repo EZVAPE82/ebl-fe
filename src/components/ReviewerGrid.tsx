@@ -130,7 +130,7 @@ function ReviewCard({ review, onClick }: { review: ReviewItem; onClick: () => vo
                     <img
                         src={thumb}
                         alt={pname}
-                        className={`w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300 ${gated ? "blur-lg" : ""}`}
+                        className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${gated ? "blur-lg" : ""}`}
                         loading="lazy"
                         draggable={false}
                     />
