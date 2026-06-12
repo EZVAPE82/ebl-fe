@@ -74,7 +74,7 @@ export function ReviewModal({
             onClick={onClose}
         >
             <div
-                className="w-full max-w-[1280px] md:h-[655px] max-h-[90vh] overflow-y-auto bg-white rounded-[16px] p-10 flex flex-col md:flex-row gap-8 relative"
+                className="w-full max-w-[1280px] md:h-[655px] max-h-[90vh] overflow-y-auto bg-white rounded-[16px] p-5 md:p-10 flex flex-col md:flex-row gap-5 md:gap-8 relative"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* LEFT — 대표 사진 (374:448 = 제품이미지 비율, cover 크롭. md 에선 h-full 로

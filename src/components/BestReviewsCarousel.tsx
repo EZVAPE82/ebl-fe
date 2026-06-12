@@ -48,22 +48,27 @@ export function BestReviewsCarousel({ reviews }: { reviews: ReviewMock[] }) {
     return (
         <>
             <section id="best-reviews" className="scroll-mt-24">
-                <header className="flex items-end justify-between mb-8">
-                    <div className="flex flex-col gap-2">
-                        <p className="text-[18px] leading-none text-[#767676]">Best Review</p>
-                        <h2 className="text-[26px] md:text-[36px] font-bold leading-tight text-[#000]">베스트 제품 후기</h2>
+                <header className="flex items-end justify-between mb-4 md:mb-8">
+                    <div className="flex flex-col gap-1 md:gap-2">
+                        <p className="text-[14px] md:text-[18px] leading-none text-[#767676]">Best Review</p>
+                        <h2 className="text-[20px] md:text-[36px] font-bold leading-tight text-[#000]">베스트 제품 후기</h2>
                     </div>
-                    <nav className="flex gap-3" aria-label="베스트 후기 캐러셀">
+                    <nav className="flex gap-2 md:gap-3" aria-label="베스트 후기 캐러셀">
                         <ReviewArrow direction="prev" onClick={() => wrapScroll(scrollRef.current, -1)} />
                         <ReviewArrow direction="next" onClick={() => wrapScroll(scrollRef.current, 1)} />
                     </nav>
                 </header>
 
-                <ul ref={scrollRef} className="flex gap-4 md:gap-7 overflow-x-auto snap-x scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <ul ref={scrollRef} className="flex gap-3 md:gap-7 overflow-x-auto snap-x scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {reviews.map((r, i) => (
                         <ReviewCard key={i} review={r} onPhotoClick={(e) => openLightbox(i, e)} />
                     ))}
                 </ul>
+
+                {/* 모바일(Figma 670-13600): 후기 아래 풀폭 더 알아보기 */}
+                <Link href="/reviews" className="md:hidden mt-7 flex h-11 w-full items-center justify-center rounded-[4px] border border-[#DDD] bg-white text-[13px] font-medium text-[#000]">
+                    더 알아보기
+                </Link>
             </section>
 
             <Lightbox
@@ -82,7 +87,7 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
     const gated = useGated();
     const { openGate } = useAdultGate();
     return (
-        <li className="flex h-full shrink-0 snap-start w-[60%] sm:w-[44%] lg:w-[calc((100%-84px)/4)]">
+        <li className="flex h-full shrink-0 snap-start w-[calc((100%-12px)/2)] sm:w-[44%] lg:w-[calc((100%-84px)/4)]">
             <Link href="/reviews/best" className="flex flex-col w-full h-full">
                 {/* 사진 박스 — 비회원은 블러+자물쇠(클릭 시 성인인증), 회원은 Lightbox 원본 보기. */}
                 <button
@@ -117,16 +122,16 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
                     )}
                 </button>
 
-                <div className="mt-4 flex flex-col flex-1 gap-3">
-                    {/* 평점 — ★ + 5.0 (18/500) */}
+                <div className="mt-2 md:mt-4 flex flex-col flex-1 gap-2 md:gap-3">
+                    {/* 평점 — ★ + 5.0 (모바일 14 / 데스크탑 18) */}
                     <div className="flex items-center gap-2">
                         <RatingStars rating={review.rating} />
-                        <span className="text-[18px] font-medium leading-none text-[#000]">{review.rating.toFixed(1)}</span>
+                        <span className="text-[14px] md:text-[18px] font-medium leading-none text-[#000]">{review.rating.toFixed(1)}</span>
                     </div>
-                    {/* 후기 텍스트 14/#767676 */}
-                    <p className="text-[14px] leading-relaxed text-[#767676] line-clamp-3">{review.review}</p>
-                    {/* 작성자 | 날짜 14/#767676 */}
-                    <p className="flex items-center gap-1.5 text-[14px] text-[#767676]">
+                    {/* 후기 텍스트 13/14 */}
+                    <p className="text-[13px] md:text-[14px] leading-relaxed text-[#767676] line-clamp-3">{review.review}</p>
+                    {/* 작성자 | 날짜 13/14 */}
+                    <p className="flex items-center gap-1.5 text-[13px] md:text-[14px] text-[#767676]">
                         <span>{review.author}</span>
                         <span className="text-[var(--color-border-strong)]">|</span>
                         <span>{review.date}</span>

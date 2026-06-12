@@ -40,20 +40,20 @@ export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
             {/* 카드 행 — 시안 gap 28(lg:gap-7), 4-up */}
             <div
                 ref={scrollRef}
-                className="flex gap-4 lg:gap-7 overflow-x-auto snap-x scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="flex gap-3 md:gap-7 overflow-x-auto snap-x scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
                 {items.map((p) => (
-                    <div key={p.id} className="snap-start shrink-0 w-[78%] sm:w-[46%] lg:w-[calc((100%-84px)/4)]">
+                    <div key={p.id} className="snap-start shrink-0 w-[calc((100%-12px)/2)] sm:w-[46%] lg:w-[calc((100%-84px)/4)]">
                         <FeaturedCard p={p} />
                     </div>
                 ))}
             </div>
 
             {/* 더 알아보기 — 시안: 카드와 60px, 가운데, 160×52 r4 아웃라인 */}
-            <div className="mt-[60px] flex justify-center">
+            <div className="mt-7 md:mt-[60px] flex justify-center">
                 <Link
                     href="/products"
-                    className="inline-flex items-center justify-center w-[160px] h-[52px] rounded-[4px] border border-[#DDD] bg-white text-sm font-medium text-[#000] hover:bg-[var(--color-bg-subtle)] transition"
+                    className="inline-flex items-center justify-center w-full md:w-[160px] h-11 md:h-[52px] rounded-[4px] border border-[#DDD] bg-white text-[13px] md:text-sm font-medium text-[#000] hover:bg-[var(--color-bg-subtle)] transition"
                 >
                     더 알아보기
                 </Link>
@@ -64,12 +64,12 @@ export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
 
 function Header({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
     return (
-        <div className="flex items-end justify-between mb-8">
-            <div className="flex flex-col gap-2">
-                <p className="text-[18px] leading-none text-[#767676]">Best Item</p>
-                <h2 className="text-[26px] md:text-[36px] font-bold leading-tight text-[#000]">엘프바의 추천 아이템</h2>
+        <div className="flex items-end justify-between mb-4 md:mb-8">
+            <div className="flex flex-col gap-1 md:gap-2">
+                <p className="text-[14px] md:text-[18px] leading-none text-[#767676]">Best Item</p>
+                <h2 className="text-[20px] md:text-[36px] font-bold leading-tight text-[#000]">엘프바의 추천 아이템</h2>
             </div>
-            <div className="flex gap-3 shrink-0">
+            <div className="flex gap-2 md:gap-3 shrink-0">
                 <Arrow dir="prev" onClick={onPrev} />
                 <Arrow dir="next" onClick={onNext} />
             </div>
@@ -83,7 +83,7 @@ function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) 
             type="button"
             onClick={onClick}
             aria-label={dir === "prev" ? "이전" : "다음"}
-            className="w-12 h-12 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition"
+            className="w-8 h-8 md:w-12 md:h-12 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition"
         >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {dir === "prev" ? <polyline points="15 18 9 12 15 6" /> : <polyline points="9 18 15 12 9 6" />}
@@ -148,9 +148,9 @@ function FeaturedCard({ p }: { p: ProductSummary }) {
             <div className="pt-4 flex flex-col gap-3">
                 {/* 이름 + 설명 gap 4 */}
                 <div className="flex flex-col gap-1">
-                    <h3 className="text-[16px] font-medium text-[#000] line-clamp-1">{p.name}</h3>
+                    <h3 className="text-[14px] md:text-[16px] font-medium text-[#000] line-clamp-1">{p.name}</h3>
                     {p.description && (
-                        <p className="text-[14px] text-[#767676] line-clamp-1">{p.description}</p>
+                        <p className="text-[13px] md:text-[14px] text-[#767676] line-clamp-1">{p.description}</p>
                     )}
                 </div>
                 {/* 구분선 */}
@@ -158,13 +158,13 @@ function FeaturedCard({ p }: { p: ProductSummary }) {
                 {/* 가격 + 별점 gap 4 */}
                 <div className="flex flex-col gap-1">
                     {hasDiscount && (
-                        <span className="text-[16px] text-[#999999] line-through tabular-nums">{formatPrice(p.price)}</span>
+                        <span className="text-[12px] md:text-[16px] text-[#999999] line-through tabular-nums">{formatPrice(p.price)}</span>
                     )}
-                    <div className="flex items-baseline gap-2">
-                        {hasDiscount && <span className="text-[16px] font-medium text-[#0073DD] tabular-nums">{pct}%</span>}
-                        <span className="text-[20px] font-medium text-[#222222] tabular-nums">{formatPrice(final)}</span>
+                    <div className="flex items-baseline gap-1 md:gap-2">
+                        {hasDiscount && <span className="text-[14px] md:text-[16px] font-medium text-[#0073DD] tabular-nums">{pct}%</span>}
+                        <span className="text-[14px] md:text-[20px] font-medium text-[#222222] tabular-nums">{formatPrice(final)}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-[14px]">
+                    <div className="flex items-center gap-1 text-[13px] md:text-[14px]">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="#F3C836" aria-hidden="true" className="shrink-0">
                             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                         </svg>

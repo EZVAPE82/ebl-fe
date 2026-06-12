@@ -78,8 +78,8 @@ export function ProductReviews({ productId }: { productId: number }) {
             </div>
 
             {/* Filter row (visual only — no filter state exists yet) */}
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex gap-3">
+            <div className="flex flex-wrap justify-between items-center gap-y-2 mb-4">
+                <div className="flex flex-wrap gap-2 md:gap-3">
                     <button type="button" className="px-4 py-3 rounded-[4px] bg-[#0072DD] text-white text-[14px] font-medium">
                         카테고리
                     </button>
@@ -90,7 +90,7 @@ export function ProductReviews({ productId }: { productId: number }) {
                         카테고리
                     </button>
                 </div>
-                <div className="flex gap-3">
+                <div className="hidden lg:flex gap-3">
                     <div className="w-[260px] p-4 rounded-[4px] border border-[#DDDDDD] bg-white flex justify-between items-center">
                         <span className="text-[14px] font-light text-[#767676]">전체카테고리</span>
                         <ChevronDown />

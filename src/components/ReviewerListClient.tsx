@@ -99,12 +99,12 @@ export function ReviewerListClient({ reviews }: { reviews: ReviewVM[] }) {
                     </div>
 
                     {/* RIGHT — 필터 드롭다운 shell (시각) */}
-                    <div className="flex gap-3">
-                        <div className="w-[260px] p-4 rounded-[4px] border border-[#E5E5EC] bg-white flex justify-between items-center">
-                            <span className="text-[14px] font-light text-[#767676]">전체카테고리</span>
+                    <div className="flex w-full sm:w-auto gap-2 sm:gap-3">
+                        <div className="flex-1 sm:flex-none sm:w-[260px] p-3 sm:p-4 rounded-[4px] border border-[#E5E5EC] bg-white flex justify-between items-center">
+                            <span className="text-[13px] sm:text-[14px] font-light text-[#767676]">전체카테고리</span>
                             <ChevronDown />
                         </div>
-                        <div className="w-[150px] p-4 rounded-[4px] border border-[#E5E5EC] bg-white flex justify-between items-center">
+                        <div className="flex-1 sm:flex-none sm:w-[150px] p-3 sm:p-4 rounded-[4px] border border-[#E5E5EC] bg-white flex justify-between items-center">
                             <span className="text-[14px] font-light text-[#767676]">별점</span>
                             <ChevronDown />
                         </div>

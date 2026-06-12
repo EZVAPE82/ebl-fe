@@ -80,13 +80,14 @@ export default async function Home() {
             {/* TrustBadges (혜택 안내 5카드): 데스크탑만 Hero 안 absolute. 모바일은 사용자 요청으로 완전 제거. */}
             {/* 히어로 — 1920×840 고정. 양옆 남는 영역은 흰색, 1920보다 좁은 화면은 가운데 크롭. */}
             <div className="w-full overflow-hidden flex justify-center bg-white">
-                <GatedMedia className="w-[1920px] h-[840px] flex-shrink-0">
+                {/* 모바일(Figma 670-13600): 360×520 풀폭 / 데스크탑: 1920×840 고정 센터크롭 */}
+                <GatedMedia className="w-full md:w-[1920px] md:h-[840px] flex-shrink-0">
                     <HeroCarousel
                         banners={heroSlides}
                         fallbackImage="/images/main-hero1.png"
                         fallbackMobileImage="/images/main-hero1.png"
                         showOverlay={false}
-                        heightClass="h-full"
+                        heightClass="aspect-[360/520] md:aspect-auto md:h-full"
                     >
                         <div className="hidden md:block">
                             <TrustBadges />
@@ -100,14 +101,14 @@ export default async function Home() {
                 <CategoryIcons categories={categories} />
             </GatedMedia>
 
-            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-20 md:space-y-40">
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-[60px] md:space-y-40">
                 {/* ===== 3. 엘프바의 추천 아이템 — 어드민 설정 (featured_order 1~4) · 시안 캐러셀 ===== */}
                 <FeaturedCarousel items={featuredItems} />
 
                 {/* ===== 5. 엘프바의 이벤트 (디자인 카드 2종 — 배경+오버레이 텍스트+버튼, 이벤트 상세로 라우팅) ===== */}
                 <CarouselShell eyebrow="Event" title="엘프바의 이벤트">
                     {EVENT_CARDS.map(c => (
-                        <div key={c.alt} className="snap-start shrink-0 w-[88%] sm:w-[70%] lg:w-[calc((100%-28px)/2)]">
+                        <div key={c.alt} className="snap-start shrink-0 w-full sm:w-[70%] lg:w-[calc((100%-28px)/2)]">
                             {/* 시안: 776×340 r16 · 이미지 전체 클릭 → 이벤트 상세 */}
                             <Link href={c.href} className="group block aspect-[776/340] rounded-[16px] overflow-hidden">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -124,19 +125,19 @@ export default async function Home() {
             </div>
 
             {/* ===== 7. 시리즈 배너 — 각 960×680 고정(비율 960/680). 2개=1920 상한, 그 이상 화면은 흰 여백 ===== */}
-            <GatedMedia className="my-20 md:my-40 mx-auto max-w-[1920px] grid grid-cols-1 md:grid-cols-2 gap-0">
-                <Link href="/products?series=iceking" className="block aspect-[960/680] overflow-hidden hover:opacity-95 transition">
+            <GatedMedia className="my-[60px] md:my-40 mx-auto max-w-[1920px] grid grid-cols-1 md:grid-cols-2 gap-0">
+                <Link href="/products?series=iceking" className="block aspect-square md:aspect-[960/680] overflow-hidden hover:opacity-95 transition">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/series-ice.png" alt="ICE COOL AS YOU WANT" className="w-full h-full object-cover" />
                 </Link>
-                <Link href="/products?series=icekingpro" className="block aspect-[960/680] overflow-hidden hover:opacity-95 transition">
+                <Link href="/products?series=icekingpro" className="block aspect-square md:aspect-[960/680] overflow-hidden hover:opacity-95 transition">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/series-shimmer.png" alt="SHIMMERING IN YOUR HAND" className="w-full h-full object-cover" />
                 </Link>
             </GatedMedia>
 
-            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-20 md:space-y-40">
-                {/* ===== 공지사항 + FAQ 2컬럼 ===== */}
+            <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-[60px] md:space-y-40">
+                {/* ===== 공지사항 + FAQ 2컬럼 (모바일: 세로 스택) ===== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
                     <NoticeBox notices={notices.content} />
                     <FaqBox />
@@ -197,18 +198,18 @@ function CategoryIcons({ categories: _categories }: { categories: Category[] }) 
         { label: "구매후기", href: "/reviews", src: "/images/cat-review.png" },
     ];
     return (
-        <section className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-16 md:pt-[100px] pb-24 md:pb-[160px]">
-            {/* 시안 CSS: 컨테이너 inline-flex · gap 48 / 타일 148×148 · padding 26 · radius 20 · border 1px · 아이콘 96×96 / 타일↔라벨 16 */}
-            <ul className="flex flex-wrap justify-center items-start gap-x-6 md:gap-x-12 gap-y-8">
+        <section className="mx-auto max-w-[1920px] px-4 xl:px-[170px] pt-10 md:pt-[100px] pb-14 md:pb-[160px]">
+            {/* 시안 CSS: 컨테이너 inline-flex · gap 48 / 타일 148×148. 모바일(Figma 670-13600): 100px 타일 가로 스크롤 */}
+            <ul className="flex md:flex-wrap md:justify-center items-start gap-x-3 md:gap-x-12 gap-y-8 overflow-x-auto md:overflow-visible pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {items.map(it => (
-                    <li key={it.label}>
+                    <li key={it.label} className="shrink-0">
                         <Link
                             href={it.href}
                             aria-label={it.label}
-                            className="group flex flex-col items-center gap-4 hover:opacity-90 transition"
+                            className="group flex flex-col items-center gap-2 md:gap-4 hover:opacity-90 transition"
                         >
                             {/* cat-*.png = 타일 통째(회색 배경+라운드+일러스트). 풀사이즈 148로 원본 그대로 */}
-                            <span className="w-[110px] h-[110px] md:w-[148px] md:h-[148px] flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <span className="w-[100px] h-[100px] md:w-[148px] md:h-[148px] flex items-center justify-center group-hover:scale-105 transition-transform">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={it.src} alt={it.label} className="w-full h-full object-contain" />
                             </span>
@@ -315,17 +316,17 @@ function SeriesRanking({ products }: { products: ProductSummary[] }) {
                     return { id: -(si * 10 + ri + 1), href: "/c/best", name: fb.name, desc: fb.desc, price: s.price, thumb: `/images/${s.prefix}${ri + 1}.png` };
                 });
                 return (
-                    <div key={s.prefix} className="snap-start shrink-0 w-[86%] sm:w-[62%] lg:w-[calc((100%-56px)/3)] flex flex-col gap-5">
+                    <div key={s.prefix} className="snap-start shrink-0 w-full sm:w-[62%] lg:w-[calc((100%-56px)/3)] flex flex-col gap-3 md:gap-5">
                         {/* 배너 508×320 r12 — 시리즈명+태그라인 베이크 (시안 동일) */}
                         <Link href="/c/best" aria-label={`${s.label} — ${s.tagline}`} className="block rounded-[12px] overflow-hidden hover:opacity-95 transition">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={s.banner} alt={`${s.label} — ${s.tagline}`} className="block w-full aspect-[508/320] object-cover" />
                         </Link>
                         {/* 베스트 3 카드 — gap 24 */}
-                        <ul className="flex flex-col gap-6">
+                        <ul className="flex flex-col gap-2 md:gap-6">
                             {rows.map(r => (
                                 <li key={r.id}>
-                                    <Link href={r.href} className="flex w-full items-center gap-4 rounded-[8px] bg-white pr-6 transition hover:shadow-sm">
+                                    <Link href={r.href} className="flex w-full items-center gap-4 rounded-[8px] bg-white pr-4 md:pr-6 transition hover:shadow-sm">
                                         {/* 썸네일 — 높이 120 고정, 너비는 이미지 원본 비율대로 자동.
                                             세로 긴 제품도 크롭/좌우 여백 없이 꽉 차고, 다른 비율 제품으로 바뀌어도 동적 대응. */}
                                         {r.thumb ? (
@@ -333,18 +334,18 @@ function SeriesRanking({ products }: { products: ProductSummary[] }) {
                                             <img
                                                 src={r.thumb}
                                                 alt={r.name}
-                                                className="block h-[120px] w-auto flex-shrink-0 rounded-[4px] bg-[#F6F7FB] object-contain"
+                                                className="block h-[96px] md:h-[120px] w-auto flex-shrink-0 rounded-[4px] bg-[#F6F7FB] object-contain"
                                             />
                                         ) : (
-                                            <div className="h-[120px] w-[100px] flex-shrink-0 rounded-[4px] bg-[#F6F7FB]" />
+                                            <div className="h-[96px] md:h-[120px] w-[80px] md:w-[100px] flex-shrink-0 rounded-[4px] bg-[#F6F7FB]" />
                                         )}
-                                        {/* 텍스트 — width 177, gap 8 */}
-                                        <div className="flex w-[177px] flex-col gap-2">
+                                        {/* 텍스트 — 데스크탑 width 177 고정, 모바일은 가변 */}
+                                        <div className="flex min-w-0 flex-1 md:flex-none md:w-[177px] flex-col gap-2">
                                             <div className="flex flex-col gap-1">
                                                 <p className="line-clamp-1 text-[14px] font-medium leading-5 text-black">{r.name}</p>
                                                 {r.desc && <p className="line-clamp-2 text-[14px] font-normal leading-5 text-[#767676]">{r.desc}</p>}
                                             </div>
-                                            <p className="text-[16px] font-medium leading-6 text-[#222222] tabular-nums">{formatPrice(r.price)}</p>
+                                            <p className="text-[14px] md:text-[16px] font-medium leading-5 md:leading-6 text-[#222222] tabular-nums">{formatPrice(r.price)}</p>
                                         </div>
                                     </Link>
                                 </li>
@@ -405,27 +406,27 @@ function NoticeBox({ notices }: { notices: Notice[] }) {
     // 시안 402:10620 — 타이틀 28/500 · 항목(제목 18/500 + 날짜 14/#767676, pad 24) · 더알아보기 #F6F7FB r4
     const display = notices.slice(0, 4);
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-5">
-                <h3 className="text-[28px] font-medium leading-none text-[#000]">공지사항</h3>
-                <ul className="divide-y divide-[var(--color-border)]">
+        <div className="flex flex-col gap-4 md:gap-6">
+            <div className="flex flex-col gap-3 md:gap-5">
+                <h3 className="text-[24px] md:text-[28px] font-medium leading-none text-[#000]">공지사항</h3>
+                <ul className="divide-y divide-[var(--color-border)] border-t border-black md:border-t-0">
                     {display.length === 0 && (
                         <li className="py-6 text-center text-sm text-[var(--color-fg-subtle)]">등록된 공지가 없습니다.</li>
                     )}
                     {display.map(n => (
                         <li key={n.id}>
-                            <Link href={`/notices/${n.id}`} className="flex flex-col gap-2 py-6 hover:opacity-70 transition">
-                                <p className="text-[18px] font-medium text-[#000] line-clamp-1">
+                            <Link href={`/notices/${n.id}`} className="flex flex-col gap-1 md:gap-2 py-4 md:py-6 hover:opacity-70 transition">
+                                <p className="text-[14px] md:text-[18px] font-medium text-[#000] line-clamp-1">
                                     {n.pinned && <span className="mr-1.5 rounded bg-[var(--color-danger)]/10 px-1.5 py-0.5 text-[12px] font-medium text-[var(--color-danger)]">필독</span>}
                                     {n.title}
                                 </p>
-                                <p className="text-[14px] text-[#767676]">{formatDate(n.createdAt)}</p>
+                                <p className="text-[13px] md:text-[14px] text-[#767676]">{formatDate(n.createdAt)}</p>
                             </Link>
                         </li>
                     ))}
                 </ul>
             </div>
-            <Link href="/notices" className="flex items-center justify-center rounded-[4px] bg-[#F6F7FB] py-6 text-[14px] font-medium text-[#767676] hover:text-[var(--color-fg)] transition">
+            <Link href="/notices" className="flex items-center justify-center rounded-[4px] bg-[#F6F7FB] py-3 md:py-6 text-[13px] md:text-[14px] font-medium text-[#767676] hover:text-[var(--color-fg)] transition">
                 더 알아보기
             </Link>
         </div>
@@ -443,26 +444,26 @@ function FaqBox() {
         { id: 4, q: "도서·산간 지역도 배송 가능한가요?",     date: "2025.07.01", answered: true },
     ];
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-5">
-                <h3 className="text-[28px] font-medium leading-none text-[#000]">FAQ</h3>
-                <ul className="divide-y divide-[var(--color-border)]">
+        <div className="flex flex-col gap-4 md:gap-6">
+            <div className="flex flex-col gap-3 md:gap-5">
+                <h3 className="text-[24px] md:text-[28px] font-medium leading-none text-[#000]">FAQ</h3>
+                <ul className="divide-y divide-[var(--color-border)] border-t border-black md:border-t-0">
                     {items.map(f => (
                         <li key={f.id}>
-                            <Link href="/faq" className="flex items-center justify-between gap-4 py-6 hover:opacity-70 transition">
-                                <div className="flex min-w-0 flex-col gap-2">
-                                    <p className="text-[18px] font-medium text-[#000] line-clamp-1">{f.q}</p>
-                                    <p className="text-[14px] text-[#767676]">{f.date}</p>
+                            <Link href="/faq" className="flex items-center justify-between gap-4 py-4 md:py-6 hover:opacity-70 transition">
+                                <div className="flex min-w-0 flex-col gap-1 md:gap-2">
+                                    <p className="text-[14px] md:text-[18px] font-medium text-[#000] line-clamp-1">{f.q}</p>
+                                    <p className="text-[13px] md:text-[14px] text-[#767676]">{f.date}</p>
                                 </div>
                                 {f.answered && (
-                                    <span className="flex-shrink-0 text-[14px] font-medium text-[#0072DD]">답변완료</span>
+                                    <span className="flex-shrink-0 rounded-[4px] bg-[#E6F3FE] px-3 py-2 text-[12px] font-medium text-[#0072DD] md:bg-transparent md:px-0 md:py-0 md:text-[14px]">답변완료</span>
                                 )}
                             </Link>
                         </li>
                     ))}
                 </ul>
             </div>
-            <Link href="/faq" className="flex items-center justify-center rounded-[4px] bg-[#F6F7FB] py-6 text-[14px] font-medium text-[#767676] hover:text-[var(--color-fg)] transition">
+            <Link href="/faq" className="flex items-center justify-center rounded-[4px] bg-[#F6F7FB] py-3 md:py-6 text-[13px] md:text-[14px] font-medium text-[#767676] hover:text-[var(--color-fg)] transition">
                 더 알아보기
             </Link>
         </div>
@@ -773,22 +774,49 @@ function InstagramFeed() {
  * ============================================================ */
 function ContactCTA() {
     return (
-        <section className="mt-16 md:mt-40 relative mx-auto w-full max-w-[1920px]">
-            {/* 푸터 위 1:1 문의 배너 — 1920 상한(히어로·시리즈와 동일). 넓은 화면에선 양옆 여백. 후기와 160. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-                src="/images/inquiry-banner-before-footer.png"
-                alt="엘프바에게 문의해주세요 — 궁금하신 부분이 있으시면 언제든지 연락주세요"
-                className="w-full block"
-            />
-            {/* 시안 402:10842: 인풋 제거, 문의하기 버튼만 — 우측(170 from right) · 세로 중앙(배너 280 기준) · 160×60 검정 */}
-            <Link
-                href="/contact"
-                aria-label="1:1 문의하기"
-                className="absolute right-[17%] top-[58%] -translate-y-1/2 inline-flex items-center justify-center w-[110px] h-10 md:w-[160px] md:h-[56px] rounded-[8px] bg-black text-white text-sm md:text-base font-medium shadow-sm hover:opacity-90 transition"
-            >
-                문의하기
-            </Link>
+        <section className="mt-[60px] md:mt-40 relative mx-auto w-full max-w-[1920px]">
+            {/* ── 데스크탑: 푸터 위 1:1 문의 와이드 배너 + 우측 문의하기 버튼 ── */}
+            <div className="relative hidden md:block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src="/images/inquiry-banner-before-footer.png"
+                    alt="엘프바에게 문의해주세요 — 궁금하신 부분이 있으시면 언제든지 연락주세요"
+                    className="w-full block"
+                />
+                <Link
+                    href="/contact"
+                    aria-label="1:1 문의하기"
+                    className="absolute right-[17%] top-[58%] -translate-y-1/2 inline-flex items-center justify-center w-[160px] h-[56px] rounded-[8px] bg-black text-white text-base font-medium shadow-sm hover:opacity-90 transition"
+                >
+                    문의하기
+                </Link>
+            </div>
+
+            {/* ── 모바일(Figma 670-13600): 360×364 배경 + 타이틀/입력/버튼 스택 ── */}
+            <div className="relative md:hidden h-[364px] overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src="/images/inquiry-banner-before-footer.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="relative px-4 pt-[60px] flex flex-col gap-5">
+                    <div className="flex flex-col gap-0.5 text-white">
+                        <p className="text-[14px] leading-5">1:1 문의</p>
+                        <h2 className="text-[24px] font-bold leading-[34px]">엘프바에게 문의해주세요</h2>
+                        <p className="text-[13px] leading-5 text-white/70">궁금하신부분들이 있으시면 언제든지 연락주세요</p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Link href="/contact" className="flex items-center rounded-[4px] bg-white px-4 py-3.5 text-[13px] text-[#505050]">
+                            문의사항을 입력해주세요
+                        </Link>
+                        <Link href="/contact" className="flex items-center justify-center rounded-[4px] bg-black px-4 py-3.5 text-[13px] font-medium text-white">
+                            문의하기
+                        </Link>
+                    </div>
+                </div>
+            </div>
         </section>
     );
 }
