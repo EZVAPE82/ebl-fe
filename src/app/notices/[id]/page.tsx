@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import type { Notice } from "@/types/api";
+import { cleanHtml } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -105,7 +106,7 @@ export default async function NoticeDetailPage({ params }: { params: Promise<{ i
                             {isHtml ? (
                                 <div
                                     className="text-[16px] text-[#767676] leading-6 [&_p]:mb-4 [&_a]:underline"
-                                    dangerouslySetInnerHTML={{ __html: body }}
+                                    dangerouslySetInnerHTML={{ __html: cleanHtml(body) }}
                                 />
                             ) : paragraphs.length > 0 ? (
                                 paragraphs.map((p, i) => (

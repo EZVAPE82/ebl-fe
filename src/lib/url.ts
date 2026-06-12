@@ -58,6 +58,25 @@ export function safeImageUrl(raw: string | null | undefined): string {
 }
 
 /**
+ * 로그인/리다이렉트 후 이동 경로 — 오픈 리다이렉트 방지.
+ * 앱 내부 상대경로만 허용: 단일 '/'로 시작 + '//'(프로토콜-상대) 아님 + 제어문자/백슬래시 없음.
+ * 절대 URL·외부 도메인·스킴은 fallback("/").
+ */
+export function safeRedirectPath(raw: string | null | undefined, fallback = "/"): string {
+    if (!raw) return fallback;
+    const s = raw.trim();
+    if (!s.startsWith("/") || s.startsWith("//")) return fallback;
+    // 백슬래시(\ → // 우회) 차단
+    if (s.includes("\\")) return fallback;
+    // 제어문자(헤더 인젝션·우회) 차단
+    for (let i = 0; i < s.length; i++) {
+        const c = s.charCodeAt(i);
+        if (c < 0x20 || c === 0x7f) return fallback;
+    }
+    return s;
+}
+
+/**
  * 상품 카드 호버 배경 스왑용 — `{base}-hover.png` 변형 자산이 실제 존재하는 시리즈만 처리.
  * 자산이 없는 상품에 호버 스왑을 걸면 404 + 호버 시 빈칸이 되므로, 존재하는 접두어만 허용한다.
  * (public/images 의 -hover.png 자산 접두어 목록)

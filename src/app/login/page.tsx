@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
+import { safeRedirectPath } from "@/lib/url";
 
 /* Figma 로그인 SPEC 매칭 — 회원/비회원 탭 + 깔끔한 input + 검정 로그인 버튼 + 소셜 (카카오/구글) */
 
@@ -20,7 +21,7 @@ function LoginForm() {
     const { login } = useAuth();
     const router = useRouter();
     const sp = useSearchParams();
-    const redirectTo = sp.get("redirect") ?? "/";
+    const redirectTo = safeRedirectPath(sp.get("redirect"));
 
     const [tab, setTab] = useState<"member" | "guest">("member");
     const [email, setEmail] = useState("");

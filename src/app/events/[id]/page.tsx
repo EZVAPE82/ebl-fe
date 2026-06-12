@@ -2,6 +2,7 @@ import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { safeImageUrl } from "@/lib/url";
 import { GatedMedia } from "@/components/GatedMedia";
+import { cleanHtml } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +114,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                             ) : body ? (
                                 <div className="w-full max-w-[860px] text-[15px] leading-7 text-[#333] whitespace-pre-line">
                                     {looksLikeHtml(body) ? (
-                                        <div dangerouslySetInnerHTML={{ __html: body }} />
+                                        <div dangerouslySetInnerHTML={{ __html: cleanHtml(body) }} />
                                     ) : (
                                         body
                                     )}
