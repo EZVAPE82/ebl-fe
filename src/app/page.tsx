@@ -15,7 +15,7 @@ type EventLite = { id: number; title: string; bannerUrl: string | null };
 type ReviewView = {
     id: number; productId: number; memberId: number; rating: number; content: string | null;
     hasPhoto: boolean; photoUrls: string[]; createdAt: string;
-    productName?: string | null; productThumbnailUrl?: string | null;
+    productName?: string | null; productThumbnailUrl?: string | null; authorName?: string | null;
 };
 
 async function safeFetch<T>(path: string, fallback: T): Promise<T> {
@@ -67,7 +67,7 @@ export default async function Home() {
         photo: (r.photoUrls && r.photoUrls[0]) || r.productThumbnailUrl || "/images/elfbar-product-1.png",
         rating: Math.min(5, Math.max(0, r.rating)),
         review: r.content ?? "",
-        author: "구매고객 님",
+        author: r.authorName ? `${r.authorName} 님` : "구매고객 님",
         date: formatDate(r.createdAt),
         product: r.productName || "상품",
         productThumb: r.productThumbnailUrl || "/images/elfbar-product-1.png",

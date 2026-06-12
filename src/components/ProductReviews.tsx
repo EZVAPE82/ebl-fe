@@ -14,6 +14,7 @@ type Review = {
     hasPhoto: boolean;
     pointRewarded: boolean;
     createdAt: string;
+    authorName?: string | null;
 };
 
 type Page<T> = { content: T[]; totalElements: number };
@@ -115,7 +116,7 @@ export function ProductReviews({ productId }: { productId: number }) {
                         >
                             <div className="flex items-center gap-2">
                                 <StarRow rating={r.rating} />
-                                <span className="text-[14px] font-medium text-[#000]">구매고객</span>
+                                <span className="text-[14px] font-medium text-[#000]">{r.authorName ?? "구매고객"}</span>
                                 <span className="w-px h-[12px] bg-[#DDDDDD]" />
                                 <span className="text-[14px] font-light text-[#767676]">{formatDate(r.createdAt)}</span>
                             </div>

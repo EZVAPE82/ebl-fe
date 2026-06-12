@@ -18,6 +18,7 @@ type ReviewView = {
     createdAt: string;
     productName?: string | null;
     productThumbnailUrl?: string | null;
+    authorName?: string | null;
 };
 
 // 후기 사진 등록 전에도 페이지가 비어보이지 않게 — 홈 "베스트 제품 후기"와 동일한
@@ -93,7 +94,7 @@ function toVM(r: ReviewView): ReviewVM {
         photo: (r.photoUrls && r.photoUrls[0]) || r.productThumbnailUrl || null,
         rating: Math.min(5, Math.max(0, r.rating)),
         text: r.content ?? "",
-        author: "구매고객 님",
+        author: r.authorName ? `${r.authorName} 님` : "구매고객 님",
         date: toDots(r.createdAt),
         productTitle: r.productName || "상품",
         productSubtitle: "",
