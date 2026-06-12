@@ -9,7 +9,6 @@ import { useAuth } from "@/lib/auth";
 type Review = {
     id: number;
     productId: number;
-    memberId: number;
     rating: number;
     content: string | null;
     hasPhoto: boolean;
@@ -116,7 +115,7 @@ export function ProductReviews({ productId }: { productId: number }) {
                         >
                             <div className="flex items-center gap-2">
                                 <StarRow rating={r.rating} />
-                                <span className="text-[14px] font-medium text-[#000]">회원{r.memberId}</span>
+                                <span className="text-[14px] font-medium text-[#000]">구매고객</span>
                                 <span className="w-px h-[12px] bg-[#DDDDDD]" />
                                 <span className="text-[14px] font-light text-[#767676]">{formatDate(r.createdAt)}</span>
                             </div>
