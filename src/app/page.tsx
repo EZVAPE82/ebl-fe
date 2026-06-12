@@ -80,8 +80,8 @@ export default async function Home() {
             {/* TrustBadges (혜택 안내 5카드): 데스크탑만 Hero 안 absolute. 모바일은 사용자 요청으로 완전 제거. */}
             {/* 히어로 — 1920×840 고정. 양옆 남는 영역은 흰색, 1920보다 좁은 화면은 가운데 크롭. */}
             <div className="w-full overflow-hidden flex justify-center bg-white">
-                {/* 모바일(Figma 670-13600): 360×520 풀폭 / 데스크탑: 1920×840 고정 센터크롭 */}
-                <GatedMedia className="w-full md:w-[1920px] md:h-[840px] flex-shrink-0">
+                {/* 모바일(Figma 670-13600): 360×520 풀폭 / 데스크탑: 1920×840 고정 센터크롭. 배너는 게이팅 제외(클라 확정) */}
+                <div className="w-full md:w-[1920px] md:h-[840px] flex-shrink-0">
                     <HeroCarousel
                         banners={heroSlides}
                         fallbackImage="/images/main-hero1.png"
@@ -93,13 +93,11 @@ export default async function Home() {
                             <TrustBadges />
                         </div>
                     </HeroCarousel>
-                </GatedMedia>
+                </div>
             </div>
 
-            {/* ===== 카테고리 아이콘 ===== */}
-            <GatedMedia>
-                <CategoryIcons categories={categories} />
-            </GatedMedia>
+            {/* ===== 카테고리 아이콘 (게이팅 제외) ===== */}
+            <CategoryIcons categories={categories} />
 
             <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-[60px] md:space-y-40">
                 {/* ===== 3. 엘프바의 추천 아이템 — 어드민 설정 (featured_order 1~4) · 시안 캐러셀 ===== */}
@@ -125,7 +123,7 @@ export default async function Home() {
             </div>
 
             {/* ===== 7. 시리즈 배너 — 각 960×680 고정(비율 960/680). 2개=1920 상한, 그 이상 화면은 흰 여백 ===== */}
-            <GatedMedia className="my-[60px] md:my-40 mx-auto max-w-[1920px] grid grid-cols-1 md:grid-cols-2 gap-0">
+            <div className="my-[60px] md:my-40 mx-auto max-w-[1920px] grid grid-cols-1 md:grid-cols-2 gap-0">
                 <Link href="/products?series=iceking" className="block aspect-square md:aspect-[960/680] overflow-hidden hover:opacity-95 transition">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/series-ice.png" alt="ICE COOL AS YOU WANT" className="w-full h-full object-cover" />
@@ -134,7 +132,7 @@ export default async function Home() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/series-shimmer.png" alt="SHIMMERING IN YOUR HAND" className="w-full h-full object-cover" />
                 </Link>
-            </GatedMedia>
+            </div>
 
             <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] space-y-[60px] md:space-y-40">
                 {/* ===== 공지사항 + FAQ 2컬럼 (모바일: 세로 스택) ===== */}
@@ -330,12 +328,15 @@ function SeriesRanking({ products }: { products: ProductSummary[] }) {
                                         {/* 썸네일 — 높이 120 고정, 너비는 이미지 원본 비율대로 자동.
                                             세로 긴 제품도 크롭/좌우 여백 없이 꽉 차고, 다른 비율 제품으로 바뀌어도 동적 대응. */}
                                         {r.thumb ? (
-                                            /* eslint-disable-next-line @next/next/no-img-element */
-                                            <img
-                                                src={r.thumb}
-                                                alt={r.name}
-                                                className="block h-[96px] md:h-[120px] w-auto flex-shrink-0 rounded-[4px] bg-[#F6F7FB] object-contain"
-                                            />
+                                            /* 상품 상세로 이동하는 판매 이미지 → 비회원 게이팅 대상 */
+                                            <GatedMedia compact className="flex-shrink-0 rounded-[4px] overflow-hidden">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src={r.thumb}
+                                                    alt={r.name}
+                                                    className="block h-[96px] md:h-[120px] w-auto rounded-[4px] bg-[#F6F7FB] object-contain"
+                                                />
+                                            </GatedMedia>
                                         ) : (
                                             <div className="h-[96px] md:h-[120px] w-[80px] md:w-[100px] flex-shrink-0 rounded-[4px] bg-[#F6F7FB]" />
                                         )}

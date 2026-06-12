@@ -6,6 +6,7 @@ import type { ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice, productHref } from "@/lib/format";
 import { hoverImageUrl, safeImageUrl } from "@/lib/url";
 import { wrapScroll } from "@/lib/scroll";
+import { useGated, useAdultGate, GateOverlay } from "@/components/AdultGate";
 
 /**
  * "엘프바의 추천 아이템" (Best Item) 캐러셀 — Figma 402:11091 1:1.
@@ -93,6 +94,8 @@ function Arrow({ dir, onClick }: { dir: "prev" | "next"; onClick: () => void }) 
 }
 
 function FeaturedCard({ p }: { p: ProductSummary }) {
+    const gated = useGated();
+    const { openGate } = useAdultGate();
     const thumb = safeImageUrl(p.thumbnailUrl);
     const bg = hoverImageUrl(thumb);
     const img = bg || thumb;
@@ -102,9 +105,14 @@ function FeaturedCard({ p }: { p: ProductSummary }) {
     const isSoldOut = p.status === "SOLD_OUT" || p.soldOut === true;
 
     return (
-        <Link href={productHref(p)} className="group block">
-            {/* 이미지 374×448 r12 + 좌상단 뱃지 */}
+        <Link
+            href={productHref(p)}
+            className="group block"
+            onClick={(e) => { if (gated) { e.preventDefault(); openGate(); } }}
+        >
+            {/* 이미지 374×448 r12 — 상품 판매 이미지 = 비회원 게이팅 대상 */}
             <div className="relative aspect-[374/448] rounded-[12px] overflow-hidden bg-[var(--color-bg-subtle)]">
+                {gated && <GateOverlay />}
                 {img ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img

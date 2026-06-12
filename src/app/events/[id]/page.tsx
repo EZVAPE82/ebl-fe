@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { safeImageUrl } from "@/lib/url";
-import { GatedMedia } from "@/components/GatedMedia";
 import { cleanHtml } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
@@ -103,14 +102,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         {/* 이미지 / 본문 블록 */}
                         <div className="border-y border-[#E5E5EC] py-10 flex justify-center">
                             {img ? (
-                                <GatedMedia className="w-full max-w-[860px]">
+                                <div className="w-full max-w-[860px]">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={img}
                                         alt={event.title}
                                         className="w-full max-w-[860px] h-auto object-contain"
                                     />
-                                </GatedMedia>
+                                </div>
                             ) : body ? (
                                 <div className="w-full max-w-[860px] text-[15px] leading-7 text-[#333] whitespace-pre-line">
                                     {looksLikeHtml(body) ? (

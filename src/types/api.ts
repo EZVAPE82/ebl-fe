@@ -17,6 +17,8 @@ export type ProductSummary = {
     brandId: number | null;
     name: string;
     slug: string;
+    /** 상품 코드(8자리) — 결제 주문명 등 외부 노출용. */
+    code?: string | null;
     /** 카드 한 줄 설명 (추천 아이템 카드 등). */
     description?: string | null;
     /** 기본 판매가 (오프라인 등). */

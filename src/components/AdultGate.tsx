@@ -1,75 +1,40 @@
 "use client";
 
 /**
- * 성인인증 게이팅 — 비회원(미로그인)에게 상품/리뷰 이미지를 블러+자물쇠로 가린다.
- * 텍스트는 가리지 않음(SEO). 기준 = 로그인 여부. 로딩 중에도 블러 기본(비회원 원본 노출 0).
+ * 비회원 이미지 게이팅 — 상품 판매 이미지(클릭 시 상품 상세로 이동하는 것)만 블러+자물쇠.
+ * 후기 사진·배너·카테고리 아이콘 등은 게이팅하지 않는다(클라이언트 확정).
  *
- *  - useGated(): 가려야 하는가(미로그인 또는 로딩 중)
- *  - <GateOverlay/>: 이미지 컨테이너(relative) 위에 얹는 블러+자물쇠 오버레이. 클릭 시 게이트 모달.
- *  - useAdultGate().openGate(): 모달 열기
+ * 동작: 비회원이 블러 이미지를 누르면 모달 없이 **바로 로그인 페이지로 이동**
+ * (성인인증은 회원가입 절차에서 수행 — 비회원 단독 성인인증 경로 없음).
+ *
+ *  - useGated(): 가려야 하는가(미로그인 또는 인증 로딩 중 — 비회원 원본 노출 0)
+ *  - useAdultGate().openGate(): /login?redirect=현재경로 로 즉시 이동
+ *  - <GateOverlay/>: 이미지 컨테이너(relative) 위 블러+자물쇠 오버레이. 클릭 시 로그인 이동.
  */
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
-    createContext, useCallback, useContext, useMemo, useState, type ReactNode,
+    createContext, useCallback, useContext, useMemo, type ReactNode,
 } from "react";
 import { useAuth } from "@/lib/auth";
 
-/**
- * 성인인증 이미지 게이팅 전역 스위치.
- *   false = OFF (원래대로, 블러/자물쇠/게이트 전부 비활성)
- *   true  = ON  (비회원 이미지 블러 + 클릭 시 성인인증 모달)
- * 다시 적용할 땐 이 값만 true 로 바꾸면 모든 영역(홈 배너·상품·후기·이벤트 등)에 즉시 재적용된다.
- */
-const GATING_ENABLED = false;
+/** 게이팅 전역 스위치 — false 면 블러/오버레이 전부 비활성. */
+const GATING_ENABLED = true;
 
 type GateCtx = { openGate: () => void };
 const Ctx = createContext<GateCtx | null>(null);
 
 export function AdultGateProvider({ children }: { children: ReactNode }) {
-    const [open, setOpen] = useState(false);
+    const router = useRouter();
     const pathname = usePathname();
-    const openGate = useCallback(() => setOpen(true), []);
-    const value = useMemo<GateCtx>(() => ({ openGate }), [openGate]);
-    const redirect = encodeURIComponent(pathname || "/");
 
-    return (
-        <Ctx.Provider value={value}>
-            {children}
-            {open && (
-                <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
-                    <div className="relative w-full max-w-[360px] rounded-[var(--radius-lg)] bg-[var(--color-surface)] p-6 text-center shadow-xl">
-                        <div className="text-4xl mb-3">🔞</div>
-                        <h2 className="text-base font-bold text-[var(--color-fg)]">성인인증 후 확인 가능합니다</h2>
-                        <p className="mt-2 text-sm text-[var(--color-fg-muted)] leading-relaxed">
-                            상품·리뷰 이미지는 로그인(성인인증) 후<br />확인할 수 있습니다. 회원가입 후 이용해주세요.
-                        </p>
-                        <div className="mt-5 flex flex-col gap-2">
-                            <Link
-                                href={`/login?redirect=${redirect}`}
-                                onClick={() => setOpen(false)}
-                                className="rounded-[var(--radius-sm)] bg-[var(--color-brand)] text-[var(--color-brand-fg)] px-4 py-2.5 text-sm font-medium hover:bg-[var(--color-brand-hover)]"
-                            >
-                                로그인
-                            </Link>
-                            <Link
-                                href="/signup"
-                                onClick={() => setOpen(false)}
-                                className="rounded-[var(--radius-sm)] border border-[var(--color-border)] px-4 py-2.5 text-sm hover:bg-[var(--color-bg-subtle)] text-[var(--color-fg)]"
-                            >
-                                회원가입
-                            </Link>
-                        </div>
-                        <button onClick={() => setOpen(false)} className="mt-3 text-xs text-[var(--color-fg-subtle)] hover:underline">
-                            닫기
-                        </button>
-                    </div>
-                </div>
-            )}
-        </Ctx.Provider>
-    );
+    // 모달 없음 — 즉시 로그인 페이지로 (로그인 후 원래 페이지 복귀)
+    const openGate = useCallback(() => {
+        router.push(`/login?redirect=${encodeURIComponent(pathname || "/")}`);
+    }, [router, pathname]);
+
+    const value = useMemo<GateCtx>(() => ({ openGate }), [openGate]);
+    return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export function useAdultGate(): GateCtx {
@@ -77,21 +42,21 @@ export function useAdultGate(): GateCtx {
     return v ?? { openGate: () => {} }; // provider 밖이면 안전한 no-op
 }
 
-/** 가려야 하는가 — 미로그인 또는 인증 로딩 중(비회원에 원본 노출 방지). 전역 스위치 OFF 면 항상 false. */
+/** 가려야 하는가 — 미로그인 또는 인증 로딩 중. 전역 스위치 OFF 면 항상 false. */
 export function useGated(): boolean {
     const { user, loading } = useAuth();
     if (!GATING_ENABLED) return false;
     return loading || !user;
 }
 
-/** 이미지(relative 컨테이너) 위에 얹는 블러+자물쇠 오버레이. 클릭 시 게이트 모달. */
+/** 이미지(relative 컨테이너) 위에 얹는 블러+자물쇠 오버레이. 클릭 시 바로 로그인 이동. */
 export function GateOverlay({ compact = false }: { compact?: boolean }) {
     const { openGate } = useAdultGate();
     return (
         <div
             role="button"
             tabIndex={0}
-            aria-label="성인인증 후 확인 가능"
+            aria-label="로그인 후 확인 가능"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); openGate(); }}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openGate(); } }}
             className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1 backdrop-blur-xl bg-black/20 cursor-pointer select-none"
@@ -99,7 +64,7 @@ export function GateOverlay({ compact = false }: { compact?: boolean }) {
             <LockIcon big={!compact} />
             {!compact && (
                 <span className="text-[10px] md:text-[11px] font-semibold text-white px-2 text-center leading-tight drop-shadow">
-                    성인인증 후 확인
+                    로그인 후 확인 가능
                 </span>
             )}
         </div>

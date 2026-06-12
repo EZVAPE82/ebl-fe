@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { safeImageUrl } from "@/lib/url";
-import { GatedMedia } from "@/components/GatedMedia";
 import type { Page } from "@/types/api";
 
 export const dynamic = "force-dynamic";
@@ -108,7 +107,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                             const period = fmtPeriod(e.startsAt, e.endsAt);
                             return (
                                 <Link key={e.id} href={`/events/${e.id}`} className="group block">
-                                    <GatedMedia className="w-full aspect-[508/248] rounded-[12px] overflow-hidden bg-[#D9D9D9]">
+                                    <div className="w-full aspect-[508/248] rounded-[12px] overflow-hidden bg-[#D9D9D9]">
                                         {img && (
                                             /* eslint-disable-next-line @next/next/no-img-element */
                                             <img
@@ -117,7 +116,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                                                 className="w-full h-full object-cover group-hover:scale-[1.02] transition"
                                             />
                                         )}
-                                    </GatedMedia>
+                                    </div>
                                     <div className="mt-3 flex flex-col gap-1">
                                         <p className="text-[16px] font-medium text-[#000] line-clamp-1">{e.title}</p>
                                         {period && <p className="text-[14px] text-[#767676]">{period}</p>}

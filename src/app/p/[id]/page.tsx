@@ -89,7 +89,13 @@ export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
                     <div>
                         {/* 프로모션 뱃지: 시안에 없어 상세에서 미노출 (프로모션 기능·장바구니 로직은 유지). 복구하려면 promos.map 뱃지 블록 복원 */}
                         <div className="flex items-start justify-between gap-3">
-                            <h1 className="text-[28px] md:text-[32px] font-bold leading-[42px] text-[#000]">{product.name}</h1>
+                            <div className="min-w-0">
+                                <h1 className="text-[28px] md:text-[32px] font-bold leading-[42px] text-[#000]">{product.name}</h1>
+                                {/* 상품코드 — 결제 전표 노출용 8자리 (어드민·CS 식별용 표기) */}
+                                {product.code && (
+                                    <p className="mt-1 text-[12px] text-[var(--color-fg-subtle)] tabular-nums">상품코드 {product.code}</p>
+                                )}
+                            </div>
                             {/* 시안: 공유 아이콘 (우측 상단) */}
                             <button
                                 type="button"
