@@ -167,12 +167,12 @@ function ReviewCard({ review, onOpen }: { review: ReviewVM; onOpen: () => void }
                 <img
                     src={review.photo}
                     alt=""
-                    className="w-full aspect-square rounded-[12px] object-cover bg-[#D9D9D9]"
+                    className="w-full aspect-[374/448] rounded-[12px] object-cover bg-[#D9D9D9]"
                     loading="lazy"
                     draggable={false}
                 />
             ) : (
-                <div className="w-full aspect-square rounded-[12px] bg-[#D9D9D9]" />
+                <div className="w-full aspect-[374/448] rounded-[12px] bg-[#D9D9D9]" />
             )}
 
             {/* 내용 */}

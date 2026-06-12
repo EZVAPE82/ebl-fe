@@ -12,6 +12,7 @@ type Review = {
     rating: number;
     content: string | null;
     hasPhoto: boolean;
+    photoUrls?: string[];
     pointRewarded: boolean;
     createdAt: string;
     authorName?: string | null;
@@ -125,11 +126,19 @@ export function ProductReviews({ productId }: { productId: number }) {
                                     {r.content}
                                 </p>
                             )}
-                            {r.hasPhoto && (
-                                <div className="flex gap-1">
-                                    <div className="w-[118px] h-[118px] rounded-[4px] bg-[#F6F7FB] flex items-center justify-center text-[11px] text-[#767676]">
-                                        📷 포토
-                                    </div>
+                            {r.photoUrls && r.photoUrls.length > 0 && (
+                                <div className="flex gap-1.5">
+                                    {r.photoUrls.map((u, i) => (
+                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                        <img
+                                            key={i}
+                                            src={u}
+                                            alt=""
+                                            className="w-[118px] aspect-[374/448] rounded-[4px] object-cover bg-[#F6F7FB]"
+                                            loading="lazy"
+                                            draggable={false}
+                                        />
+                                    ))}
                                 </div>
                             )}
                         </div>
