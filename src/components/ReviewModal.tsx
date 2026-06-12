@@ -74,26 +74,27 @@ export function ReviewModal({
             onClick={onClose}
         >
             <div
-                className="w-full max-w-[1280px] max-h-[90vh] overflow-y-auto bg-white rounded-[16px] p-10 flex flex-col md:flex-row gap-8 relative"
+                className="w-full max-w-[1280px] md:h-[655px] max-h-[90vh] overflow-y-auto bg-white rounded-[16px] p-10 flex flex-col md:flex-row gap-8 relative"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* LEFT — 대표 사진 (회색 fallback) */}
+                {/* LEFT — 대표 사진 (374:448 = 제품이미지 비율, cover 크롭. md 에선 h-full 로
+                    행 높이(655-80=575px = 480×448/374)에 맞춰 우측 텍스트칸과 상하단 정렬) */}
                 {active.photo ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                         src={active.photo}
                         alt=""
-                        className="w-full md:w-[480px] aspect-[374/448] rounded-[16px] object-cover bg-[#D9D9D9] shrink-0"
+                        className="w-full md:w-[480px] aspect-[374/448] md:aspect-auto md:h-full rounded-[16px] object-cover bg-[#D9D9D9] shrink-0"
                         draggable={false}
                     />
                 ) : (
-                    <div className="w-full md:w-[480px] aspect-[374/448] rounded-[16px] bg-[#D9D9D9] shrink-0" />
+                    <div className="w-full md:w-[480px] aspect-[374/448] md:aspect-auto md:h-full rounded-[16px] bg-[#D9D9D9] shrink-0" />
                 )}
 
-                {/* RIGHT */}
-                <div className="flex-1 flex flex-col justify-between gap-8">
+                {/* RIGHT — 사진과 같은 높이. 본문이 길면 TOP 만 내부 스크롤, BOTTOM 스트립은 사진 하단선에 고정 */}
+                <div className="flex-1 flex flex-col justify-between gap-8 md:h-full md:min-h-0">
                     {/* TOP */}
-                    <div className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-5 md:overflow-y-auto md:min-h-0">
                         <div className="flex flex-col gap-4">
                             {/* 별점 행 + 닫기 */}
                             <div className="flex justify-between items-center">
