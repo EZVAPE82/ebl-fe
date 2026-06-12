@@ -896,11 +896,11 @@ function CertScreen({ foreign, onPick, onClose }: { foreign?: boolean; onPick: (
         };
     }, [onClose]);
 
-    // 타이틀 — 두 줄, <br/> 유지 (Figma 37:11763 / 274:8727)
+    // 타이틀 — 두 줄, <br/> 유지. 성인 인증 목적 명시(클라 요청 — 구: 가입 가능 여부 확인)
     const title = foreign ? (
-        <>We will verify your identity<br />to check your eligibility</>
+        <>We will verify your identity<br />for adult verification</>
     ) : (
-        <>가입 가능 여부 확인을 위해<br />본인인증을 진행할게요</>
+        <>성인 인증을 위해<br />본인인증을 진행할게요</>
     );
     const bullets = foreign
         ? [
