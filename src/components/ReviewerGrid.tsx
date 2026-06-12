@@ -292,7 +292,7 @@ function ReviewLightbox({ reviews, index, onClose, onPrev, onNext }: {
                             {/* thumbnail strip 5 개 */}
                             <div className="flex gap-2">
                                 {otherReviews.map((r, i) => {
-                                    const t = r.photoUrls?.[0] ?? "/images/review-photo-1-v2.png";
+                                    const t = r.photoUrls?.[0] ?? r.productThumbnailUrl ?? "/images/review-photo-1-v3.png";
                                     return (
                                         /* eslint-disable-next-line @next/next/no-img-element */
                                         <img
