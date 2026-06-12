@@ -5,6 +5,7 @@ import { useRef } from "react";
 import type { ProductSummary } from "@/types/api";
 import { displayPrice, formatPrice, productHref } from "@/lib/format";
 import { hoverImageUrl, safeImageUrl } from "@/lib/url";
+import { wrapScroll } from "@/lib/scroll";
 
 /**
  * "엘프바의 추천 아이템" (Best Item) 캐러셀 — Figma 402:11091 1:1.
@@ -18,9 +19,7 @@ export function FeaturedCarousel({ items }: { items: ProductSummary[] }) {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     function scroll(dir: -1 | 1) {
-        const el = scrollRef.current;
-        if (!el) return;
-        el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.85), behavior: "smooth" });
+        wrapScroll(scrollRef.current, dir);
     }
 
     if (items.length === 0) {

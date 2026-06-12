@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
+import { wrapScroll } from "@/lib/scroll";
 
 /**
  * 공용 캐러셀 셸 — 아이브로 라벨 + 한글 타이틀 + 우측 ‹ › 화살표 + 가로 스크롤.
@@ -11,9 +12,7 @@ export function CarouselShell({ eyebrow, title, children }: { eyebrow: string; t
     const ref = useRef<HTMLDivElement>(null);
 
     function scroll(dir: -1 | 1) {
-        const el = ref.current;
-        if (!el) return;
-        el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.85), behavior: "smooth" });
+        wrapScroll(ref.current, dir);
     }
 
     return (

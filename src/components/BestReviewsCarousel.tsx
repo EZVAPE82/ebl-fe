@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Lightbox } from "@/components/Lightbox";
 import { useGated, useAdultGate } from "@/components/AdultGate";
+import { wrapScroll } from "@/lib/scroll";
 
 /**
  * 베스트 후기 4 카드 + Lightbox.
@@ -30,6 +31,7 @@ export type ReviewMock = {
 export function BestReviewsCarousel({ reviews }: { reviews: ReviewMock[] }) {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
+    const scrollRef = useRef<HTMLUListElement>(null);
 
     const lightboxImages = reviews.map(r => ({
         src: r.original ?? r.photo,
@@ -52,12 +54,12 @@ export function BestReviewsCarousel({ reviews }: { reviews: ReviewMock[] }) {
                         <h2 className="text-[26px] md:text-[36px] font-bold leading-tight text-[#000]">베스트 제품 후기</h2>
                     </div>
                     <nav className="flex gap-3" aria-label="베스트 후기 캐러셀">
-                        <ReviewArrow direction="prev" />
-                        <ReviewArrow direction="next" />
+                        <ReviewArrow direction="prev" onClick={() => wrapScroll(scrollRef.current, -1)} />
+                        <ReviewArrow direction="next" onClick={() => wrapScroll(scrollRef.current, 1)} />
                     </nav>
                 </header>
 
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-7">
+                <ul ref={scrollRef} className="flex gap-4 md:gap-7 overflow-x-auto snap-x scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {reviews.map((r, i) => (
                         <ReviewCard key={i} review={r} onPhotoClick={(e) => openLightbox(i, e)} />
                     ))}
@@ -80,7 +82,7 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
     const gated = useGated();
     const { openGate } = useAdultGate();
     return (
-        <li className="flex h-full">
+        <li className="flex h-full shrink-0 snap-start w-[60%] sm:w-[44%] lg:w-[calc((100%-84px)/4)]">
             <Link href="/reviews/best" className="flex flex-col w-full h-full">
                 {/* 사진 박스 — 비회원은 블러+자물쇠(클릭 시 성인인증), 회원은 Lightbox 원본 보기. */}
                 <button
@@ -163,10 +165,11 @@ function RatingStars({ rating }: { rating: number }) {
     );
 }
 
-function ReviewArrow({ direction }: { direction: "prev" | "next" }) {
+function ReviewArrow({ direction, onClick }: { direction: "prev" | "next"; onClick: () => void }) {
     return (
         <button
             type="button"
+            onClick={onClick}
             aria-label={direction === "prev" ? "이전" : "다음"}
             className="w-12 h-12 rounded-full border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:border-[var(--color-border-strong)] transition"
         >
