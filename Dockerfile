@@ -9,7 +9,10 @@ WORKDIR /app
 
 # 의존성만 먼저 복사 (캐시 효율)
 COPY package.json package-lock.json* ./
-RUN npm ci --no-audit --no-fund
+# npm ci 대신 install — 개발은 Windows, 빌드는 linux-alpine 이라 win32 에서 생성된 lock 이
+# linux 전용 옵션 의존(@tailwindcss/oxide-linux·@emnapi)을 누락해 npm ci 가 실패함.
+# install 은 linux 에서 누락분을 해결한다(lock 의 고정 버전은 그대로 존중).
+RUN npm install --no-audit --no-fund
 
 
 # ----- 2. builder -----
