@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { getRecentlyViewed, RECENT_EVENT, type RecentProduct } from "@/lib/recentlyViewed";
 
 /**
  * 우측 플로팅 dock — 시안 402:11754 (Frame 1707488248) 매칭.
  *  - 흰색 라운드 컨테이너 88px 폭, border + 그림자, padding 12.
- *  - 아이콘+라벨 6개: 내정보 / 최근본상품 ×2 / 장바구니 / 문의 / 위쳇
+ *  - 아이콘+라벨 5개: 내정보 / 최근 본 상품 / 장바구니 / 문의 / 위쳇
  *  - 맨 아래 파란 ⌃ "맨 위로" 버튼.
  *  - 우측 35px, 세로 중앙 고정. 2xl 이상만 노출(좁은 화면 콘텐츠 가림 방지).
  *  - z-20 으로 헤더(z-40)/모달(z-50)보다 낮춤.
- *  - "최근본상품" 썸네일은 추후 recently-viewed 연동 전까지 플레이스홀더.
+ *  - "최근 본 상품"은 localStorage 기반 실연동(DockRecent) — 버튼 1개 + 좌측 플라이아웃.
  */
 export function FloatingDock() {
     const { user } = useAuth();
@@ -27,8 +29,7 @@ export function FloatingDock() {
                 <DockItem href={profileHref} label="내정보">
                     <PersonIcon />
                 </DockItem>
-                <DockThumb href="/c/best" label="최근본상품" />
-                <DockThumb href="/c/best" label="최근본상품" />
+                <DockRecent />
                 <DockItem href="/cart" label="장바구니">
                     <BagIcon />
                 </DockItem>
@@ -64,18 +65,88 @@ function DockItem({ href, label, children }: { href: string; label: string; chil
     );
 }
 
-function DockThumb({ href, label }: { href: string; label: string }) {
+/**
+ * 최근 본 상품 — localStorage(getRecentlyViewed) 연동. 버튼은 최근 본 1건의 썸네일,
+ * 클릭 시 좌측 플라이아웃에 최근 목록(최대 8) 노출. 비어 있으면 박스 아이콘 + 안내.
+ */
+function DockRecent() {
+    const [recent, setRecent] = useState<RecentProduct[]>([]);
+    const [open, setOpen] = useState(false);
+    const wrapRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const read = () => setRecent(getRecentlyViewed());
+        read();
+        window.addEventListener(RECENT_EVENT, read);
+        window.addEventListener("storage", read);
+        return () => {
+            window.removeEventListener(RECENT_EVENT, read);
+            window.removeEventListener("storage", read);
+        };
+    }, []);
+
+    // 바깥 클릭 시 플라이아웃 닫기.
+    useEffect(() => {
+        if (!open) return;
+        function onDown(e: PointerEvent) {
+            if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+        }
+        document.addEventListener("pointerdown", onDown);
+        return () => document.removeEventListener("pointerdown", onDown);
+    }, [open]);
+
+    const latest = recent[0];
+
     return (
-        <Link
-            href={href}
-            aria-label={label}
-            className="w-full flex flex-col items-center gap-1.5 pb-1 hover:opacity-70 transition"
-        >
-            <span className="w-11 h-11 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] overflow-hidden">
-                <BoxIcon />
-            </span>
-            <span className="text-[10px] text-[var(--color-fg-muted)] leading-none">{label}</span>
-        </Link>
+        <div ref={wrapRef} className="relative w-full flex flex-col items-center">
+            <button
+                type="button"
+                onClick={() => setOpen((o) => !o)}
+                aria-label="최근 본 상품"
+                aria-expanded={open}
+                className="w-full flex flex-col items-center gap-1.5 pb-1 hover:opacity-70 transition"
+            >
+                <span className="w-11 h-11 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-fg-muted)] overflow-hidden">
+                    {latest?.thumb ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={latest.thumb} alt="" className="w-full h-full object-cover" draggable={false} />
+                    ) : (
+                        <BoxIcon />
+                    )}
+                </span>
+                <span className="text-[10px] text-[var(--color-fg-muted)] leading-none">최근 본 상품</span>
+            </button>
+
+            {open && (
+                <>
+                    <div className="absolute right-[calc(100%+12px)] top-0 w-[240px] rounded-xl border border-[#DDD] bg-white shadow-xl p-3">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[13px] font-semibold text-[#000]">최근 본 상품</span>
+                            <button type="button" onClick={() => setOpen(false)} aria-label="닫기" className="text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] text-sm leading-none">✕</button>
+                        </div>
+                        {recent.length === 0 ? (
+                            <p className="text-[12px] text-[var(--color-fg-muted)] py-5 text-center">최근 본 상품이 없습니다.</p>
+                        ) : (
+                            <ul className="flex flex-col gap-2 max-h-[320px] overflow-y-auto">
+                                {recent.map((p) => (
+                                    <li key={p.id}>
+                                        <Link href={p.href} onClick={() => setOpen(false)} className="flex items-center gap-2.5 group">
+                                            <span className="w-10 h-12 shrink-0 rounded-md bg-[var(--color-bg-subtle)] border border-[var(--color-border)] overflow-hidden">
+                                                {p.thumb ? (
+                                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                                    <img src={p.thumb} alt="" className="w-full h-full object-cover" draggable={false} />
+                                                ) : null}
+                                            </span>
+                                            <span className="min-w-0 flex-1 text-[12px] leading-snug text-[#000] line-clamp-2 group-hover:text-[#1f8fff] transition">{p.name}</span>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </>
+            )}
+        </div>
     );
 }
 

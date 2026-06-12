@@ -6,8 +6,9 @@ import { ProductQna } from "@/components/ProductQna";
 import { DetailTabs } from "@/components/DetailTabs";
 import { DetailExpand } from "@/components/DetailExpand";
 import { ProductBuyBox } from "@/components/ProductBuyBox";
+import { RecordRecentView } from "@/components/RecordRecentView";
 import type { Page, ProductDetail, ProductSummary } from "@/types/api";
-import { displayPrice, formatPrice } from "@/lib/format";
+import { displayPrice, formatPrice, productHref } from "@/lib/format";
 import { notFound } from "next/navigation";
 
 type Params = Promise<{ id: string }>;
@@ -51,7 +52,12 @@ export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
         : null;
     const siblings = (siblingsData?.content ?? [])
         .filter((s) => s.id !== product.id)
-        .map((s) => ({ id: s.id, name: s.name, price: displayPrice(s) }));
+        // 같은 시리즈 형제 맛 — "{시리즈} - " prefix 제거하고 맛 이름만(드롭다운은 이미 시리즈 컨텍스트).
+        .map((s) => ({
+            id: s.id,
+            name: s.name.includes(" - ") ? s.name.slice(s.name.indexOf(" - ") + 3) : s.name,
+            price: displayPrice(s),
+        }));
 
     type PromoBadge = { id: number; name: string; buyQuantity: number; getQuantity: number; label: string };
     const promos = await safeFetch<PromoBadge[]>(
@@ -71,6 +77,8 @@ export async function ProductDetailView({ idOrSlug }: { idOrSlug: string }) {
 
     return (
         <div className="pb-28 md:pb-12">
+            {/* 최근 본 상품 기록(부수효과 전용, 렌더 없음) */}
+            <RecordRecentView id={product.id} name={product.name} href={productHref(product)} thumb={product.thumbnailUrl} />
             {/* ===== 상단: 갤러리 + 정보 ===== */}
             <div className="mx-auto max-w-[1920px] px-4 xl:px-[170px] py-6 md:py-10 grid gap-8 md:gap-[60px] md:grid-cols-2">
                 {/* 갤러리 (client island) */}
