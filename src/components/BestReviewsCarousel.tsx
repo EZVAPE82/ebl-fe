@@ -91,7 +91,7 @@ function ReviewCard({ review, onPhotoClick }: { review: ReviewMock; onPhotoClick
                     onClick={gated ? (e) => { e.preventDefault(); e.stopPropagation(); openGate(); } : onPhotoClick}
                     className="relative w-full block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent,#7c5cff)] rounded-[12px]"
                     style={{
-                        aspectRatio: "374 / 448",
+                        aspectRatio: "1 / 1",
                         overflow: "hidden",
                         borderRadius: 12,
                         backgroundColor: isColor ? review.photo : undefined,

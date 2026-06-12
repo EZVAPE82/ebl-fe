@@ -83,11 +83,11 @@ export function ReviewModal({
                     <img
                         src={active.photo}
                         alt=""
-                        className="w-full md:w-[480px] aspect-[374/448] rounded-[16px] object-cover bg-[#D9D9D9] shrink-0"
+                        className="w-full md:w-[480px] aspect-square rounded-[16px] object-contain bg-[#f4f4f5] shrink-0"
                         draggable={false}
                     />
                 ) : (
-                    <div className="w-full md:w-[480px] aspect-[374/448] rounded-[16px] bg-[#D9D9D9] shrink-0" />
+                    <div className="w-full md:w-[480px] aspect-square rounded-[16px] bg-[#f4f4f5] shrink-0" />
                 )}
 
                 {/* RIGHT */}

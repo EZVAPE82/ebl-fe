@@ -124,7 +124,7 @@ function ReviewCard({ review, onClick }: { review: ReviewItem; onClick: () => vo
             onClick={gated ? openGate : onClick}
             className="flex flex-col w-full h-full text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] rounded-[18px]"
         >
-            <div className="relative w-full overflow-hidden rounded-[18px] bg-[var(--color-bg-subtle)]" style={{ aspectRatio: "374 / 448" }}>
+            <div className="relative w-full overflow-hidden rounded-[18px] bg-[var(--color-bg-subtle)]" style={{ aspectRatio: "1 / 1" }}>
                 {thumb ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
