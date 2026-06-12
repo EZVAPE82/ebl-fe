@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
 import { safeRedirectPath } from "@/lib/url";
 
-/* Figma 로그인 SPEC 매칭 — 회원/비회원 탭 + 깔끔한 input + 검정 로그인 버튼 + 소셜 (카카오/구글) */
+/* Figma 로그인 SPEC 매칭 — 회원 전용(비회원 경로 제거) + 검정 로그인 버튼 + 소셜 (카카오/구글) */
 
 export default function LoginPage() {
     return (
@@ -23,7 +23,6 @@ function LoginForm() {
     const sp = useSearchParams();
     const redirectTo = safeRedirectPath(sp.get("redirect"));
 
-    const [tab, setTab] = useState<"member" | "guest">("member");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberEmail, setRememberEmail] = useState(false);
@@ -32,10 +31,6 @@ function LoginForm() {
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (tab === "guest") {
-            router.push("/checkout?guest=1");
-            return;
-        }
         setError(null);
         setSubmitting(true);
         try {
@@ -57,30 +52,11 @@ function LoginForm() {
 
             {/* 폼 블록 */}
             <div className="w-full max-w-[480px] flex flex-col gap-7">
-                {/* 회원/비회원 탭 — 밑줄 */}
+                {/* 회원 로그인 단일 — 비회원 로그인/구매 경로 제거(회원 전용 몰, 클라 확정) */}
                 <div className="flex border-b border-[#DDDDDD]">
-                    <button
-                        type="button"
-                        onClick={() => setTab("member")}
-                        className={
-                            tab === "member"
-                                ? "flex-1 py-4 text-center border-b-2 border-[#222222] text-[16px] font-medium text-[#222222]"
-                                : "flex-1 py-4 text-center text-[16px] font-medium text-[#999999]"
-                        }
-                    >
+                    <span className="flex-1 py-4 text-center border-b-2 border-[#222222] text-[16px] font-medium text-[#222222]">
                         회원로그인
-                    </button>
-                    <Link
-                        href="/checkout?guest=1"
-                        onClick={() => setTab("guest")}
-                        className={
-                            tab === "guest"
-                                ? "flex-1 py-4 text-center border-b-2 border-[#222222] text-[16px] font-medium text-[#222222]"
-                                : "flex-1 py-4 text-center text-[16px] font-medium text-[#999999]"
-                        }
-                    >
-                        비회원로그인
-                    </Link>
+                    </span>
                 </div>
 
                 {/* 폼 */}

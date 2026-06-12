@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 
-/* 시안 14:7971 (비회원) / 14:8776 (회원) 매칭 — 2-col 레이아웃, 좌:폼 / 우:결제정보 sticky */
+/* 시안 14:8776 (회원) 매칭 — 2-col 레이아웃, 좌:폼 / 우:결제정보 sticky.
+   회원 전용 몰(클라 확정) — 비회원(게스트) 주문 경로 제거, 비로그인은 /login 으로. */
 
 type CartItem = { id: number; productId: number; productOptionId: number | null; quantity: number };
 type Cart = { id: number; memberId: number; items: CartItem[] };
@@ -28,8 +29,6 @@ type LineItem = { id: number; name: string; orderNo: string; price: number; qty:
 export default function CheckoutPage() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const isGuest = searchParams.get("guest") === "1" || !user;
 
     const [cart, setCart] = useState<Cart | null>(null);
     const [lines, setLines] = useState<LineItem[]>([]);
@@ -53,8 +52,6 @@ export default function CheckoutPage() {
         emailDomain: "",
         memo: "",
         defaultAddress: "save" as "save" | "skip",
-        guestPassword: "",
-        guestPasswordConfirm: "",
         memberCouponId: null as number | null,
         pointUsed: 0,
         paymentMethod: "CARD" as "CARD" | "EASY" | "BANK",
@@ -120,12 +117,8 @@ export default function CheckoutPage() {
                 }
             })();
         } else {
-            // 비회원 — mock 라인
-            setLines([
-                { id: 1, name: "상품타이틀", orderNo: "#2021156599898", price: 100000, qty: 1, img: "/images/elfbar-product-1.png" },
-                { id: 2, name: "상품타이틀", orderNo: "#2021156599898", price: 100000, qty: 1, img: "/images/elfbar-product-1.png" },
-            ]);
-            setProductAmount(200000);
+            // 비로그인 — 회원 전용 몰: 즉시 로그인으로 (게스트 주문 경로 없음)
+            router.replace("/login?redirect=/checkout");
         }
     }, [user, authLoading, router]);
 
@@ -180,7 +173,7 @@ export default function CheckoutPage() {
         }
     }
 
-    if (authLoading) {
+    if (authLoading || !user) {
         return <div className="mx-auto max-w-3xl px-4 py-10 text-[var(--color-fg-subtle)]">불러오는 중...</div>;
     }
 
@@ -324,48 +317,11 @@ export default function CheckoutPage() {
                                         <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#767676]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
                                     </div>
                                 </Field>
-                                {isGuest && (
-                                    <Field label="기본 배송지 저장" required>
-                                        <div className="flex items-center gap-6 text-sm">
-                                            <label className="flex items-center gap-1.5 cursor-pointer">
-                                                <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${form.defaultAddress === "save" ? "border-[#0072DD]" : "border-[var(--color-border)]"}`}>
-                                                    {form.defaultAddress === "save" && <span className="w-2 h-2 rounded-full bg-[#0072DD]" />}
-                                                </span>
-                                                <input type="radio" name="defaultAddress" checked={form.defaultAddress === "save"} onChange={() => setForm(s => ({ ...s, defaultAddress: "save" }))} className="sr-only"/>
-                                                <span className="text-[var(--color-fg)]">저장함</span>
-                                            </label>
-                                            <label className="flex items-center gap-1.5 cursor-pointer">
-                                                <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${form.defaultAddress === "skip" ? "border-[#0072DD]" : "border-[var(--color-border)]"}`}>
-                                                    {form.defaultAddress === "skip" && <span className="w-2 h-2 rounded-full bg-[#0072DD]" />}
-                                                </span>
-                                                <input type="radio" name="defaultAddress" checked={form.defaultAddress === "skip"} onChange={() => setForm(s => ({ ...s, defaultAddress: "skip" }))} className="sr-only"/>
-                                                <span className="text-[var(--color-fg-muted)]">저장안함</span>
-                                            </label>
-                                        </div>
-                                    </Field>
-                                )}
                             </dl>
                         )}
                         </div>
                     </section>
 
-                    {/* 비회원 비밀번호 */}
-                    {isGuest && (
-                        <section>
-                            <h2 className="text-[24px] font-medium text-[#000]">비회원 주문조회 비밀번호</h2>
-                            <div className="border-t border-[#222]">
-                                <dl className="flex flex-col gap-8 pt-10 pb-10 text-sm">
-                                    <Field label="비밀번호" required>
-                                        <input type="password" className={`${inputClass} md:w-[480px]`} value={form.guestPassword} onChange={e => setForm(s => ({ ...s, guestPassword: e.target.value }))} />
-                                        <p className="mt-2 text-[14px] font-light text-[#DC0000]">(영문 대소문자/숫자/특수문자 중 2가지 이상 조합, 10자 ~ 16자)</p>
-                                    </Field>
-                                    <Field label="비밀번호 확인">
-                                        <input type="password" className={`${inputClass} md:w-[480px]`} value={form.guestPasswordConfirm} onChange={e => setForm(s => ({ ...s, guestPasswordConfirm: e.target.value }))} />
-                                    </Field>
-                                </dl>
-                            </div>
-                        </section>
-                    )}
 
                     {/* 회원 — 할인/부가결제 (쿠폰/적립금) */}
                     {user && (
@@ -493,7 +449,7 @@ export default function CheckoutPage() {
                             <div className="flex items-center justify-between">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" className="w-[22px] h-[22px]" />
-                                    <span className="text-[14px] font-medium text-[#767676]">{isGuest ? "비회원 " : ""}개인정보 수집 이용동의</span>
+                                    <span className="text-[14px] font-medium text-[#767676]">개인정보 수집 이용동의</span>
                                 </label>
                                 <svg className="text-[#767676]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 6 15 12 9 18"/></svg>
                             </div>
